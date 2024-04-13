@@ -49,9 +49,9 @@ for index in min_indices:
 
 result = -1
 if count_true > count_false:
-    result = np.array([3])
-else:
     result = np.array([4])
+else:
+    result = np.array([3])
 print(result)
 plt.scatter(data[0], data[1], c=result, marker='o', cmap=colors, s=20, )
 
