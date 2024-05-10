@@ -9,7 +9,7 @@ full_path = glob.glob(path + filename)
 
 # 读取CSV文件
 column_names = ['id', 'attr_time', 'attr_x', 'attr_y', 'attr_z']
-df = [pd.read_csv(file, names=column_names, nrows=300, skiprows=400) for file in full_path]
+df = [pd.read_csv(file, names=column_names, nrows=300, skiprows=1) for file in full_path]
 fig, axs = plt.subplots(1,2)
 
 # dataFrame index

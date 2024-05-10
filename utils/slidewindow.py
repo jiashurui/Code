@@ -37,7 +37,6 @@ def slide_window2(input_list, window_size, over_lap):
 
     return all_data
 
-
 def slide_window_df(data_frame, window_size, over_lap):
     buffer = []
     all_data = []

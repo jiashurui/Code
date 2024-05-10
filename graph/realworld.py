@@ -6,7 +6,7 @@ filename = 'acc_jumping_head.csv'
 
 # 读取CSV文件
 column_names = ['id', 'attr_time', 'attr_x', 'attr_y', 'attr_z']
-df = pd.read_csv(path + filename, names=column_names, nrows=80, skiprows=1)
+df = pd.read_csv(path + filename, names=column_names, nrows=800, skiprows=1)
 # format date
 df['attr_time'] = pd.to_datetime(df['attr_time'])
 

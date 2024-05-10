@@ -1,12 +1,16 @@
 # 用来解压realworld的数据集,记得换路径!
+import glob
 import os
 import zipfile
 import tarfile
 
 def unzip_file(zip_path, extract_to):
     """解压ZIP文件"""
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+    except Exception as e:
+        print(e)
 
 def untar_file(tar_path, extract_to):
     """解压TAR文件"""
@@ -26,6 +30,10 @@ def extract_files(folder_path,extract_to):
             untar_file(file_path, extract_to)
 
 # 指定文件夹路径
-frompath = '../data/realworld/2/'
-topath = '../data/realworld/2/'
-extract_files(frompath, topath)
+frompath = '../data/realworld/?/'
+topath = '../data/realworld/?/'
+
+for i in range(1,16):
+    f = frompath.replace('?', str(i))
+    t = topath.replace('?', str(i))
+    extract_files(f, t)

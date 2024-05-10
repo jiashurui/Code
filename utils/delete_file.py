@@ -2,15 +2,15 @@ import os
 import glob
 
 # 设定文件的目录和名称模式
-directory = "../data/realworld/2/"
+directory = "../data/realworld/"
 patternGPS = ""
 
 # 构建完整的路径模式
-path_pattern_GPS = os.path.join(directory, 'GPS*.csv')
-path_pattern_LIGHT = os.path.join(directory, 'Light*.csv')
-path_pattern_Mic = os.path.join(directory, 'Microphone*.csv')
-path_pattern_SQL = os.path.join(directory, '*.sqlite')
-path_pattern_ZIP = os.path.join(directory, '*.zip')
+path_pattern_GPS = os.path.join(directory, '*/GPS*.csv')
+path_pattern_LIGHT = os.path.join(directory, '*/Light*.csv')
+path_pattern_Mic = os.path.join(directory, '*/Microphone*.csv')
+path_pattern_SQL = os.path.join(directory, '*/*.sqlite')
+path_pattern_ZIP = os.path.join(directory, '*/*.zip')
 
 # 使用glob找到所有匹配的文件
 list_file_patterns = [glob.glob(path_pattern_GPS),

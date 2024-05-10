@@ -4,7 +4,6 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from model import Simple1DCNN
-from sklearn.preprocessing import StandardScaler
 
 from utils.slidewindow import slide_window2
 import random
@@ -109,28 +108,3 @@ for epoch in range(epochs):
 
 # save my model
 torch.save(model.state_dict(), '../model/1D-CNN.pth')
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-# 实例化模型(加载模型参数)
-model_load = Simple1DCNN()
-model_load.load_state_dict(torch.load('../model/1D-CNN.pth'))
-
-model_load.eval()
-test_loss = 0
-correct = 0
-with torch.no_grad():
-
-    for i in range(0, test_data.size()[0], batch_size):
-        input_data, label = train_data[i: i + batch_size], test_labels[i: i + batch_size]
-        outputs = model_load(input_data)
-        loss += loss_function(outputs, label).item()
-        pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
-        print()
-
-test_loss /= len(test_data)
-print(
-    f'\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_data)} ({100. * correct / len(test_data):.0f}%)\n')
