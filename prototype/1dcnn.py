@@ -6,6 +6,7 @@ import torch.nn as nn
 from model import Simple1DCNN
 from sklearn.preprocessing import StandardScaler
 
+from utils.show import show_me_data1, show_me_data2, show_me_data0
 from utils.slidewindow import slide_window2
 import random
 
@@ -13,9 +14,10 @@ import random
 channel = 1  # 输入通道数
 slide_window_length = 100  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 50
-batch_size = 4  # 或其他合适的批次大小
-
+epochs = 20
+batch_size = 64  # 或其他合适的批次大小
+stop_simple = 300  # 数据静止的个数
+learning_rate = 0.005
 # 创建示例输入数据 TODO
 file_list = glob.glob('../data/realworld/*/acc_walking_*.csv')
 final_data = []
@@ -45,21 +47,23 @@ for file_name in file_list:
     # 数据处理(合并特征到1维度)
     # TODO 判断初始手机朝向, 数据转换(暂时先试试不用转换能不能做)
 
+    # 去除头部
+    data = data[stop_simple: len(data)]
+
     # 滑动窗口平均噪声
     data.rolling(window=3).mean()
 
-    data_agg = pd.DataFrame(columns=['xyz', 'label'])
-    # 数据合并
-    for index, row in data.iterrows():
-        magnitude = np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
-        # new_row = pd.Series({'xyz': magnitude, 'label': data['label']})
-        # data_agg = pd.concat([data_agg, new_row])
-        data['xyz'] = magnitude
-    #######################################################################
+    # 特征合并
+    data['xyz'] = data.apply(lambda row:
+                             np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
+                             , axis=1)
+
+    # show_me_data1(data[1000:1100], ['attr_x','attr_y','attr_z','xyz'])
 
     # 分割后的数据 100个 X组
     data_sliced = slide_window2(data, slide_window_length, 0.5)
 
+    # show_me_data2(data_sliced,['attr_x','attr_y','attr_z','xyz'])
     # 对于每一个dataframe , 滑动窗口分割数据
     final_data.extend(data_sliced)
 
@@ -68,6 +72,8 @@ random.shuffle(final_data)
 # 提取输入和标签
 input_features = np.array([df['xyz'].values for df in final_data])
 labels = np.array([df['label'].values for df in final_data])[:, 0]
+
+# show_me_data0(input_features[0])
 
 # 将NumPy数组转换为Tensor
 inputs_tensor = torch.tensor(input_features, dtype=torch.float32).unsqueeze(1)  # 添加通道维度
@@ -84,11 +90,13 @@ test_labels = labels_tensor[split_point:]
 
 # model instance
 model = Simple1DCNN()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 loss_function = nn.CrossEntropyLoss()
 
 # train
 model.train()
+lost_arr = []
+
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
     for i in range(0, train_data.size()[0], batch_size):
@@ -99,6 +107,7 @@ for epoch in range(epochs):
         # forward
         outputs = model(input_data)
         loss = loss_function(outputs, label)
+        lost_arr.append(loss.item())
         # BP
         loss.backward()
         optimizer.step()
@@ -107,6 +116,7 @@ for epoch in range(epochs):
             print('epoch: {}, loss: {}'.format(epoch, loss.item()))
     print(f'Epoch {epoch + 1}, Loss: {loss.item()}')
 
+show_me_data0(lost_arr)
 # save my model
 torch.save(model.state_dict(), '../model/1D-CNN.pth')
 ################################################################################
@@ -127,7 +137,7 @@ with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):
         input_data, label = train_data[i: i + batch_size], test_labels[i: i + batch_size]
         outputs = model_load(input_data)
-        loss += loss_function(outputs, label).item()
+        # loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
         print()
 
