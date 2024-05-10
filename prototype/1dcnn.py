@@ -10,6 +10,8 @@ from utils.show import show_me_data1, show_me_data2, show_me_data0
 from utils.slidewindow import slide_window2
 import random
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # 示例数据
 channel = 1  # 输入通道数
 slide_window_length = 100  # 序列长度
@@ -83,13 +85,13 @@ labels_tensor = torch.tensor(labels, dtype=torch.long)
 split_point = int(0.7 * len(inputs_tensor))
 
 # train data/label   test data/label
-train_data = inputs_tensor[:split_point]
-test_data = inputs_tensor[split_point:]
-train_labels = labels_tensor[:split_point]
-test_labels = labels_tensor[split_point:]
+train_data = inputs_tensor[:split_point].to(device)
+test_data = inputs_tensor[split_point:].to(device)
+train_labels = labels_tensor[:split_point].to(device)
+test_labels = labels_tensor[split_point:].to(device)
 
 # model instance
-model = Simple1DCNN()
+model = Simple1DCNN().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 loss_function = nn.CrossEntropyLoss()
 
