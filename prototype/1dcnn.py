@@ -53,7 +53,7 @@ for file_name in file_list:
     data = data[stop_simple: len(data)]
 
     # 滑动窗口平均噪声
-    data.rolling(window=3).mean()
+    data = data.rolling(window=3).mean()
 
     # 特征合并
     data['xyz'] = data.apply(lambda row:
