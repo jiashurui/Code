@@ -138,7 +138,7 @@ test_loss = 0
 with torch.no_grad():
 
     for i in range(0, test_data.size()[0], batch_size):
-        input_data, label = train_data[i: i + batch_size], test_labels[i: i + batch_size]
+        input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
         if label.size(0) != batch_size:
             continue
 
