@@ -6,7 +6,7 @@ def show_me_data0(np_arr):
     ax.plot(np_arr)
     ax.legend()
 
-    plt.xlim(0, 10000)
+    # plt.xlim(0, 10000)
     plt.ylim(0, 2.5)
 
     plt.show()

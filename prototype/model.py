@@ -9,9 +9,9 @@ class Simple1DCNN(nn.Module):
         self.pool = nn.MaxPool1d(2)
         self.conv1d2 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=kernel_size, stride=stride,
                                  padding=padding)
-
-        self.fc = nn.Linear(512 * 25, 7)  # 输出大小调整为与标签相匹配
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.conv1d3 = nn.Conv1d(in_channels=512, out_channels=1024, kernel_size=kernel_size, stride=stride,
+                                 padding=padding)
+        self.fc = nn.Linear(1024 * 25, 7)  # 输出大小调整为与标签相匹配
 
     def forward(self, x):
         x = self.conv1d(x)
@@ -20,7 +20,11 @@ class Simple1DCNN(nn.Module):
         x = self.conv1d2(x)
         x = self.relu(x)
         x = self.pool(x)
-        x = x.view(x.size(0), -1)  # flatten
-        x = self.fc(x)
 
+        x = self.conv1d3(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = x.view(x.size(0), -1)
+
+        x = self.fc(x)
         return x

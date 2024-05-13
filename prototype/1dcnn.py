@@ -14,12 +14,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 示例数据
 channel = 1  # 输入通道数
-slide_window_length = 100  # 序列长度
+slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 20
-batch_size = 64  # 或其他合适的批次大小
-stop_simple = 300  # 数据静止的个数
-learning_rate = 0.005
+epochs = 100
+batch_size = 128  # 或其他合适的批次大小
+stop_simple = 500  # 数据静止的个数
+learning_rate = 0.0001
 # 创建示例输入数据 TODO
 file_list = glob.glob('../data/realworld/*/acc_walking_*.csv')
 final_data = []
@@ -53,7 +53,7 @@ for file_name in file_list:
     data = data[stop_simple: len(data)]
 
     # 滑动窗口平均噪声
-    data = data.rolling(window=3).mean()
+    data.rolling(window=3).mean()
 
     # 特征合并
     data['xyz'] = data.apply(lambda row:
@@ -128,21 +128,28 @@ torch.save(model.state_dict(), '../model/1D-CNN.pth')
 ################################################################################
 ################################################################################
 # 实例化模型(加载模型参数)
-model_load = Simple1DCNN()
+model_load = Simple1DCNN().to(device)
 model_load.load_state_dict(torch.load('../model/1D-CNN.pth'))
 
 model_load.eval()
-test_loss = 0
+num_sum = 0
 correct = 0
+test_loss = 0
 with torch.no_grad():
 
     for i in range(0, test_data.size()[0], batch_size):
+        input_data, label = train_data[i: i + batch_size], test_labels[i: i + batch_size]
+        if label.size(0) != batch_size:
+            continue
+
         input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
         outputs = model_load(input_data)
-        # loss += loss_function(outputs, label).item()
-        pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
-        print()
 
-test_loss /= len(test_data)
+        # test_loss += loss_function(outputs, label).item()
+        pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
+
+        correct += torch.eq(pred, label.reshape(batch_size,1)).sum().item()
+        num_sum += batch_size
+
 print(
-    f'\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_data)} ({100. * correct / len(test_data):.0f}%)\n')
+    f'\nTest set: Average loss: {test_loss/num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
