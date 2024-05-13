@@ -142,7 +142,6 @@ with torch.no_grad():
         if label.size(0) != batch_size:
             continue
 
-        input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
         outputs = model_load(input_data)
 
         # test_loss += loss_function(outputs, label).item()
@@ -151,5 +150,4 @@ with torch.no_grad():
         correct += torch.eq(pred, label.reshape(batch_size,1)).sum().item()
         num_sum += batch_size
 
-print(
-    f'\nTest set: Average loss: {test_loss/num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
+print(f'\nTest set: Average loss: {test_loss/num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
