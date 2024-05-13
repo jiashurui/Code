@@ -20,8 +20,7 @@ class Simple1DCNN(nn.Module):
         x = self.conv1d2(x)
         x = self.relu(x)
         x = self.pool(x)
-        x = x.view(x.size(0), -1)
-
+        x = x.view(x.size(0), -1)  # flatten
         x = self.fc(x)
-        x = self.softmax(x)
+
         return x

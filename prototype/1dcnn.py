@@ -137,7 +137,7 @@ correct = 0
 with torch.no_grad():
 
     for i in range(0, test_data.size()[0], batch_size):
-        input_data, label = train_data[i: i + batch_size], test_labels[i: i + batch_size]
+        input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
         outputs = model_load(input_data)
         # loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
