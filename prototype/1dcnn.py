@@ -79,7 +79,7 @@ with torch.no_grad():
 
         # test_loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
-        correct += torch.eq(pred, label.reshape(batch_size, 1)).sum().item()
+        # correct += torch.eq(pred, label.reshape(batch_size, 1)).sum().item()
 
         for (expected, actual) in zip(pred, label.reshape(batch_size, 1)):
             confusion_matrix[actual, expected] += 1
