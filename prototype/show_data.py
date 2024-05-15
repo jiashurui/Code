@@ -53,8 +53,9 @@ def show_fft_result():
     single_no_dc = one_simple_data - np.mean(one_simple_data)
     fft_result = np.fft.fft(single_no_dc)
     freqs = np.fft.fftfreq(len(one_simple_data), 1 / 100)
+    window = np.hanning(len(one_simple_data))
 
-    fig, (a1, a2, a3, a4, a5, a6, a7) = plt.subplots(7, 1)
+    fig, (a1, a2, a3, a4, a5, a6, a7, a8) = plt.subplots(8, 1)
     fig.set_size_inches(12, 12)
 
     a1.plot(one_simple_data)
@@ -77,6 +78,9 @@ def show_fft_result():
 
     a7.plot(np.angle(fft_result))
     a7.set_title('fft angle value(val)')
+
+    a8.plot(one_simple_data * window)
+    a8.set_title('fft origin data with windows function')
 
     plt.show()
 

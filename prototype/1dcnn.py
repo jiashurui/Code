@@ -34,6 +34,8 @@ model.train()
 lost_arr = []
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
+
+    loss_per_epoch = 0.0
     for i in range(0, train_data.size()[0], batch_size):
         optimizer.zero_grad()
         indices = permutation[i:i + batch_size]
@@ -42,11 +44,14 @@ for epoch in range(epochs):
         # forward
         outputs = model(input_data)
         loss = loss_function(outputs, label)
-        lost_arr.append(loss.item())
+        loss_per_epoch = loss_per_epoch + loss.item()/batch_size
+
         # BP
         loss.backward()
         optimizer.step()
-        print('epoch: {}, loss: {}'.format(epoch, loss.item()))
+
+    lost_arr.append(loss_per_epoch)
+    print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
 
 loss_plot = show.show_me_data0(lost_arr)
 report.save_plot(loss_plot, 'learn-loss')
