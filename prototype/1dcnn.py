@@ -1,15 +1,10 @@
-import glob
 import numpy as np
-import pandas as pd
 import torch
 import torch.nn as nn
-from model import Simple1DCNN
-from sklearn.preprocessing import StandardScaler
 
+from model import Simple1DCNN
 from prototype.dataReader import get_data
-from utils.show import show_me_data1, show_me_data2, show_me_data0
-from utils.slidewindow import slide_window2
-import random
+import utils.show as show
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -50,7 +45,7 @@ for epoch in range(epochs):
         optimizer.step()
         print('epoch: {}, loss: {}'.format(epoch, loss.item()))
 
-show_me_data0(lost_arr)
+show.show_me_data0(lost_arr)
 # save my model
 torch.save(model.state_dict(), '../model/1D-CNN.pth')
 ################################################################################
@@ -88,5 +83,6 @@ with torch.no_grad():
 
         num_sum += batch_size
 
-print(
-    f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
+print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
+
+show.show_me_hotmap(confusion_matrix)
