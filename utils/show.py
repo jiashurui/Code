@@ -33,9 +33,15 @@ def show_me_hotmap(mat):
         'upperarm': 6
     }
 
-    plt.imshow(mat, cmap='Blues', annot=True, interpolation='nearest')
+    plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
     plt.title('Heatmap using Matplotlib')
+    # 在每个单元格的中心显示数字
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            plt.text(j, i, f'{mat[i, j]}', ha='center', va='center', color='black')
+
+    # 添加颜色条
     plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()))
     plt.yticks(np.arange(mat.shape[1]), labels=list(label_map.keys()))
     plt.show()
