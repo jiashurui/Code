@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 
 from model import Simple1DCNN
+from prototype.constant import Constant
 from prototype.dataReader import get_data
 import utils.show as show
 
@@ -16,6 +17,7 @@ epochs = 20
 batch_size = 128  # 或其他合适的批次大小
 stop_simple = 500  # 数据静止的个数
 learning_rate = 0.0001
+label_map = Constant.RealWorld.label_map
 
 # read data
 train_data, train_labels, test_data, test_labels = get_data(slide_window_length)
@@ -62,7 +64,7 @@ model_load.eval()
 num_sum = 0
 correct = 0
 test_loss = 0
-confusion_matrix = np.zeros((test_labels.size(), test_labels.size()))
+confusion_matrix = np.zeros((label_map.size(), label_map.size()))
 
 with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):

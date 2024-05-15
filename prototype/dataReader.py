@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 
+from prototype.constant import Constant
 from utils.slidewindow import slide_window2
 
 stop_simple = 500  # 数据静止的个数
@@ -18,15 +19,7 @@ def get_data(slide_window_length):
 
     # make label by fileName (walking)
     # chest 1 forearm 2 head 3 shin 4 thigh 5 upper arm 6 waist 7
-    label_map = {
-        'waist': 0,
-        'chest': 1,
-        'forearm': 2,
-        'head': 3,
-        'shin': 4,
-        'thigh': 5,
-        'upperarm': 6
-    }
+    label_map = Constant.RealWorld.label_map
     for file_name in file_list:
         data = pd.read_csv(file_name)
         # 对于每一个dataframe , 按照文件名给其打上标签
