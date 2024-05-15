@@ -60,6 +60,7 @@ def get_data(slide_window_length):
         # show_me_data2(data_sliced,['attr_x','attr_y','attr_z','xyz'])
         # 对于每一个dataframe , 滑动窗口分割数据
         final_data.extend(data_sliced)
+        print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
 
     # shuffle data
     random.shuffle(final_data)
