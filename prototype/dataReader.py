@@ -37,10 +37,10 @@ def get_data(slide_window_length):
         # 去除头部
         data = data[stop_simple: len(data)]
 
-        print(f'before{data['attr_x']}')
+        # print(f'before{data['attr_x']}')
         # 滑动窗口平均噪声
         data['attr_x'] = data['attr_x'].rolling(window=3).mean().bfill()
-        print(f'after{data['attr_x']}')
+        # print(f'after{data['attr_x']}')
 
         # 特征合并
         # data['xyz'] = data.apply(lambda row:
@@ -59,7 +59,9 @@ def get_data(slide_window_length):
             x_axis = data_simple[:, 2]
             y_axis = data_simple[:, 3]
             z_axis = data_simple[:, 4]
-            xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
+            # xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
+            xyz_axis = merge_data_to_1D(x=x_axis, y=y_axis, z=z_axis, method='fft').reshape(-1, 1)
+
             result = np.hstack((data_simple, xyz_axis))
             data_processed.append(result)
 
@@ -91,27 +93,22 @@ def get_data(slide_window_length):
     return train_data, train_labels, test_data, test_labels
 
 
-def merge_data_to_1D(data_simple, method):
-    if method == 'mean':
-        data_simple['xyz'] = data_simple.apply(lambda row:
-                          np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
-                          , axis=1)
-
-    elif method == 'fft':
+def merge_data_to_1D(x, y, z, method):
+    if method == 'fft':
         # x fft
-        fft_x_origin = data_simple['attr_x'].to_numpy()
+        fft_x_origin = x
         fft_x_no_dc = fft_x_origin - np.mean(fft_x_origin)
         fft_x_result = np.fft.fft(fft_x_no_dc)
         fft_x_magnitude = np.abs(fft_x_result)
 
         # y fft
-        fft_y_origin = data_simple['attr_y'].to_numpy()
+        fft_y_origin = y
         fft_y_no_dc = fft_y_origin - np.mean(fft_y_origin)
         fft_y_result = np.fft.fft(fft_y_no_dc)
         fft_y_magnitude = np.abs(fft_y_result)
 
         # z fft
-        fft_z_origin = data_simple['attr_z'].to_numpy()
+        fft_z_origin = z
         fft_z_no_dc = fft_z_origin - np.mean(fft_z_origin)
         fft_z_result = np.fft.fft(fft_z_no_dc)
         fft_z_magnitude = np.abs(fft_z_result)
@@ -124,4 +121,4 @@ def merge_data_to_1D(data_simple, method):
         # merge xyz
         fft_xyz_magnitude = np.sqrt(fft_x_magnitude ** 2 + fft_y_magnitude ** 2 + fft_z_magnitude ** 2)
 
-        data_simple['xyz'] = fft_xyz_magnitude
+        return fft_xyz_magnitude
