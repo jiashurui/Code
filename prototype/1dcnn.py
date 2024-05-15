@@ -6,6 +6,7 @@ from model import Simple1DCNN
 from prototype.constant import Constant
 from prototype.dataReader import get_data
 import utils.show as show
+import utils.report as report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -47,7 +48,9 @@ for epoch in range(epochs):
         optimizer.step()
         print('epoch: {}, loss: {}'.format(epoch, loss.item()))
 
-show.show_me_data0(lost_arr)
+loss_plot = show.show_me_data0(lost_arr)
+report.save_plot(loss_plot, 'learn-loss')
+
 # save my model
 torch.save(model.state_dict(), '../model/1D-CNN.pth')
 ################################################################################
@@ -87,4 +90,5 @@ with torch.no_grad():
 
 print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-show.show_me_hotmap(confusion_matrix)
+heatmap_plot = show.show_me_hotmap(confusion_matrix)
+report.save_plot(heatmap_plot, 'heat-map')

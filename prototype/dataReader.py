@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def get_data(slide_window_length):
     # 创建示例输入数据 TODO
-    file_list = glob.glob('../data/realworld/*/acc_*.csv')
+    file_list = glob.glob('../data/realworld/1/acc_*.csv')
     final_data = []
 
     # make label by fileName (walking)
@@ -41,14 +41,21 @@ def get_data(slide_window_length):
         data.rolling(window=3).mean()
 
         # 特征合并
-        data['xyz'] = data.apply(lambda row:
-                                 np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
-                                 , axis=1)
+        # data['xyz'] = data.apply(lambda row:
+        #                          np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
+        #                          , axis=1)
+        merge_data_to_1D(data,'fft')
 
         # show_me_data1(data[1000:1100], ['attr_x','attr_y','attr_z','xyz'])
 
         # 分割后的数据 100个 X组
-        data_sliced = slide_window2(data, slide_window_length, 0.5)
+        data_sliced = slide_window2(data, slide_window_length, 0.5).copy()
+
+        # 对于每个样本组,100条数据,都进行特征合并操作
+        # for data_simple in data_sliced:
+        #     data_simple['xyz'] = data_simple.apply(lambda row:
+        #                                            np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
+        #                                            , axis=1)
 
         # show_me_data2(data_sliced,['attr_x','attr_y','attr_z','xyz'])
         # 对于每一个dataframe , 滑动窗口分割数据
@@ -75,3 +82,34 @@ def get_data(slide_window_length):
     test_labels = labels_tensor[split_point:].to(device)
 
     return train_data, train_labels, test_data, test_labels
+
+
+def merge_data_to_1D(data_simple, method):
+    if method == 'mean':
+        data_simple['xyz'] = data_simple.apply(lambda row:
+                          np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
+                          , axis=1)
+
+    elif method == 'fft':
+        # x fft
+        fft_x_origin = data_simple['attr_x'].to_numpy()
+        fft_x_no_dc = fft_x_origin - np.mean(fft_x_origin)
+        fft_x_result = np.fft.fft(fft_x_no_dc)
+        fft_x_magnitude = np.abs(fft_x_result)
+
+        # y fft
+        fft_y_origin = data_simple['attr_y'].to_numpy()
+        fft_y_no_dc = fft_y_origin - np.mean(fft_y_origin)
+        fft_y_result = np.fft.fft(fft_y_no_dc)
+        fft_y_magnitude = np.abs(fft_y_result)
+
+        # z fft
+        fft_z_origin = data_simple['attr_z'].to_numpy()
+        fft_z_no_dc = fft_z_origin - np.mean(fft_z_origin)
+        fft_z_result = np.fft.fft(fft_z_no_dc)
+        fft_z_magnitude = np.abs(fft_z_result)
+
+        # merge xyz
+        fft_xyz_magnitude = np.sqrt(fft_x_magnitude ** 2 + fft_y_magnitude ** 2 + fft_z_magnitude ** 2)
+
+        data_simple['xyz'] = fft_xyz_magnitude

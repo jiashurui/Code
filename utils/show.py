@@ -1,15 +1,18 @@
 import numpy as np
 #
 from matplotlib import pyplot as plt
+
+from utils.report import save_report, save_plot
+
+
 def show_me_data0(np_arr):
     fig, ax = plt.subplots()
     ax.plot(np_arr)
     ax.legend()
-
-    # plt.xlim(0, 10000)
     plt.ylim(0, 2.5)
 
     plt.show()
+    return plt
 
 def show_me_data1(df, col_name):
     fig, ax = plt.subplots()
@@ -45,3 +48,4 @@ def show_me_hotmap(mat):
     plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()))
     plt.yticks(np.arange(mat.shape[1]), labels=list(label_map.keys()))
     plt.show()
+    return plt

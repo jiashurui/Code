@@ -31,7 +31,7 @@ def slide_window2(input_list, window_size, over_lap):
             # all_data.append(input_list[stat_point: len(input_list) - 1 ])
             break
 
-        all_data.append(input_list[stat_point: end_point])
+        all_data.append(input_list.iloc[stat_point: end_point])
         stat_point += stride
         end_point += stride
 
