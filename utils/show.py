@@ -22,3 +22,4 @@ def show_me_data2(df_list, col_name):
     # too many plot is hard
     for df in df_list[0:5]:
         show_me_data1(df, col_name)
+
