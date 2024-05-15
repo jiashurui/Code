@@ -95,20 +95,22 @@ def get_data(slide_window_length):
 
 def merge_data_to_1D(x, y, z, method):
     if method == 'fft':
+        window = np.hamming(len(x))
+
         # x fft
-        fft_x_origin = x
+        fft_x_origin = x * window
         fft_x_no_dc = fft_x_origin - np.mean(fft_x_origin)
         fft_x_result = np.fft.fft(fft_x_no_dc)
         fft_x_magnitude = np.abs(fft_x_result)
 
         # y fft
-        fft_y_origin = y
+        fft_y_origin = y * window
         fft_y_no_dc = fft_y_origin - np.mean(fft_y_origin)
         fft_y_result = np.fft.fft(fft_y_no_dc)
         fft_y_magnitude = np.abs(fft_y_result)
 
         # z fft
-        fft_z_origin = z
+        fft_z_origin = z * window
         fft_z_no_dc = fft_z_origin - np.mean(fft_z_origin)
         fft_z_result = np.fft.fft(fft_z_no_dc)
         fft_z_magnitude = np.abs(fft_z_result)
