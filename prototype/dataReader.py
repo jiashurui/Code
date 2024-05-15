@@ -49,7 +49,7 @@ def get_data(slide_window_length):
         # show_me_data1(data[1000:1100], ['attr_x','attr_y','attr_z','xyz'])
 
         # 分割后的数据 100个 X组
-        data_sliced = slide_window2(data, slide_window_length, 0.5).copy()
+        data_sliced = slide_window2(data, slide_window_length, 0.5)
 
         # 对于每个样本组,100条数据,都进行特征合并操作
         # for data_simple in data_sliced:
@@ -108,6 +108,11 @@ def merge_data_to_1D(data_simple, method):
         fft_z_no_dc = fft_z_origin - np.mean(fft_z_origin)
         fft_z_result = np.fft.fft(fft_z_no_dc)
         fft_z_magnitude = np.abs(fft_z_result)
+
+        # 对信号进行标准化
+        fft_x_magnitude = (fft_x_magnitude - np.mean(fft_x_magnitude)) / np.std(fft_x_magnitude)
+        fft_y_magnitude = (fft_y_magnitude - np.mean(fft_y_magnitude)) / np.std(fft_y_magnitude)
+        fft_z_magnitude = (fft_z_magnitude - np.mean(fft_z_magnitude)) / np.std(fft_z_magnitude)
 
         # merge xyz
         fft_xyz_magnitude = np.sqrt(fft_x_magnitude ** 2 + fft_y_magnitude ** 2 + fft_z_magnitude ** 2)
