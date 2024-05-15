@@ -37,36 +37,43 @@ def get_data(slide_window_length):
         # 去除头部
         data = data[stop_simple: len(data)]
 
+        print(f'before{data['attr_x']}')
         # 滑动窗口平均噪声
-        data.rolling(window=3).mean()
+        data['attr_x'] = data['attr_x'].rolling(window=3).mean().bfill()
+        print(f'after{data['attr_x']}')
 
         # 特征合并
         # data['xyz'] = data.apply(lambda row:
         #                          np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
         #                          , axis=1)
-        merge_data_to_1D(data,'fft')
+        # merge_data_to_1D(data,'fft')
 
         # show_me_data1(data[1000:1100], ['attr_x','attr_y','attr_z','xyz'])
 
         # 分割后的数据 100个 X组
-        data_sliced = slide_window2(data, slide_window_length, 0.5)
+        data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
 
+        data_processed = []
         # 对于每个样本组,100条数据,都进行特征合并操作
-        # for data_simple in data_sliced:
-        #     data_simple['xyz'] = data_simple.apply(lambda row:
-        #                                            np.sqrt(row['attr_x'] ** 2 + row['attr_y'] ** 2 + row['attr_z'] ** 2)
-        #                                            , axis=1)
+        for data_simple in data_sliced_list:
+            x_axis = data_simple[:, 2]
+            y_axis = data_simple[:, 3]
+            z_axis = data_simple[:, 4]
+            xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
+            result = np.hstack((data_simple, xyz_axis))
+            data_processed.append(result)
 
         # show_me_data2(data_sliced,['attr_x','attr_y','attr_z','xyz'])
+
         # 对于每一个dataframe , 滑动窗口分割数据
-        final_data.extend(data_sliced)
+        final_data.extend(data_processed)
         print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
 
     # shuffle data
     random.shuffle(final_data)
     # 提取输入和标签
-    input_features = np.array([df['xyz'].values for df in final_data])
-    labels = np.array([df['label'].values for df in final_data])[:, 0]
+    input_features = np.array([arr[:, 6] for arr in final_data])
+    labels = np.array([arr[:, 5] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor
     inputs_tensor = torch.tensor(input_features, dtype=torch.float32).unsqueeze(1)  # 添加通道维度
