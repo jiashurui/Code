@@ -17,7 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 channel = 1  # 1D data
 slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 100
+epochs = 20
 batch_size = 128  # 或其他合适的批次大小
 stop_simple = 500  # 数据静止的个数
 learning_rate = 0.0001
@@ -67,18 +67,25 @@ model_load.eval()
 num_sum = 0
 correct = 0
 test_loss = 0
+confusion_matrix = np.zeros((test_labels.size(), test_labels.size()))
+
 with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):
         input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
         if label.size(0) != batch_size:
             continue
 
-        outputs = model_load(input_data)
+        outputs = model_load(input_data)  # tensor(64,1,7)  概率
 
         # test_loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
-
         correct += torch.eq(pred, label.reshape(batch_size, 1)).sum().item()
+
+        for (expected, actual) in zip(pred, label.reshape(batch_size, 1)):
+            confusion_matrix[actual, expected] += 1
+            if actual == expected:
+                correct += 1
+
         num_sum += batch_size
 
 print(
