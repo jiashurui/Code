@@ -33,7 +33,7 @@ def show_me_hotmap(mat):
         'upperarm': 6
     }
 
-    plt.imshow(mat, cmap='Blues', interpolation='nearest')
+    plt.imshow(mat, cmap='Blues', annot=True, interpolation='nearest')
     plt.colorbar()
     plt.title('Heatmap using Matplotlib')
     plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()))
