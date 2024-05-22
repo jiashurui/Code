@@ -2,38 +2,38 @@ import random
 
 import numpy as np
 
-from prototype.dataReader import get_data
+from prototype.constant import Constant
+from prototype.dataReader import get_data, get_origin_data
 from matplotlib import pyplot as plt
 from utils.map_utils import find_key_by_value
 
 
 # 随便展示几条数据
 def show_some_data():
-    rows = 4
-    cols = 4
+    rows = 2
+    cols = 2
 
-    train_data, train_labels, test_data, test_labels = get_data(100)
+    x,y,z, places, actions, who = get_origin_data(100)
     fig, axs = plt.subplots(rows, cols)
-    random_integers = [random.randint(1, train_data.size(0)) for _ in range(16)]
+    fig.set_size_inches(10, 10)
+    random_integers = [random.randint(1, len(x)) for _ in range(16)]
 
     index = 0
-    label_map = {
-        'waist': 0,
-        'chest': 1,
-        'forearm': 2,
-        'head': 3,
-        'shin': 4,
-        'thigh': 5,
-        'upperarm': 6
-    }
+    label_map = Constant.RealWorld.label_map
+    action_map = Constant.RealWorld.action_map
 
     for i in range(rows):
         for j in range(cols):
             indite = random_integers[index]
-            axs[i, j].plot(train_data[indite, 0, :])
+            axs[i, j].plot(x[indite, :], label='x')
+            axs[i, j].plot(y[indite, :], label='y')
+            axs[i, j].plot(z[indite, :], label='z')
 
-            label_text = find_key_by_value(label_map, train_labels[indite])
-            axs[i, j].set_title(f'{label_text} , {indite}')
+            label_text = find_key_by_value(label_map, places[indite])
+            action_text = find_key_by_value(action_map, actions[indite])
+
+            axs[i, j].set_title(f'{indite}, {label_text} , {action_text}')
+            axs[i, j].legend(fontsize="x-large")
             index += 1
 
     # tensor2np
@@ -88,3 +88,4 @@ def show_fft_result():
 show_fft_result()
 
 # 对比下不同数据
+show_some_data()

@@ -1,10 +1,12 @@
+import torch
 import torch.nn as nn
 
 
 class Simple1DCNN(nn.Module):
     def __init__(self, kernel_size=3, stride=1, padding=1):
         super(Simple1DCNN, self).__init__()
-        self.conv1d = nn.Conv1d(in_channels=1, out_channels=256, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv1d = nn.Conv1d(in_channels=1, out_channels=256, kernel_size=kernel_size, stride=stride,
+                                padding=padding)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool1d(2)
         self.conv1d2 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=kernel_size, stride=stride,
@@ -28,3 +30,19 @@ class Simple1DCNN(nn.Module):
 
         x = self.fc(x)
         return x
+
+
+class SimpleRNN(nn.Module):
+    def __init__(self, input_size=1, hidden_layer_size=200, output_size=7, batch_size=128):
+        super(SimpleRNN, self).__init__()
+        self.hidden_layer_size = hidden_layer_size
+        self.rnn = nn.RNN(input_size, hidden_layer_size, batch_first=True)
+        self.linear = nn.Linear(hidden_layer_size, output_size)
+
+    def forward(self, input_seq, hidden_state):
+        rnn_out, hidden_state = self.rnn(input_seq, hidden_state)
+        predictions = self.linear(rnn_out[:, -1, :])
+        return predictions, hidden_state
+
+    def init_hidden(self, batch_size):
+        return torch.zeros(1, batch_size, self.hidden_layer_size)

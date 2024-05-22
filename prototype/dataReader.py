@@ -1,5 +1,6 @@
 import glob
 import random
+import re
 
 import numpy as np
 import pandas as pd
@@ -124,3 +125,57 @@ def merge_data_to_1D(x, y, z, method):
         fft_xyz_magnitude = np.sqrt(fft_x_magnitude ** 2 + fft_y_magnitude ** 2 + fft_z_magnitude ** 2)
 
         return fft_xyz_magnitude
+
+def get_origin_data(slide_window_length):
+    # 创建示例输入数据 TODO
+    file_list = glob.glob('../data/realworld/*/acc_*.csv')
+    final_data = []
+
+    # make label by fileName (walking)
+    # chest 1 forearm 2 head 3 shin 4 thigh 5 upper arm 6 waist 7
+    label_map = Constant.RealWorld.label_map
+    action_map = Constant.RealWorld.action_map
+
+    for file_name in file_list:
+        whoami = re.findall(r'\d+', file_name)
+        data = pd.read_csv(file_name)
+        # 对于每一个dataframe , 按照文件名给其打上标签
+        matched_substrings = [label for label in label_map.keys() if label in file_name]
+        matched_action = [label for label in action_map.keys() if label in file_name]
+
+        if not matched_substrings or len(matched_substrings) != 1:
+            raise KeyError("无法生成标签")
+        else:
+            data['label'] = label_map.get(matched_substrings[0])
+            data['action'] = action_map.get(matched_action[0])
+            data['whoami'] = whoami[0]
+        ########################################################
+        # 去除头部
+        data = data[stop_simple: len(data)]
+
+        # print(f'before{data['attr_x']}')
+        # 滑动窗口平均噪声
+        data['attr_x'] = data['attr_x'].rolling(window=3).mean().bfill()
+        # print(f'after{data['attr_x']}')
+
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
+
+
+        # show_me_data2(data_sliced,['attr_x','attr_y','attr_z','xyz'])
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+        print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
+
+    # shuffle data
+    random.shuffle(final_data)
+    # 提取输入和标签
+    x = np.array([arr[:, 2] for arr in final_data])
+    y = np.array([arr[:, 3] for arr in final_data])
+    z = np.array([arr[:, 4] for arr in final_data])
+    labels = np.array([arr[:, 5] for arr in final_data])[:, 0]
+    actions = np.array([arr[:, 6] for arr in final_data])[:, 0]
+    who = np.array([arr[:, 7] for arr in final_data])[:, 0]
+
+    return x, y, z, labels,actions,who

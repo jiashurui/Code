@@ -9,7 +9,7 @@ def show_me_data0(np_arr):
     fig, ax = plt.subplots()
     ax.plot(np_arr)
     ax.legend()
-    plt.ylim(0, 2.5)
+    plt.ylim(0, 10)
 
     plt.show()
     return plt
