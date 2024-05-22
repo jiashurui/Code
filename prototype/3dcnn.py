@@ -2,29 +2,28 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from model import Simple1DCNN, SimpleRNN
-from prototype.constant import Constant
-from prototype.dataReader import get_data
-import utils.show as show
 import utils.report as report
+import utils.show as show
+from model import Simple3DCNN
+from prototype.constant import Constant
+from prototype.dataReader import get_data_3d_cnn
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # param
 slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 20
+epochs = 1
 batch_size = 128  # 或其他合适的批次大小
 stop_simple = 500  # 数据静止的个数
 learning_rate = 0.0001
 label_map = Constant.RealWorld.label_map
 
 # read data
-train_data, train_labels, test_data, test_labels = get_data(slide_window_length)
+train_data, train_labels, test_data, test_labels = get_data_3d_cnn(slide_window_length)
 
 # model instance
-# model = Simple1DCNN().to(device)
-model = SimpleRNN().to(device)
+model = Simple3DCNN().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 loss_function = nn.CrossEntropyLoss()
 
@@ -40,8 +39,11 @@ for epoch in range(epochs):
         optimizer.zero_grad()
         indices = permutation[i:i + batch_size]
         input_data, label = train_data[indices], train_labels[indices]
+        if input_data.size(0) != batch_size:
+            continue
 
-        # forward
+        input_data = torch.permute(input_data, (0, 2, 3, 1)).unsqueeze(-1)
+        # forward (batch, 3 features(xyz) , 200 size_dim(时间维度) , 1 (空间维度), 1(空间维度))
         outputs = model(input_data)
         loss = loss_function(outputs, label)
         loss_per_epoch = loss_per_epoch + loss.item()/batch_size
@@ -57,16 +59,16 @@ loss_plot = show.show_me_data0(lost_arr)
 report.save_plot(loss_plot, 'learn-loss')
 
 # save my model
-torch.save(model.state_dict(), '../model/1D-CNN.pth')
+torch.save(model.state_dict(), '../model/3D-CNN.pth')
+
+
 ################################################################################
 ################################################################################
 ################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 # 实例化模型(加载模型参数)
-model_load = Simple1DCNN().to(device)
-model_load.load_state_dict(torch.load('../model/1D-CNN.pth'))
+model_load = Simple3DCNN().to(device)
+model_load.load_state_dict(torch.load('../model/3D-CNN.pth'))
 
 model_load.eval()
 num_sum = 0
@@ -80,7 +82,8 @@ with torch.no_grad():
         if label.size(0) != batch_size:
             continue
 
-        outputs = model_load(input_data)  # tensor(64,1,7)  概率
+        input_data = torch.permute(input_data, (0, 2, 3, 1)).unsqueeze(-1)
+        outputs = model_load(input_data)
 
         # test_loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引

@@ -22,12 +22,10 @@ class Simple1DCNN(nn.Module):
         x = self.conv1d2(x)
         x = self.relu(x)
         x = self.pool(x)
-
         x = self.conv1d3(x)
         x = self.relu(x)
         x = self.pool(x)
         x = x.view(x.size(0), -1)
-
         x = self.fc(x)
         return x
 
@@ -46,3 +44,30 @@ class SimpleRNN(nn.Module):
 
     def init_hidden(self, batch_size):
         return torch.zeros(1, batch_size, self.hidden_layer_size)
+
+
+# 3D CNN模型
+class Simple3DCNN(nn.Module):
+    def __init__(self, kernel_size=(3, 1, 1), stride=1, padding=1):
+        super(Simple3DCNN, self).__init__()
+        self.conv1 = nn.Conv3d(in_channels=3, out_channels=32, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.pool = nn.MaxPool3d(kernel_size=(2, 1, 1), stride=(2, 1, 1))
+        self.relu = nn.ReLU()
+        self.conv2 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv3 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.fc1 = nn.Linear(128 * 1225, 512)
+        self.fc2 = nn.Linear(512, 7)
+        # self.dropout = nn.Dropout(p=0.5)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.pool(self.relu(self.conv2(x)))
+        x = self.pool(self.relu(self.conv3(x)))
+        x = x.view(x.size(0), -1)
+        x = self.fc1(x)
+        x = self.relu(x)
+        # x = self.dropout(x)
+        x = self.fc2(x)
+        return x

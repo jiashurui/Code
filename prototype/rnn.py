@@ -11,7 +11,6 @@ import utils.report as report
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # param
-channel = 1  # 1D data
 slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
 epochs = 20
@@ -78,7 +77,7 @@ model_load.eval()
 num_sum = 0
 correct = 0
 test_loss = 0
-confusion_matrix = np.zeros((len(label_map.keys()), len(label_map.keys())))
+confusion_matrix = np.zeros((len(label_map), len(label_map)))
 
 with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):
