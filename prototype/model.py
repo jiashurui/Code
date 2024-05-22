@@ -3,9 +3,9 @@ import torch.nn as nn
 
 
 class Simple1DCNN(nn.Module):
-    def __init__(self, kernel_size=3, stride=1, padding=1):
+    def __init__(self, kernel_size=3, stride=1, padding=1, in_channels=1):
         super(Simple1DCNN, self).__init__()
-        self.conv1d = nn.Conv1d(in_channels=1, out_channels=256, kernel_size=kernel_size, stride=stride,
+        self.conv1d = nn.Conv1d(in_channels=in_channels, out_channels=256, kernel_size=kernel_size, stride=stride,
                                 padding=padding)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool1d(2)
