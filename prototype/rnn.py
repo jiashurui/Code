@@ -41,7 +41,7 @@ for epoch in range(epochs):
     loss_per_epoch = 0.0
     for i in range(0, train_data.size()[0], batch_size):
         optimizer.zero_grad()
-        hidden_state = model.init_hidden(batch_size)
+        hidden_state = model.init_hidden(batch_size).to(device)
 
         indices = permutation[i:i + batch_size]
         input_data, label = train_data[indices], train_labels[indices]
@@ -86,7 +86,7 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        hidden = model.init_hidden(batch_size)
+        hidden = model.init_hidden(batch_size).to(device)
         outputs, _ = model_load(input_data, hidden)  # tensor(64,1,7)  概率
 
         # test_loss += loss_function(outputs, label).item()
