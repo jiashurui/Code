@@ -10,5 +10,5 @@ def save_report(config):
     with open(f'../report/{now}.txt', 'w') as file:
         file.write(data)
 def save_plot(plt , name):
-    plt.savefig(f'../{name}.png', dpi=300, bbox_inches='tight')
+    plt.gcf().savefig(f'../{name}.png', bbox_inches='tight')
 

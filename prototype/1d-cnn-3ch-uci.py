@@ -1,12 +1,12 @@
 import numpy as np
 import torch
-import torch.nn as nn
 
 import utils.report as report
 import utils.show as show
-from model import Simple1DCNN
+
 from prototype.constant import Constant
-from prototype.dataReader import get_data_1d_3ch
+from prototype.model import Simple1DCNN
+from utils.uci_datareader import get_data_1d_uci
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -19,51 +19,8 @@ stop_simple = 500  # 数据静止的个数
 learning_rate = 0.0001
 label_map = Constant.RealWorld.label_map
 
-# read data
-train_data, train_labels, test_data, test_labels = get_data_1d_3ch(slide_window_length)
+test_data, test_labels = get_data_1d_uci()
 
-# model instance
-model = Simple1DCNN(in_channels=3).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-loss_function = nn.CrossEntropyLoss()
-
-# train
-model.train()
-
-lost_arr = []
-for epoch in range(epochs):
-    permutation = torch.randperm(train_data.size()[0])
-
-    loss_per_epoch = 0.0
-    for i in range(0, train_data.size()[0], batch_size):
-        optimizer.zero_grad()
-        indices = permutation[i:i + batch_size]
-        input_data, label = train_data[indices], train_labels[indices]
-        if input_data.size(0) != batch_size:
-            continue
-
-        # forward (batch, 3 features(xyz) , 200 size_dim(时间维度) , 1 (空间维度), 1(空间维度))
-        outputs = model(input_data)
-        loss = loss_function(outputs, label)
-        loss_per_epoch = loss_per_epoch + loss.item()/batch_size
-
-        # BP
-        loss.backward()
-        optimizer.step()
-
-    lost_arr.append(loss_per_epoch)
-    print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
-
-loss_plot = show.show_me_data0(lost_arr)
-report.save_plot(loss_plot, 'learn-loss')
-
-# save my model
-torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
-
-
-################################################################################
-################################################################################
-################################################################################
 
 # 实例化模型(加载模型参数)
 model_load = Simple1DCNN(in_channels=3).to(device)

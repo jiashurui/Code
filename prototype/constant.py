@@ -19,3 +19,14 @@ class Constant:
             'standing': 6,
             'walking': 7,
         }
+
+    class UCI:
+        place_map = {}
+        action_map = {
+            'WALKING': 1,
+            'WALKING_UPSTAIRS': 2,
+            'WALKING_DOWNSTAIRS': 3,
+            'SITTING': 4,
+            'STANDING': 5,
+            'LAYING': 6
+        }

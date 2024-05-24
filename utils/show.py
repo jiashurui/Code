@@ -25,7 +25,7 @@ def show_me_data2(df_list, col_name):
     # too many plot is hard
     for df in df_list[0:5]:
         show_me_data1(df, col_name)
-def show_me_hotmap(mat):
+def show_me_hotmap(mat, show=True):
     label_map = {
         'waist': 0,
         'chest': 1,
@@ -47,5 +47,7 @@ def show_me_hotmap(mat):
     # 添加颜色条
     plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()))
     plt.yticks(np.arange(mat.shape[1]), labels=list(label_map.keys()))
-    plt.show()
+    if show:
+        plt.show()
     return plt
+
