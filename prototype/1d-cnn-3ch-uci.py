@@ -20,7 +20,9 @@ learning_rate = 0.0001
 label_map = Constant.RealWorld.label_map
 
 test_data, test_labels = get_data_1d_uci()
-
+# to GPU
+test_data = test_data.to(device)
+test_labels = test_labels.to(device)
 
 # 实例化模型(加载模型参数)
 model_load = Simple1DCNN(in_channels=3).to(device)
