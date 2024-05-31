@@ -13,10 +13,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # param
 slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 1
 batch_size = 128  # 或其他合适的批次大小
-stop_simple = 500  # 数据静止的个数
-learning_rate = 0.0001
+learning_rate: float = 0.0001
 label_map = Constant.RealWorld.label_map
 
 test_data, test_labels = get_data_1d_uci()
@@ -41,10 +39,7 @@ with torch.no_grad():
             continue
 
         outputs = model_load(input_data)
-
-        # test_loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
-        # correct += torch.eq(pred, label.reshape(batch_size, 1)).sum().item()
 
         for (expected, actual) in zip(pred, label.reshape(batch_size, 1)):
             confusion_matrix[actual, expected] += 1

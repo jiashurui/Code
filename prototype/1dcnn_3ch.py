@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # param
 slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 1
+epochs = 100
 batch_size = 128  # 或其他合适的批次大小
 stop_simple = 500  # 数据静止的个数
 learning_rate = 0.0001
@@ -24,7 +24,7 @@ train_data, train_labels, test_data, test_labels = get_data_1d_3ch(slide_window_
 
 # model instance
 model = Simple1DCNN(in_channels=3).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,weight_decay=0.01)
 loss_function = nn.CrossEntropyLoss()
 
 # train

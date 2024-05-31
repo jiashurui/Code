@@ -81,7 +81,7 @@ def get_data(slide_window_length):
     return train_data, train_labels, test_data, test_labels
 def get_data_1d_3ch(slide_window_length):
     # 创建示例输入数据 TODO
-    file_list = glob.glob('../data/realworld/1/acc_*.csv')
+    file_list = glob.glob('../data/realworld/*/acc_*.csv')
     final_data = []
 
     # make label by fileName (walking)
