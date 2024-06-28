@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class Simple1DCNN(nn.Module):
-    def __init__(self, kernel_size=3, stride=1, padding=1, in_channels=1):
+    def __init__(self, kernel_size=3, stride=1, padding=1, in_channels=1, out_label=7):
         super(Simple1DCNN, self).__init__()
         self.conv1d = nn.Conv1d(in_channels=in_channels, out_channels=256, kernel_size=kernel_size, stride=stride,
                                 padding=padding)
@@ -13,7 +13,7 @@ class Simple1DCNN(nn.Module):
                                  padding=padding)
         self.conv1d3 = nn.Conv1d(in_channels=512, out_channels=1024, kernel_size=kernel_size, stride=stride,
                                  padding=padding)
-        self.fc = nn.Linear(1024 * 25, 7)  # 输出大小调整为与标签相匹配
+        self.fc = nn.Linear(1024 * 25, out_label)  # 输出大小调整为与标签相匹配
         self.dropout = nn.Dropout(0.3)  # 添加Dropout层，dropout率为0.3
 
     def forward(self, x):

@@ -45,6 +45,3 @@ transformed_accel_vector = np.dot(rotation_matrix, accel_vector)
 print("原始加速度向量:", accel_vector)
 print("转换后的加速度向量:", transformed_accel_vector)
 
-# 観測方程式
-p = np.
-
