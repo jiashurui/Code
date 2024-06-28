@@ -1,0 +1,93 @@
+import glob
+import random
+
+import numpy as np
+import pandas as pd
+import torch
+
+from prototype.dataReader import merge_data_to_1D
+from utils.slidewindow import slide_window2
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+flag_if_show_image = False
+def get_mh_data(slide_window_length):
+    file_list = glob.glob('../data/mHealth/mHealth_*.log')
+    final_data = []
+    appended_data = []
+
+    for file_name in file_list:
+        print(file_name)
+        data = pd.read_csv(file_name,sep='\t',header=None)
+
+        data.columns = ['chest_x', 'chest_y', 'chest_z',
+                        'electrocardiogram_1', 'electrocardiogram_2',
+                        'ankle_x', 'ankle_y', 'ankle_z',
+                        'gyro_x', 'gyro_y', 'gyro_z',
+                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
+                        'arm_x', 'arm_y', 'arm_z',
+                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
+                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
+                        'label']
+        appended_data.append(data)
+
+    big_df = pd.concat(appended_data, ignore_index=True)
+    record_diff = []
+    pre_val = -1
+    for index, value in big_df['label'].items():
+        if value != pre_val:
+            record_diff.append(index)
+        pre_val = value
+
+    sliced_list = []
+    for i in range(1, len(record_diff)):
+        start = record_diff[i-1]
+        end = record_diff[i]
+        sliced_df = big_df.iloc[start:end]
+        if sliced_df['label'].array[0] != 0:
+            sliced_list.append(sliced_df)
+
+    for df in sliced_list:
+        # 滑动窗口平均噪声
+        df['chest_x'] = df['chest_x'].rolling(window=3).mean().bfill()
+        df['chest_y'] = df['chest_y'].rolling(window=3).mean().bfill()
+        df['chest_z'] = df['chest_z'].rolling(window=3).mean().bfill()
+
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
+
+        data_processed = []
+        # 对于每个样本组,100条数据,都进行特征合并操作
+        for data_simple in data_sliced_list:
+            x_axis = data_simple[:, 0]
+            y_axis = data_simple[:, 1]
+            z_axis = data_simple[:, 2]
+            # xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
+            xyz_axis = merge_data_to_1D(x=x_axis, y=y_axis, z=z_axis, method='fft').reshape(-1, 1)
+
+            result = np.hstack((data_simple, xyz_axis))
+            data_processed.append(result)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_processed)
+        print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
+
+    # shuffle data
+    random.shuffle(final_data)
+    # 提取输入和标签
+    input_features = np.array([arr[:, 24] for arr in final_data])
+    labels = np.array([arr[:, 23] for arr in final_data])[:, 0]
+
+    # 将NumPy数组转换为Tensor
+    inputs_tensor = torch.tensor(input_features, dtype=torch.float32).unsqueeze(1)  # 添加通道维度
+    labels_tensor = torch.tensor(labels, dtype=torch.long)
+
+    # 计算分割点 7:3
+    split_point = int(0.7 * len(inputs_tensor))
+
+    # train data/label   test data/label
+    train_data = inputs_tensor[:split_point].to(device)
+    test_data = inputs_tensor[split_point:].to(device)
+    train_labels = labels_tensor[:split_point].to(device)
+    test_labels = labels_tensor[split_point:].to(device)
+
+    return train_data, train_labels, test_data, test_labels
