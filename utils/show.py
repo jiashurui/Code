@@ -88,7 +88,7 @@ def show_me_child_hotmap(mat, show=True):
         '止まる': 2,
         '走る': 3,
     }
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(5,5))
 
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
