@@ -1,18 +1,13 @@
-import pandas as pd
-from matplotlib import pyplot as plt
+#! python
+import sys
+import csv
+from decimal import Decimal, ROUND_HALF_UP
 
-import numpy as np
-
-x = [0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,1.0]
-y = [1,1,0.67,0.6,0.5,0.42,0.375,0.35,0]
-fig, ax = plt.subplots()
-
-plt.plot(x, y)
-for i in range(len(x)):
-    plt.text(x[i], y[i], f'({x[i]}, {y[i]})')
-
-plt.title("precision-recall-curve")
-plt.xlabel('recall')
-plt.ylabel('precision')
-
-plt.show()
+reader = csv.reader(sys.stdin)
+fstr = [row for row in reader]
+fmtx = [[sv for sv in row] for row in fstr]
+rmtx = [[Decimal(sv).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) \
+         for sv in row[0:50]] for row in fmtx[0:100]]
+print("Your data is read as")
+writer = csv.writer(sys.stdout)
+writer.writerows(rmtx)

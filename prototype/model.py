@@ -13,7 +13,7 @@ class Simple1DCNN(nn.Module):
                                  padding=padding)
         self.conv1d3 = nn.Conv1d(in_channels=512, out_channels=1024, kernel_size=kernel_size, stride=stride,
                                  padding=padding)
-        self.fc = nn.Linear(1024 * 25, out_label)  # 输出大小调整为与标签相匹配
+        self.fc = nn.Linear(1024 * 5, out_label)  # 输出大小调整为与标签相匹配
         self.dropout = nn.Dropout(0.3)  # 添加Dropout层，dropout率为0.3
 
     def forward(self, x):

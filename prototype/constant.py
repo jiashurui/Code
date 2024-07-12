@@ -56,3 +56,10 @@ class Constant:
             'Running': 11,
             'Jump front & back': 12
         }
+    class ChildWalk:
+        place_map = {}
+        action_map = {
+            '歩く': 1,
+            '止まる': 2,
+            '走る': 3,
+        }
