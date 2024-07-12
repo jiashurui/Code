@@ -92,6 +92,6 @@ with torch.no_grad():
 
 print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-heatmap_plot = show.show_me_mh_hotmap(confusion_matrix)
+heatmap_plot = show.show_me_child_hotmap(confusion_matrix)
 fig = heatmap_plot.gcf()
 report.save_plot(heatmap_plot, 'heat-map')
