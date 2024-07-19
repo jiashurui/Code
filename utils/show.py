@@ -84,20 +84,24 @@ def show_me_mh_hotmap(mat, show=True):
 
 def show_me_child_hotmap(mat, show=True):
     label_map = {
-        '歩く': 1,
-        '止まる': 2,
-        '走る': 3,
+        'walking': 1,
+        'waiting': 2,
+        'running': 3,
     }
-    plt.figure(figsize=(5,5))
+    plt.figure(figsize=(7,7))
 
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
-    plt.title('Heatmap using Matplotlib')
+    plt.title('Confusion Matrix')
+
+
     # 在每个单元格的中心显示数字
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
             plt.text(j, i, f'{mat[i, j]}', ha='center', va='center', color='black')
-
+    # comment
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
     # 添加颜色条
     plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()), rotation=90)
     plt.yticks(np.arange(mat.shape[1]), labels=list(label_map.keys()))

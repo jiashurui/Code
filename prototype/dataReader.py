@@ -300,6 +300,7 @@ def get_data_1d_3ch_child(slide_window_length):
         end = record_diff[i]
         sliced_df = big_df.iloc[start:end]
         if sliced_df['X'].array[0] != 'なし':
+            #print('len: ' + str(len(sliced_df)) + ' label: ' + str(sliced_df['X'].iloc[0]))
             sliced_list.append(sliced_df)
 
     for df in sliced_list:

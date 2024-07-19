@@ -33,7 +33,7 @@ class Simple1DCNN(nn.Module):
 
 
 class SimpleRNN(nn.Module):
-    def __init__(self, input_size=1, hidden_layer_size=200, output_size=7, batch_size=128):
+    def __init__(self, input_size=1, hidden_layer_size=200, output_size=3):
         super(SimpleRNN, self).__init__()
         self.hidden_layer_size = hidden_layer_size
         self.rnn = nn.RNN(input_size, hidden_layer_size, batch_first=True)
