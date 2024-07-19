@@ -14,7 +14,7 @@ slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
 epochs = 200
 batch_size = 128  # 或其他合适的批次大小
-learning_rate = 0.0001
+learning_rate = 0.01
 label_map = Constant.mHealth.action_map
 
 # read data
@@ -33,6 +33,9 @@ model.train()
 lost_arr = []
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
+    num_sum_train = 0
+    correct_train = 0
+    confusion_matrix_train = np.zeros((len(label_map), len(label_map)))
 
     loss_per_epoch = 0.0
     for i in range(0, train_data.size()[0], batch_size):

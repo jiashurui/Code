@@ -6,6 +6,7 @@ from prototype.constant import Constant
 from prototype.dataReader import get_data_1d_3ch_child
 from prototype.model import Simple1DCNN
 from utils import show, report
+from sklearn.metrics import f1_score, confusion_matrix
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -13,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 40  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
 epochs = 200
-batch_size = 128  # 或其他合适的批次大小
+batch_size = 128
 learning_rate = 0.1
 label_map = Constant.ChildWalk.action_map
 
@@ -35,6 +36,8 @@ for epoch in range(epochs):
     num_sum_train = 0
     correct_train = 0
     confusion_matrix_train = np.zeros((len(label_map), len(label_map)))
+    all_preds = []
+    all_labels = []
 
     permutation = torch.randperm(train_data.size()[0])
 
@@ -52,10 +55,10 @@ for epoch in range(epochs):
         loss_per_epoch = loss_per_epoch + loss.item()/batch_size
 
         pred = outputs.argmax(dim=1, keepdim=True) # 获取概率最大的索引
-        for (expected, actual) in zip(pred, label.reshape(batch_size, 1)):
-            confusion_matrix_train[actual, expected] += 1
-            if actual == expected:
-                correct_train += 1
+        correct_train += pred.eq(label.view_as(pred)).sum().item()
+        all_preds.extend(pred.cpu().numpy())
+        all_labels.extend(label.cpu().numpy())
+
 
         num_sum_train += batch_size
 
@@ -64,6 +67,8 @@ for epoch in range(epochs):
         optimizer.step()
 
     lost_arr.append(loss_per_epoch)
+    f1 = f1_score(all_labels, all_preds, average='weighted')
+
     print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
     print(f'Accuracy: {correct_train}/{num_sum_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
 
@@ -87,6 +92,8 @@ num_sum = 0
 correct = 0
 test_loss = 0
 confusion_matrix = np.zeros((len(label_map), len(label_map)))
+all_preds = []
+all_labels = []
 
 with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):
