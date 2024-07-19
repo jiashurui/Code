@@ -232,7 +232,7 @@ def get_mh_data_1d_3ch_for_test(slide_window_length):
     labels = np.array([arr[:, 23] for arr in final_data])[:, 0]
 
     # 提取数据和标签
-    data = torch.tensor(xyz, dtype=torch.float32)
-    label = torch.tensor(labels, dtype=torch.long)
+    data = torch.tensor(xyz, dtype=torch.float32).to(device)
+    label = torch.tensor(labels, dtype=torch.long).to(device)
 
     return data, label

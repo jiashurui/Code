@@ -27,12 +27,12 @@ all_pred = []
 all_labels = []
 slide_window_length = 40  # 序列长度
 
-data, label = get_mh_data_1d_3ch_for_test(slide_window_length)
-label -= 1
+test_data, test_label = get_mh_data_1d_3ch_for_test(slide_window_length)
+test_label -= 1
 
 with torch.no_grad():
-    for i in range(0, data.size()[0], batch_size):
-        input_data, label = data[i: i + batch_size], label[i: i + batch_size]
+    for i in range(0, test_data.size()[0], batch_size):
+        input_data, label = test_data[i: i + batch_size], test_label[i: i + batch_size]
         if label.size(0) != batch_size:
             continue
 
