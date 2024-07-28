@@ -24,7 +24,7 @@ def show_me_acc(np_arr):
     plt.title('Test Accuracy vs Epoch')
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    plt.xticks(x)
+    plt.xticks([x[-1]])
 
     # 显示图表
     plt.grid(True)
