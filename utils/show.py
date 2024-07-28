@@ -12,6 +12,24 @@ def show_me_data0(np_arr):
 
     plt.show()
     return plt
+def show_me_acc(np_arr):
+    # 生成横坐标，数组索引加1
+    x = list(range(1, len(np_arr) + 1))
+
+    # 绘制图表
+    plt.figure(figsize=(10, 5))
+    plt.plot(x, np_arr, marker='o', linestyle='-')
+
+    # 添加标题和标签
+    plt.title('Test Accuracy vs Epoch')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.xticks(x)
+
+    # 显示图表
+    plt.grid(True)
+    plt.show()
+
 
 def show_me_data1(df, col_name):
     fig, ax = plt.subplots()
