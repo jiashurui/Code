@@ -25,6 +25,7 @@ def show_me_acc(np_arr):
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.xticks([x[-1]])
+    plt.yticks([])  # 隐藏纵坐标刻度
 
     # 显示图表
     plt.grid(True)
