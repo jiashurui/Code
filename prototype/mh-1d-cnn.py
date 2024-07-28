@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # param
 slide_window_length = 200  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 200
+epochs = 3
 batch_size = 128  # 或其他合适的批次大小
 learning_rate = 0.01
 label_map = Constant.mHealth.action_map
@@ -31,6 +31,7 @@ loss_function = nn.CrossEntropyLoss()
 model.train()
 
 lost_arr = []
+acc_arr = []
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
     num_sum_train = 0
@@ -50,6 +51,11 @@ for epoch in range(epochs):
         loss = loss_function(outputs, label)
         loss_per_epoch = loss_per_epoch + loss.item()/batch_size
 
+        pred = outputs.argmax(dim=1, keepdim=True) # 获取概率最大的索引
+        correct_train += pred.eq(label.view_as(pred)).sum().item()
+
+        num_sum_train += batch_size
+
         # BP
         loss.backward()
         optimizer.step()
@@ -57,11 +63,19 @@ for epoch in range(epochs):
     lost_arr.append(loss_per_epoch)
     print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
 
+    acc_train = correct_train / num_sum_train
+    acc_arr.append(acc_train * 100.)
+    print(f'Accuracy: {acc_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
+
+
+
 loss_plot = show.show_me_data0(lost_arr)
+acc_plot = show.show_me_acc(acc_arr)
+
 report.save_plot(loss_plot, 'learn-loss')
 
 # save my model
-torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
+torch.save(model.state_dict(), '../../model/mh-cnn-model.pth')
 
 
 ################################################################################
@@ -70,7 +84,7 @@ torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
 
 # 实例化模型(加载模型参数)
 model_load = Simple1DCNN(in_channels=3,out_label=12).to(device)
-model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+model_load.load_state_dict(torch.load('../../model/mh-cnn-model.pth'))
 
 model_load.eval()
 num_sum = 0
