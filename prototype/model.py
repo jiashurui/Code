@@ -13,7 +13,7 @@ class Simple1DCNN(nn.Module):
                                  padding=padding)
         self.conv1d3 = nn.Conv1d(in_channels=512, out_channels=1024, kernel_size=kernel_size, stride=stride,
                                  padding=padding)
-        self.fc = nn.Linear(1024 * 5, out_label)  # 输出大小调整为与标签相匹配
+        self.fc = nn.Linear(1024 * 25, out_label)  # 输出大小调整为与标签相匹配
         self.dropout = nn.Dropout(0.3)  # 添加Dropout层，dropout率为0.3
 
     def forward(self, x):
@@ -33,19 +33,21 @@ class Simple1DCNN(nn.Module):
 
 
 class SimpleRNN(nn.Module):
-    def __init__(self, input_size=1, hidden_layer_size=200, output_size=3):
+    def __init__(self, input_size=1, hidden_layer_size=256, output_size=3):
         super(SimpleRNN, self).__init__()
         self.hidden_layer_size = hidden_layer_size
-        self.rnn = nn.RNN(input_size, hidden_layer_size, batch_first=True)
+        self.rnn = nn.RNN(input_size, hidden_layer_size, num_layers=3, batch_first=True)
         self.linear = nn.Linear(hidden_layer_size, output_size)
+        self.dropout = nn.Dropout(0.1)
 
     def forward(self, input_seq, hidden_state):
         rnn_out, hidden_state = self.rnn(input_seq, hidden_state)
+        rnn_out = self.dropout(rnn_out)
         predictions = self.linear(rnn_out[:, -1, :])
         return predictions, hidden_state
 
     def init_hidden(self, batch_size):
-        return torch.zeros(1, batch_size, self.hidden_layer_size)
+        return torch.zeros(3, batch_size, self.hidden_layer_size)
 
 
 # 3D CNN模型

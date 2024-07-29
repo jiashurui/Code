@@ -11,7 +11,7 @@ from utils.slidewindow import slide_window2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 flag_if_show_image = False
 def get_mh_data(slide_window_length):
-    file_list = glob.glob('../../data/mHealth/mHealth_*.log')
+    file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
     appended_data = []
 
@@ -55,30 +55,36 @@ def get_mh_data(slide_window_length):
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
 
-        data_processed = []
-        # 对于每个样本组,100条数据,都进行特征合并操作
-        for data_simple in data_sliced_list:
-            x_axis = data_simple[:, 0]
-            y_axis = data_simple[:, 1]
-            z_axis = data_simple[:, 2]
-            # xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
-            xyz_axis = merge_data_to_1D(x=x_axis, y=y_axis, z=z_axis, method='fft').reshape(-1, 1)
-
-            result = np.hstack((data_simple, xyz_axis))
-            data_processed.append(result)
+        # data_processed = []
+        # # 对于每个样本组,100条数据,都进行特征合并操作
+        # for data_simple in data_sliced_list:
+        #     x_axis = data_simple[:, 0]
+        #     y_axis = data_simple[:, 1]
+        #     z_axis = data_simple[:, 2]
+        #     xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
+        #     # xyz_axis = merge_data_to_1D(x=x_axis, y=y_axis, z=z_axis, method='fft').reshape(-1, 1)
+        #
+        #     result = np.hstack((data_simple, xyz_axis))
+        #     data_processed.append(result)
 
         # 对于每一个dataframe , 滑动窗口分割数据
-        final_data.extend(data_processed)
+        final_data.extend(data_sliced_list)
         print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
 
     # shuffle data
     random.shuffle(final_data)
     # 提取输入和标签
-    input_features = np.array([arr[:, 24] for arr in final_data])
-    labels = np.array([arr[:, 23] for arr in final_data])[:, 0]
+    x = np.array([arr[:, 0] for arr in final_data])
+    y = np.array([arr[:, 1] for arr in final_data])
+    z = np.array([arr[:, 2] for arr in final_data])
+    xyz = np.stack((x, y, z), axis=1)
 
+    # 提取输入和标签
+    # inputs_tensor = torch.tensor(xyz, dtype=torch.float32).unsqueeze(1)  # 添加通道维度
+    # input_features = np.array([arr[:, 24] for arr in final_data])
+    inputs_tensor = torch.tensor(xyz, dtype=torch.float32)  # 添加通道维度
+    labels = np.array([arr[:, 23] for arr in final_data])[:, 0]
     # 将NumPy数组转换为Tensor
-    inputs_tensor = torch.tensor(input_features, dtype=torch.float32).unsqueeze(1)  # 添加通道维度
     labels_tensor = torch.tensor(labels, dtype=torch.long)
 
     # 计算分割点 7:3
