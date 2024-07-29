@@ -49,7 +49,6 @@ class SimpleRNN(nn.Module):
     def init_hidden(self, batch_size):
         return torch.zeros(3, batch_size, self.hidden_layer_size)
 
-
 # 3D CNN模型
 class Simple3DCNN(nn.Module):
     def __init__(self, kernel_size=(3, 1, 1), stride=1, padding=1):
@@ -76,18 +75,25 @@ class Simple3DCNN(nn.Module):
         x = self.fc2(x)
         return x
 
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, output_size):
-        super(LSTMModel, self).__init__()
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, output_size)
+class LSTM(nn.Module):
+    def __init__(self, input_size=1, hidden_layer_size=256, output_size=3):
+        super(LSTM, self).__init__()
+        self.layer_size = input_size
+        self.hidden_layer_size = hidden_layer_size
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=3, batch_first=True)
+        self.linear = nn.Linear(hidden_layer_size, output_size)
+        self.dropout = nn.Dropout(0.1)
+    def forward(self, input_seq):
+        batch_size = input_seq.size(0)
+        h0 = torch.zeros(self.layer_size, batch_size, self.hidden_layer_size).to(input_seq.device)
+        c0 = torch.zeros(self.layer_size, batch_size, self.hidden_layer_size).to(input_seq.device)
 
-    def forward(self, x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        lstm_out, (h0, c0) = self.lstm(input_seq, (h0, c0))
 
-        out, _ = self.lstm(x, (h0, c0))
-        out = self.fc(out[:, -1, :])
-        return out
+        predictions = self.linear(lstm_out[:, -1, :])
+
+        return predictions
+
+    def init_hidden(self, batch_size):
+        return (torch.zeros(self.layer_size, batch_size, self.hidden_layer_size),
+                torch.zeros(self.layer_size, batch_size, self.hidden_layer_size))
