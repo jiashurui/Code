@@ -28,7 +28,7 @@ test_data = torch.transpose(test_data, 1, 2)
 
 # model instance
 model = LSTM(input_size=3, output_size=6).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-5)
 loss_function = nn.CrossEntropyLoss()
 
 # train

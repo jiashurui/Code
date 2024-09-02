@@ -80,7 +80,7 @@ class LSTM(nn.Module):
         super(LSTM, self).__init__()
         self.layer_size = input_size
         self.hidden_layer_size = hidden_layer_size
-        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=3, batch_first=True)
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=3, batch_first=True, dropout=0.1)
         self.linear = nn.Linear(hidden_layer_size, output_size)
         self.dropout = nn.Dropout(0.1)
     def forward(self, input_seq):
