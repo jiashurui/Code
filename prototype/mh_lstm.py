@@ -10,7 +10,7 @@ from utils import show, report
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # param
-slide_window_length = 400  # 序列长度
+slide_window_length = 100  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
 epochs = 100
 batch_size = 12  # 或其他合适的批次大小
@@ -101,8 +101,7 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        hidden = model.init_hidden(batch_size).to(device)
-        outputs, _ = model_load(input_data, hidden)  # tensor(64,1,7)  概率
+        outputs = model_load(input_data)  # tensor(64,1,7)  概率
 
         # test_loss += loss_function(outputs, label).item()
         pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
