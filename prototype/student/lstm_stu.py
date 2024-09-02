@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 from torch import nn
 
 from prototype.constant import Constant
@@ -35,6 +36,8 @@ model.train()
 
 lost_arr = []
 acc_arr = []
+gradient_norms = {name: [] for name, _ in model.named_parameters()}
+
 
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
@@ -62,6 +65,13 @@ for epoch in range(epochs):
 
         # BP
         loss.backward()
+
+        # 记录梯度范数
+        for name, param in model.named_parameters():
+            if param.grad is not None:
+                grad_norm = param.grad.norm().item()  # 计算梯度范数
+                gradient_norms[name].append(grad_norm)
+
         optimizer.step()
 
     lost_arr.append(loss_per_epoch)
@@ -71,6 +81,15 @@ for epoch in range(epochs):
     acc_arr.append(acc_train * 100.)
     print(f'Accuracy: {acc_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
 
+# 绘制梯度范数曲线
+plt.figure(figsize=(12, 6))
+for name, norms in gradient_norms.items():
+    plt.plot(norms, label=name)
+plt.xlabel('Training Step')
+plt.ylabel('Gradient Norm')
+plt.title('Gradient Norms During Training')
+plt.legend()
+plt.show()
 
 loss_plot = show.show_me_data0(lost_arr)
 acc_plot = show.show_me_acc(acc_arr)
