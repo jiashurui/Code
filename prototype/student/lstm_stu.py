@@ -37,6 +37,7 @@ model.train()
 lost_arr = []
 acc_arr = []
 gradient_norms = {name: [] for name, _ in model.named_parameters()}
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
 
 for epoch in range(epochs):
