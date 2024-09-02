@@ -2,9 +2,9 @@ import numpy as np
 import torch
 from torch import nn
 
-from datareader.mh_datareader import get_mh_data
 from prototype.constant import Constant
-from prototype.model import SimpleRNN, LSTM
+from prototype.model import LSTM
+from prototype.student.datareader_stu import get_stu_data
 from utils import show, report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -12,13 +12,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # param
 slide_window_length = 100  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 1
-batch_size = 12  # 或其他合适的批次大小
+epochs = 50
+batch_size = 32  # 或其他合适的批次大小
 learning_rate = 0.00001
-label_map = Constant.mHealth.action_map
+label_map = Constant.uStudent.action_map
 
 # read data
-train_data, train_labels, test_data, test_labels = get_mh_data(slide_window_length)
+train_data, train_labels, test_data, test_labels = get_stu_data(slide_window_length)
 train_labels -= 1
 test_labels -= 1
 
@@ -26,7 +26,7 @@ train_data = torch.transpose(train_data, 1, 2)
 test_data = torch.transpose(test_data, 1, 2)
 
 # model instance
-model = LSTM(input_size=3, output_size=12).to(device)
+model = LSTM(input_size=3, output_size=6).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 loss_function = nn.CrossEntropyLoss()
 
@@ -78,7 +78,7 @@ acc_plot = show.show_me_acc(acc_arr)
 report.save_plot(loss_plot, 'learn-loss')
 
 # save my model
-torch.save(model.state_dict(), '../model/lstm.pth')
+torch.save(model.state_dict(), '../../model/lstm.pth')
 ################################################################################
 ################################################################################
 ################################################################################
@@ -86,8 +86,8 @@ torch.save(model.state_dict(), '../model/lstm.pth')
 ################################################################################
 ################################################################################
 # 实例化模型(加载模型参数)
-model_load = LSTM(input_size=3,output_size=12).to(device)
-model_load.load_state_dict(torch.load('../model/lstm.pth'))
+model_load = LSTM(input_size=3,output_size=6).to(device)
+model_load.load_state_dict(torch.load('../../model/lstm.pth'))
 
 model_load.eval()
 num_sum = 0
@@ -116,7 +116,5 @@ with torch.no_grad():
 
 print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-heatmap_plot = show.show_me_mh_hotmap(confusion_matrix)
+heatmap_plot = show.show_me_stu_hotmap(confusion_matrix)
 report.save_plot(heatmap_plot, 'heat-map')
-
-
