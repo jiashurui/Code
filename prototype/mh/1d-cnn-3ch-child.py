@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # param
 slide_window_length = 40  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 200
+epochs = 20
 batch_size = 128
 learning_rate = 0.1
 label_map = Constant.ChildWalk.action_map
@@ -76,7 +76,7 @@ loss_plot = show.show_me_data0(lost_arr)
 report.save_plot(loss_plot, 'learn-loss')
 
 # save my model
-torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
+torch.save(model.state_dict(), '../../model/1D-CNN-3CH.pth')
 
 
 ################################################################################
@@ -85,7 +85,7 @@ torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
 
 # 实例化模型(加载模型参数)
 model_load = Simple1DCNN(in_channels=3,out_label=3).to(device)
-model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+model_load.load_state_dict(torch.load('../../model/1D-CNN-3CH.pth'))
 
 model_load.eval()
 num_sum = 0
@@ -112,6 +112,6 @@ with torch.no_grad():
 
 print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-heatmap_plot = show.show_me_child_hotmap(confusion_matrix)
+heatmap_plot = show.show_me_stu_hotmap(confusion_matrix)
 fig = heatmap_plot.gcf()
 report.save_plot(heatmap_plot, 'heat-map')

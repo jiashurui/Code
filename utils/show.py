@@ -128,3 +128,31 @@ def show_me_child_hotmap(mat, show=True):
         plt.show()
     return plt
 
+def show_me_stu_hotmap(mat, show=True):
+    label_map = {
+        'stand': 1,
+        'wait': 2,
+        'crouch': 3,
+        'jump': 4,
+        'walk': 5,
+        'run': 6,
+    }
+    plt.figure(figsize=(7,7))
+
+    plt.imshow(mat, cmap='Blues', interpolation='nearest')
+    plt.colorbar()
+    plt.title('Student Action Confusion Matrix')
+
+    # 在每个单元格的中心显示数字
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            plt.text(j, i, f'{mat[i, j]}', ha='center', va='center', color='black')
+    # comment
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    # 添加颜色条
+    plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()), rotation=90)
+    plt.yticks(np.arange(mat.shape[1]), labels=list(label_map.keys()))
+    if show:
+        plt.show()
+    return plt
