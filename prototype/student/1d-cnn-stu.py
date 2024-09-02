@@ -13,9 +13,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # param
 slide_window_length = 80  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 20
-batch_size = 8
-learning_rate = 0.1
+epochs = 30
+batch_size = 32
+learning_rate = 0.0005
 label_map = Constant.uStudent.action_map
 
 # read data
@@ -73,7 +73,6 @@ for epoch in range(epochs):
     print(f'Accuracy: {correct_train}/{num_sum_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
 
 loss_plot = show.show_me_data0(lost_arr)
-report.save_plot(loss_plot, 'learn-loss')
 
 # save my model
 torch.save(model.state_dict(), '../../model/1D-CNN-3CH.pth')
@@ -114,4 +113,3 @@ print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}
 
 heatmap_plot = show.show_me_stu_hotmap(confusion_matrix)
 fig = heatmap_plot.gcf()
-report.save_plot(heatmap_plot, 'heat-map')
