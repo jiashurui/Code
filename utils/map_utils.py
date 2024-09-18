@@ -1,24 +1,21 @@
-def find_key_by_value(d, target_value):
-    for key, value in d.items():
-        if value == target_value:
-            return key
-    return None  # 如果没有找到，返回 None
-
-# 示例字典
-my_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 2}
-
-# 查找值为 2 的键
-key = find_key_by_value(my_dict, 2)
-print(key)  # 输出 'b'，因为它是第一个值为 2 的键
+import math
 
 
-def find_keys_by_value(d, target_value):
-    keys = [key for key, value in d.items() if value == target_value]
-    return keys
+# haversine
+# https://note.com/b_giganteus/n/n197aea3af14a
+def cal_distance(lon1, lat1, lon2, lat2):
+    lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
 
-# 示例字典
-my_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 2}
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    c = 2 * math.asin(math.sqrt(a))
 
-# 查找所有值为 2 的键
-keys = find_keys_by_value(my_dict, 2)
-print(keys)  # 输出 ['b', 'd']
+    r = 6371
+
+    distance = c * r
+    return distance * 1000
+
+if __name__ == "__main__":
+    # 37.445487, 138.849725
+    print(cal_distance(138.849725,37.445487, 138.849725, 37.4455666))

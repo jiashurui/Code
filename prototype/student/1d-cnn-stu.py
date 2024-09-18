@@ -6,7 +6,7 @@ from torch import nn
 from prototype.constant import Constant
 from prototype.model import Simple1DCNN
 from prototype.student.datareader_stu import get_stu_data
-from utils import show, report
+from utils import show
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

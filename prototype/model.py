@@ -31,6 +31,34 @@ class Simple1DCNN(nn.Module):
         x = self.dropout(x)
         return x
 
+class CNN(nn.Module):
+    def __init__(self, kernel_size=3, stride=1, padding=1, in_channels=1, out_label=7):
+        super(Simple1DCNN, self).__init__()
+        self.conv1d = nn.Conv1d(in_channels=in_channels, out_channels=64, kernel_size=kernel_size, stride=stride,
+                                padding=padding)
+        self.relu = nn.ReLU()
+        self.pool = nn.MaxPool1d(2)
+        self.conv1d2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=kernel_size, stride=stride,
+                                 padding=padding)
+        self.conv1d3 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=kernel_size, stride=stride,
+                                 padding=padding)
+        self.fc = nn.Linear(256 * 5, out_label)
+        self.dropout = nn.Dropout(0.1)
+
+    def forward(self, x):
+        x = self.conv1d(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.conv1d2(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.conv1d3(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        x = self.dropout(x)
+        return x
 
 class SimpleRNN(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=256, output_size=3):
