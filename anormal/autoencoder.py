@@ -1,8 +1,12 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from matplotlib import pyplot as plt
 
+from datareader.show_child_2024 import show_tensor_data
 from prototype.dataReader import get_data_1d_3ch_child
+from utils import show
 
 
 # LSTM Autoencoder Model
@@ -42,7 +46,7 @@ hidden_dim = 128  # Hidden state size
 latent_dim = 64  # Latent space size
 num_layers = 1  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 100  # Number of training epochs
+epochs = 20  # Number of training epochs
 slide_window_length = 20  # 序列长度
 
 # Instantiate the model, loss function and optimizer
@@ -56,7 +60,7 @@ batch_size = 16
 train_data, train_labels, test_data, test_labels = get_data_1d_3ch_child(slide_window_length)
 train_data = torch.transpose(train_data, 1, 2)
 test_data = torch.transpose(test_data, 1, 2)
-
+gradient_norms = {name: [] for name, _ in model.named_parameters()}
 
 # Train
 model.train()
@@ -79,10 +83,17 @@ for epoch in range(epochs):
         output = model(input_data)
         # 自己和重构后的自己比较
         loss = loss_function(output, input_data)
-        loss_per_epoch = loss_per_epoch + loss.item()/batch_size
+        loss_per_epoch = loss_per_epoch + loss.item() / batch_size
 
         # BP
         loss.backward()
+
+        # 记录梯度范数
+        for name, param in model.named_parameters():
+            if param.grad is not None:
+                grad_norm = param.grad.norm().item()  # 计算梯度范数
+                gradient_norms[name].append(grad_norm)
+
         optimizer.step()
 
     lost_arr.append(loss_per_epoch)
@@ -90,9 +101,47 @@ for epoch in range(epochs):
 
 print("Training complete.")
 
-
 # save my model
 torch.save(model.state_dict(), '../model/autoencoder.pth')
+loss_plot = show.show_me_data0(lost_arr)
 
+# 绘制梯度范数曲线
+plt.figure(figsize=(12, 6))
+for name, norms in gradient_norms.items():
+    plt.plot(norms, label=name)
+plt.xlabel('Training Step')
+plt.ylabel('Gradient Norm')
+plt.title('Gradient Norms During Training')
+plt.legend()
+plt.show()
+
+
+# 或者使用 state_dict
+print(model.state_dict())
 
 # Test
+
+##############################################################################################################
+# 实例化模型(加载模型参数)
+model_load = LSTMAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers)
+model_load.load_state_dict(torch.load('../model/autoencoder.pth'))
+model_load.eval()
+
+num_sum = 0
+correct = 0
+test_loss = 0
+show_count = 0
+
+with torch.no_grad():
+    for i in range(0, test_data.size()[0], batch_size):
+        input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
+
+        if input_data.size(0) != batch_size:
+            continue
+        outputs = model_load(input_data)
+        loss = loss_function(outputs, input_data)
+
+        # 输出
+        if show_count < 5:
+            show_tensor_data(input_data, outputs, loss)
+            show_count += 1
