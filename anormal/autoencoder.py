@@ -134,6 +134,6 @@ with torch.no_grad():
             show_tensor_data(input_data, outputs, loss)
             show_count += 1
 
-    lost_avg_test.append(loss_sum / i)  # 平均单样本 loss
+    lost_avg_test.append(loss_sum_test / i)  # 平均单样本 loss
 loss_avg_plot = show.show_me_data0(lost_avg_test)
 print(lost_avg_test)
