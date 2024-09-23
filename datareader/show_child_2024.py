@@ -52,8 +52,8 @@ def show_child_2024():
 
 # (batch_size , seq , feature)
 def show_tensor_data(tensor_before, tensor_after, loss):
-    numpy_data = tensor_before.numpy()
-    numpy_data_after = tensor_after.numpy()
+    numpy_data = tensor_before.cpu().numpy()
+    numpy_data_after = tensor_after.cpu().numpy()
 
     seq_data = numpy_data[0]
     seq_data_after = numpy_data_after[0]

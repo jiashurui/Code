@@ -25,8 +25,8 @@ epochs = 1  # Number of training epochs
 slide_window_length = 20  # 序列长度
 
 # Instantiate the model, loss function and optimizer
-model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers)
-model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers)
+model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
 
 loss_function = nn.MSELoss()  # We use MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -136,3 +136,4 @@ with torch.no_grad():
 
     lost_avg_test.append(loss_sum / i)  # 平均单样本 loss
 loss_avg_plot = show.show_me_data0(lost_avg_test)
+print(lost_avg_test)
