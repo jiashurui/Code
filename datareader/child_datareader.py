@@ -10,12 +10,14 @@ from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 mapping = Constant.ChildWalk.action_map
+
+
 # 定义转换函数
-def transform_column(x ,value):
-    item = mapping.get(x)
-    if item is None:
-        print(value)
-    return item
+def transform_column(value):
+    if value == 'なし':
+        return value
+    else:
+        return mapping.get(value)
 
 
 def get_child_data_rnn(slide_window_length):
@@ -138,12 +140,11 @@ def get_child_all_features(slide_window_length):
     return data_tensor
 
 
-
 # 获取小学生所有的特征(小学生数据集的freq是10hz)
 # 根据ground truth , 选择部分的行为
 # 这个方法是用于无监督学习的,没有数据集标签
 # 输出格式(batch_size, seq , )
-def get_child_part_action(slide_window_length, train_action = None):
+def get_child_part_action(slide_window_length, train_action=None):
     # 读取数据
     labeled_path = '/Users/jiashurui/Desktop/Dataset_labeled/merged_data/*.csv'
 
@@ -156,6 +157,9 @@ def get_child_part_action(slide_window_length, train_action = None):
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
+
+    big_df['X'] = big_df['X'].apply(transform_column)
+
     record_diff = []
     pre_val = -1
     for index, value in big_df['X'].items():
@@ -180,35 +184,19 @@ def get_child_part_action(slide_window_length, train_action = None):
 
     # shuffle data
     random.shuffle(final_data)
-    for np_arr in final_data:
-
-        # 定义条件：找到第二列中小于或等于18的值
-        condition = (np_arr[:, 23] != '歩く') & (np_arr[:, 23] != '止まる') & (np_arr[:, 23] != '走る')
-        # 获取不满足条件的行
-        invalid_rows = np_arr[condition]
-
-        if len(invalid_rows) > 0:
-            print('?')
-        np_arr[:, 23] = np.vectorize(lambda x: transform_column(x, np_arr))(np_arr[:, 23])
-        condition = (np_arr[:, 23] != 1) & (np_arr[:, 23] != 2) & (np_arr[:, 23] != 2)
-        # 获取不满足条件的行
-        invalid_rows = np_arr[condition]
-
-        if len(invalid_rows) > 0:
-            print('?')
-
-
-
-    # 提取输入
-    # arr : (seq_length , )
-
     data = np.array([arr[:, 1:24].astype(np.float64) for arr in final_data])
-
     # 将NumPy数组转换为Tensor
     data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
 
-    return data_tensor
+    # 根据第一列的值进行分割，比如大于 5 和小于等于 5
+    condition = data_tensor[:, :, 22] == 1.0
+
+    # 使用布尔索引进行分割
+    tensor_walk = data_tensor[condition[:, 0]]  # 满足条件 (第一列 > 5) 的行
+    tensor_not_walk = data_tensor[~condition[:, 0]]  # 不满足条件 (第一列 <= 5) 的行
+
+    return tensor_walk, tensor_not_walk
+
 
 if __name__ == '__main__':
-    print(get_child_part_action(slide_window_length=200))
-
+    print(get_child_part_action(slide_window_length=20))
