@@ -21,7 +21,7 @@ hidden_dim = 128  # Hidden state size
 latent_dim = 64  # Latent space size
 num_layers = 22  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 10  # Number of training epochs
+epochs = 1  # Number of training epochs
 slide_window_length = 20  # 序列长度
 
 # Instantiate the model, loss function and optimizer
@@ -100,7 +100,7 @@ plt.show()
 
 
 # 或者使用 state_dict
-print(model.state_dict())
+# print(model.state_dict())
 
 # Test
 
@@ -126,7 +126,7 @@ with torch.no_grad():
         loss = loss_function(outputs, input_data)
 
         # 单样本Loss
-        loss_sum_test = (loss_sum + loss.item())
+        loss_sum_test = (loss_sum_test + loss.item())
 
 
         # 输出
