@@ -4,6 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import torch
+from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
 from utils.slidewindow import slide_window2
@@ -156,7 +157,12 @@ def get_child_part_action(slide_window_length, train_action=None):
         data = pd.read_csv(file_name)
         appended_data.append(data)
 
+    # 初始化 MinMaxScaler
+    scaler = MinMaxScaler()
     big_df = pd.concat(appended_data, ignore_index=True)
+
+    # 对 DataFrame 的每一列进行归一化
+    big_df.iloc[:, 1:21] = scaler.fit_transform(big_df.iloc[:, 1:21])
 
     big_df['X'] = big_df['X'].apply(transform_column)
 
@@ -195,7 +201,12 @@ def get_child_part_action(slide_window_length, train_action=None):
     tensor_walk = data_tensor[condition[:, 0]]  # 满足条件 (第一列 > 5) 的行
     tensor_not_walk = data_tensor[~condition[:, 0]]  # 不满足条件 (第一列 <= 5) 的行
 
-    return tensor_walk[:,:,:22], tensor_not_walk[:,:,:22]
+
+    # TODO long lat
+    return tensor_walk[:,:,:20], tensor_not_walk[:,:,:20]
+
+
+
 
 
 if __name__ == '__main__':

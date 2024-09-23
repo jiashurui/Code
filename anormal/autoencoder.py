@@ -16,7 +16,7 @@ from utils import show
 
 # Hyperparameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-input_dim = 22  # Dimensionality of input sequence
+input_dim = 20  # Dimensionality of input sequence
 hidden_dim = 128  # Hidden state size
 latent_dim = 64  # Latent space size
 num_layers = 3  # Number of LSTM layers
