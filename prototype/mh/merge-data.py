@@ -33,6 +33,8 @@ for file in files:
     # 为合并后的数据添加列名
     merged_df.columns = list(data_df.columns) + ['no','time','X','Y','Z','A','B']
 
+    merged_df['object'] = file.replace('.csv', '')
+
     # 保存合并后的数据
     merged_df.to_csv(folder_path + '/merged_data/' + file, index=False)
 

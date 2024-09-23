@@ -52,14 +52,13 @@ def show_child_2024():
 
 # (batch_size , seq , feature)
 def show_tensor_data(tensor_before, tensor_after, loss):
-    batch_size = tensor_before.shape[0]
     numpy_data = tensor_before.numpy()
     numpy_data_after = tensor_after.numpy()
 
     seq_data = numpy_data[0]
     seq_data_after = numpy_data_after[0]
-    df = pd.DataFrame(seq_data, columns=['x', 'y', 'z'])
-    df_after = pd.DataFrame(seq_data_after, columns=['x_after', 'y_after', 'z_after'])
+    df = pd.DataFrame(seq_data[0:2], columns=['x', 'y', 'z'])
+    df_after = pd.DataFrame(seq_data_after[0:2], columns=['x_after', 'y_after', 'z_after'])
 
     plt.figure(figsize=(10, 10))
     plt.plot(df.index, df['x'], label='x', color='red')

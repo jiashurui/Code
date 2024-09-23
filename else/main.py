@@ -1,34 +1,26 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from tslearn.clustering import TimeSeriesKMeans
-from tslearn.preprocessing import TimeSeriesScalerMeanVariance
+import plotly.express as px
+from sklearn.cluster import KMeans
 
-# 假设有 1000 组数据，每组有 100 个时间点，每个时间点有 10 维特征
-data = np.random.rand(1000, 100, 10)
+# 生成三维示例数据
+X = np.random.rand(300, 3)  # 300个样本，每个样本有三个特征
 
-# 1. 标准化数据
-scaler = TimeSeriesScalerMeanVariance()
-data_scaled = scaler.fit_transform(data)
+# 使用 KMeans 进行聚类
+kmeans = KMeans(n_clusters=3, random_state=42)
+kmeans.fit(X)
 
-# 2. 使用 KMeans 进行聚类（DTW距离）
-n_clusters = 5
-kmeans = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=10, random_state=42)
-y_pred = kmeans.fit_predict(data_scaled)
+# 获取聚类结果
+labels = kmeans.labels_  # 聚类标签
+centroids = kmeans.cluster_centers_  # 聚类质心
 
-# 3. 从每个簇中随机选择几组样本进行可视化
-n_samples_per_cluster = 5  # 每个簇可视化 5 个样本
-plt.figure(figsize=(12, 10))
+# 使用 Plotly 进行三维动态可视化
+fig = px.scatter_3d(x=X[:, 0], y=X[:, 1], z=X[:, 2], color=labels.astype(str),
+                    title="K-Means Clustering (3D)",
+                    labels={'x': 'Feature 1', 'y': 'Feature 2', 'z': 'Feature 3'})
 
-for i in range(n_clusters):
-    cluster_indices = np.where(y_pred == i)[0]
-    selected_indices = np.random.choice(cluster_indices, n_samples_per_cluster, replace=False)
+# 添加聚类质心
+fig.add_scatter3d(x=centroids[:, 0], y=centroids[:, 1], z=centroids[:, 2],
+                  mode='markers', marker=dict(size=10, color='red'), name='Centroids')
 
-    plt.subplot(n_clusters, 1, i + 1)
-    for idx in selected_indices:
-        plt.plot(data_scaled[idx].ravel(), alpha=0.6)
-    plt.title(f"Cluster {i + 1} Sample Time Series")
-    plt.xlabel("Time Step")
-    plt.ylabel("Feature Value")
-
-plt.tight_layout()
-plt.show()
+# 显示图形
+fig.show()

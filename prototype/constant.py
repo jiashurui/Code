@@ -80,3 +80,11 @@ class Constant:
             '歩く': 5,
             '走る': 6
         }
+        action_map_en = {
+            'stand': 1,
+            'Wandering': 2,
+            'squat': 3,
+            'jump': 4,
+            'walk': 5,
+            'run': 6
+        }

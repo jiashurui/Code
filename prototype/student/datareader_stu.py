@@ -90,5 +90,49 @@ def get_stu_data(slide_window_length):
 
     return train_data, train_labels, test_data, test_labels
 
+def get_stu_all_features(slide_window_length):
+    base_path = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/merge_labeled.csv'
 
-get_stu_data(100)
+    acc_file = glob.glob(base_path)
+    final_data = []
+    df = pd.read_csv(acc_file[0])
+
+    record_diff = []
+    pre_val = -2
+    # 按照label,分成各个label单位的小组
+    for index, value in df['label'].items():
+        if value != pre_val:
+            record_diff.append(index)
+        pre_val = value
+
+    sliced_list = []
+    for i in range(1, len(record_diff) - 1):
+        start = record_diff[i]
+        end = record_diff[i + 1]
+        sliced_df = df.iloc[start:end]
+
+        if sliced_df['label'].array[0] != -1:
+            sliced_list.append(sliced_df)
+
+    for df in sliced_list:
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+
+    # shuffle data
+    random.shuffle(final_data)
+
+    ########    ########    ########    ########    ########    ########    ########
+    # 提取输入和标签
+    data = np.array([arr[:, 1:11].astype(np.float64) for arr in final_data])
+
+    # 将NumPy数组转换为Tensor
+    data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
+
+    return data_tensor
+
+
+if __name__ == '__main__':
+    print(get_stu_all_features(100))
