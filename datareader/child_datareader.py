@@ -195,7 +195,7 @@ def get_child_part_action(slide_window_length, train_action=None):
     tensor_walk = data_tensor[condition[:, 0]]  # 满足条件 (第一列 > 5) 的行
     tensor_not_walk = data_tensor[~condition[:, 0]]  # 不满足条件 (第一列 <= 5) 的行
 
-    return tensor_walk, tensor_not_walk
+    return tensor_walk[:,:,:22], tensor_not_walk[:,:,:22]
 
 
 if __name__ == '__main__':

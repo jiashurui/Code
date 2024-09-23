@@ -5,7 +5,7 @@ import torch.optim as optim
 from matplotlib import pyplot as plt
 
 from anormal.AEModel import LSTMFCAutoencoder
-from datareader.child_datareader import get_child_all_features
+from datareader.child_datareader import get_child_all_features, get_child_part_action
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 
@@ -21,7 +21,7 @@ hidden_dim = 128  # Hidden state size
 latent_dim = 64  # Latent space size
 num_layers = 22  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 20  # Number of training epochs
+epochs = 10  # Number of training epochs
 slide_window_length = 20  # 序列长度
 
 # Instantiate the model, loss function and optimizer
@@ -32,8 +32,9 @@ loss_function = nn.MSELoss()  # We use MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 batch_size = 16
-train_data = get_child_all_features(slide_window_length)
-test_data = train_data
+#train_data = get_child_all_features(slide_window_length)
+train_data, test_data = get_child_part_action(slide_window_length)
+
 gradient_norms = {name: [] for name, _ in model.named_parameters()}
 
 # Train
@@ -75,7 +76,7 @@ for epoch in range(epochs):
 
         optimizer.step()
 
-    lost_avg_arr.append(loss_sum/i)  # 平均单样本 loss
+    lost_avg_arr.append(loss_sum/i)      # 平均单样本 loss
     lost_arr.append(loss_per_epoch)      # 平均每轮累计 loss
     print('epoch: {}, sum_loss: {}, avg_loss_per_simple:{}'.format(epoch, loss_per_epoch, loss_sum/i))
 
@@ -112,6 +113,8 @@ num_sum = 0
 correct = 0
 test_loss = 0
 show_count = 0
+loss_sum_test = 0.0
+lost_avg_test = []
 
 with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):
@@ -122,7 +125,14 @@ with torch.no_grad():
         outputs = model_load(input_data)
         loss = loss_function(outputs, input_data)
 
+        # 单样本Loss
+        loss_sum_test = (loss_sum + loss.item())
+
+
         # 输出
         if show_count < 5:
             show_tensor_data(input_data, outputs, loss)
             show_count += 1
+
+    lost_avg_test.append(loss_sum / i)  # 平均单样本 loss
+loss_avg_plot = show.show_me_data0(lost_avg_test)
