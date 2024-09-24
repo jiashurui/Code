@@ -156,3 +156,30 @@ def show_me_stu_hotmap(mat, show=True):
     if show:
         plt.show()
     return plt
+
+def show_model_gradient_hotmap(model):
+    gradient_norms = {name: [] for name, _ in model.named_parameters()}
+
+
+class GradientUtils:
+    def __init__(self, model):
+        self.model = model
+        self.gradient_norms = {name: [] for name, _ in model.named_parameters()}
+
+    def show(self):
+        # 绘制梯度范数曲线
+        plt.figure(figsize=(12, 6))
+        for name, norms in self.gradient_norms.items():
+            plt.plot(norms, label=name)
+        plt.xlabel('Training Step')
+        plt.ylabel('Gradient Norm')
+        plt.title('Gradient Norms During Training')
+        plt.legend()
+        plt.show()
+
+    def record_gradient_norm(self):
+        # 记录梯度范数
+        for name, param in self.model.named_parameters():
+            if param.grad is not None:
+                grad_norm = param.grad.norm().item()  # 计算梯度范数
+                self.gradient_norms[name].append(grad_norm)

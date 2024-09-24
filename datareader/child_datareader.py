@@ -14,6 +14,7 @@ mapping = Constant.ChildWalk.action_map
 # 初始化 MinMaxScaler(Normalization [0,1])
 scaler = MinMaxScaler()
 
+
 # 定义转换函数
 def transform_column(value):
     if value == 'なし':
@@ -109,7 +110,6 @@ def get_child_all_features(slide_window_length):
     big_df = pd.concat(appended_data, ignore_index=True)
     big_df.iloc[:, 1:21] = scaler.fit_transform(big_df.iloc[:, 1:21])
 
-
     record_diff = []
     pre_val = -1
     for index, value in big_df['X'].items():
@@ -203,14 +203,11 @@ def get_child_part_action(slide_window_length, train_action=None):
     condition = data_tensor[:, :, 22] == 1.0
 
     # 使用布尔索引进行分割
-    tensor_walk = data_tensor[condition[:, 0]]  # 满足条件 (第一列 > 5) 的行
-    tensor_not_walk = data_tensor[~condition[:, 0]]  # 不满足条件 (第一列 <= 5) 的行
+    tensor_walk = data_tensor[condition[:, 0]]
+    tensor_not_walk = data_tensor[~condition[:, 0]]
 
     # TODO long lat
-    return tensor_walk[:,:,:20], tensor_not_walk[:,:,:20]
-
-
-
+    return tensor_walk[:, :, :20], tensor_not_walk[:, :, :20]
 
 
 if __name__ == '__main__':
