@@ -4,6 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import torch
+from sklearn.preprocessing import MinMaxScaler
 
 from utils.slidewindow import slide_window2
 
@@ -23,6 +24,8 @@ from utils.slidewindow import slide_window2
 # ５　金：　　15:48 ~ 15:54        1721976480000 ~ 1721976840000
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# 初始化 MinMaxScaler
+scaler = MinMaxScaler()
 
 def get_stu_data(slide_window_length):
     base_path = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/accelerometers_label.csv'
@@ -96,6 +99,9 @@ def get_stu_all_features(slide_window_length):
     acc_file = glob.glob(base_path)
     final_data = []
     df = pd.read_csv(acc_file[0])
+
+    # 对 DataFrame 的每一列进行归一化
+    df.iloc[:, 1:10] = scaler.fit_transform(df.iloc[:, 1:10])
 
     record_diff = []
     pre_val = -2

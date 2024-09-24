@@ -11,7 +11,8 @@ from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 mapping = Constant.ChildWalk.action_map
-
+# 初始化 MinMaxScaler(Normalization [0,1])
+scaler = MinMaxScaler()
 
 # 定义转换函数
 def transform_column(value):
@@ -106,6 +107,9 @@ def get_child_all_features(slide_window_length):
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
+    big_df.iloc[:, 1:21] = scaler.fit_transform(big_df.iloc[:, 1:21])
+
+
     record_diff = []
     pre_val = -1
     for index, value in big_df['X'].items():
@@ -210,4 +214,4 @@ def get_child_part_action(slide_window_length, train_action=None):
 
 
 if __name__ == '__main__':
-    print(get_child_part_action(slide_window_length=20))
+    print(get_child_all_features(slide_window_length=20))
