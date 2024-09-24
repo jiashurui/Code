@@ -21,6 +21,7 @@ num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
 epochs = 1  # Number of training epochs
 slide_window_length = 20  # 序列长度
+batch_size = 16
 
 # Instantiate the model, loss function and optimizer
 model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
@@ -29,7 +30,6 @@ model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_l
 loss_function = nn.MSELoss()  # We use MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-batch_size = 16
 # train_data = get_child_all_features(slide_window_length)
 train_data, test_data = get_child_part_action(slide_window_length)
 

@@ -27,6 +27,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 初始化 MinMaxScaler
 scaler = MinMaxScaler()
 
+
 def get_stu_data(slide_window_length):
     base_path = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/accelerometers_label.csv'
 
@@ -93,6 +94,7 @@ def get_stu_data(slide_window_length):
 
     return train_data, train_labels, test_data, test_labels
 
+
 def get_stu_all_features(slide_window_length):
     base_path = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/merge_labeled.csv'
 
@@ -140,5 +142,19 @@ def get_stu_all_features(slide_window_length):
     return data_tensor
 
 
+# 传递出所有特征(不带标签)
+def get_stu_part_features(slide_window_length, label_for_abnormal_test):
+    all_features_data = get_stu_all_features(slide_window_length)
+
+    # 根据标签,分割数据
+    condition = all_features_data[:, :, 9] == label_for_abnormal_test
+
+    # 使用布尔索引进行分割
+    tensor_train = all_features_data[~condition[:, 0]]  # 不满足条件
+    tensor_test = all_features_data[condition[:, 0]]    # 满足条件
+
+    # TODO long lat
+    return tensor_train[:, :, :9], tensor_test[:, :, :9]
+
 if __name__ == '__main__':
-    print(get_stu_all_features(100))
+    print(get_stu_part_features(100, 1.0))

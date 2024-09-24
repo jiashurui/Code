@@ -149,6 +149,7 @@ def get_child_all_features(slide_window_length):
 # 根据ground truth , 选择部分的行为
 # 这个方法是用于无监督学习的,没有数据集标签
 # 输出格式(batch_size, seq , )
+# 用来做异常检测的数据处理代码, 行走数据作为正常数据, 跑步和停止作为异常数据
 def get_child_part_action(slide_window_length, train_action=None):
     # 读取数据
     labeled_path = '/Users/jiashurui/Desktop/Dataset_labeled/merged_data/*.csv'
@@ -198,13 +199,12 @@ def get_child_part_action(slide_window_length, train_action=None):
     # 将NumPy数组转换为Tensor
     data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
 
-    # 根据第一列的值进行分割，比如大于 5 和小于等于 5
+    # 根据标签,分割数据
     condition = data_tensor[:, :, 22] == 1.0
 
     # 使用布尔索引进行分割
     tensor_walk = data_tensor[condition[:, 0]]  # 满足条件 (第一列 > 5) 的行
     tensor_not_walk = data_tensor[~condition[:, 0]]  # 不满足条件 (第一列 <= 5) 的行
-
 
     # TODO long lat
     return tensor_walk[:,:,:20], tensor_not_walk[:,:,:20]
