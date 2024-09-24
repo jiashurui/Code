@@ -12,8 +12,6 @@ from utils import show
 
 # LSTM Autoencoder Model
 # Forward Input (batch_size, seq_length, dim)
-
-
 # Hyperparameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 input_dim = 20  # Dimensionality of input sequence
@@ -32,7 +30,7 @@ loss_function = nn.MSELoss()  # We use MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 batch_size = 16
-#train_data = get_child_all_features(slide_window_length)
+# train_data = get_child_all_features(slide_window_length)
 train_data, test_data = get_child_part_action(slide_window_length)
 
 gradient_norms = {name: [] for name, _ in model.named_parameters()}
@@ -127,7 +125,6 @@ with torch.no_grad():
 
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())
-
 
         # 输出
         if show_count < 5:
