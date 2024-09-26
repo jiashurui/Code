@@ -35,4 +35,4 @@ def get_value_from_config(key, default=None):
 
 if __name__ == "__main__":
     # 使用示例
-    print(get_value_from_config('MY_ENV_VAR'))
+    print(get_value_from_config('child_data_set'))
