@@ -5,8 +5,8 @@ import pandas as pd
 from matplotlib.ticker import ScalarFormatter
 
 
-def show_child_2024():
-    base_path = '/Users/jiashurui/Desktop/Dataset_labeled/acc_data/*.csv'
+def show_child_2024(path):
+    base_path = path
     files = glob.glob(base_path)
     show_count = 0
 
@@ -77,3 +77,58 @@ def show_tensor_data(tensor_before, tensor_after, loss):
     plt.legend()
     plt.title('Data before and after')
     plt.show()
+
+
+def show_toyota_data_2024(path):
+    print()
+
+    base_path = path
+    files = glob.glob(base_path)
+    show_count = 0
+
+    for file in files:
+        if show_count == 3:
+            break
+
+        df_data = pd.read_csv(file)
+        df = df_data.head(100)
+        plt.figure(figsize=(20, 20))
+
+        plt.subplot(2, 2, 1)
+        plt.plot(df['latitude'], df['longitude'], label='geo')
+        plt.xlabel('latitude')
+        plt.ylabel('longitude')
+        plt.title('geo data' + ' ' + file)
+
+        plt.gca().yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+        plt.gca().yaxis.get_major_formatter().set_scientific(False)
+        plt.gca().yaxis.get_major_formatter().set_useOffset(False)
+        plt.legend()
+        plt.grid(True)
+
+        plt.subplot(2, 2, 2)
+        df['time'] = pd.to_datetime(df['UNIX_time'], unit='ms')
+
+        plt.plot(df['time'], df['acc_x'], label='x')
+        plt.plot(df['time'], df['acc_y'], label='y')
+        plt.plot(df['time'], df['acc_z'], label='z')
+        plt.xlabel('time')
+        plt.ylabel('acc')
+        plt.gca().xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+        plt.gca().xaxis.get_major_formatter().set_scientific(False)
+        plt.gca().xaxis.get_major_formatter().set_useOffset(False)
+        plt.legend()
+        plt.grid(True)
+        plt.rcParams['timezone'] = 'Asia/Tokyo'
+        plt.title('acc data' + ' ' + file)
+
+        plt.show()
+        show_count += 1
+
+
+if __name__ == '__main__':
+    #path = '/Users/jiashurui/Desktop/Dataset_labeled/acc_data/*.csv'
+    path_2024_04 = '/Users/jiashurui/Desktop/Dataset_labeled/origin/toyota_202404_crossing/*/*/*.csv'
+    show_toyota_data_2024(path_2024_04)
+
+    print()

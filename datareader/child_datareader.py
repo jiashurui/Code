@@ -210,5 +210,12 @@ def get_child_part_action(slide_window_length, train_action=None):
     return tensor_walk[:, :, :20], tensor_not_walk[:, :, :20]
 
 
+def get_child_2024_all_features(slide_window_length):
+
+
+    print('hi')
+
+
+
 if __name__ == '__main__':
     print(get_child_all_features(slide_window_length=20))
