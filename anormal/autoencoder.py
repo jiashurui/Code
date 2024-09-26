@@ -16,9 +16,9 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 10  # Number of training epochs
+epochs = 100  # Number of training epochs
 slide_window_length = 40  # 序列长度
-batch_size = 16
+batch_size = 8
 
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
