@@ -91,7 +91,7 @@ def show_toyota_data_2024(path):
             break
 
         df_data = pd.read_csv(file)
-        df = df_data.head(100)
+        df = df_data.head(500)
         plt.figure(figsize=(20, 20))
 
         plt.subplot(2, 2, 1)
@@ -109,9 +109,12 @@ def show_toyota_data_2024(path):
         plt.subplot(2, 2, 2)
         df['time'] = pd.to_datetime(df['UNIX_time'], unit='ms')
 
-        plt.plot(df['time'], df['acc_x'], label='x')
-        plt.plot(df['time'], df['acc_y'], label='y')
-        plt.plot(df['time'], df['acc_z'], label='z')
+        # filtered_values = df[(df['Label_X'] != 1.0)&(df['Label_X'] != 2.0)&(df['Label_X'] != 3.0)&(df['Label_X'] != 4.0)]
+        filtered_values = df
+
+        plt.plot(filtered_values['time'], filtered_values['acc_x'], label='x')
+        plt.plot(filtered_values['time'], filtered_values['acc_y'], label='y')
+        plt.plot(filtered_values['time'], filtered_values['acc_z'], label='z')
         plt.xlabel('time')
         plt.ylabel('acc')
         plt.gca().xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
@@ -127,7 +130,7 @@ def show_toyota_data_2024(path):
 
 
 if __name__ == '__main__':
-    #path = '/Users/jiashurui/Desktop/Dataset_labeled/acc_data/*.csv'
+    # path = '/Users/jiashurui/Desktop/Dataset_labeled/acc_data/*.csv'
     path_2024_04 = '/Users/jiashurui/Desktop/Dataset_labeled/origin/toyota_202404_crossing/*/*/*.csv'
     show_toyota_data_2024(path_2024_04)
 

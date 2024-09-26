@@ -12,13 +12,16 @@ from utils.show import GradientUtils
 
 # Hyperparameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-hidden_dim = 128  # Hidden state size
-latent_dim = 64  # Latent space size
+hidden_dim = 256  # Hidden state size
+latent_dim = 128  # Latent space size
 num_layers = 3  # Number of LSTM layers
-learning_rate = 0.0001  # Learning rate
+learning_rate = 0.01  # Learning rate
 epochs = 20  # Number of training epochs
 slide_window_length = 40  # 序列长度
 batch_size = 16
+
+# https://arxiv.org/abs/2109.08203
+torch.manual_seed(3407)
 
 # (simple_size, window_length, features_num)
 # train_data = get_child_all_features(slide_window_length)
@@ -89,14 +92,13 @@ gradient_utils.show()
 model_load.load_state_dict(torch.load('../model/autoencoder.pth'))
 model_load.eval()
 
-num_sum = 0
-correct = 0
-test_loss = 0
-show_count = 0
-loss_sum_test = 0.0
-lost_avg_test = []
-
+# 测试Ground_truth 的反例
 with torch.no_grad():
+
+    loss_sum_test = 0.0  #
+    every_simple_loss = []  # 每个样本的loss(batch)
+    show_count = 0
+
     for i in range(0, test_data.size()[0], batch_size):
         input_data = test_data[i: i + batch_size]
 
@@ -113,6 +115,34 @@ with torch.no_grad():
             show_tensor_data(input_data, outputs, loss)
             show_count += 1
 
-    lost_avg_test.append(loss_sum_test / i)  # 平均单样本 loss
-loss_avg_plot = show.show_me_data0(lost_avg_test)
-print(lost_avg_test)
+        every_simple_loss.append(loss.item())
+
+    print(f'平均单样本(反例) loss: {loss_sum_test / i}')  # 平均单样本 loss
+
+    show.show_me_data0(every_simple_loss)
+
+# 测试Ground_truth 的正例
+with torch.no_grad():
+    loss_sum_test = 0.0  #
+    every_simple_loss = []  # 每个样本的loss(batch)
+    show_count = 0
+
+    for i in range(0, train_data.size()[0], batch_size):
+        input_data = train_data[i: i + batch_size]
+
+        if input_data.size(0) != batch_size:
+            continue
+        outputs = model_load(input_data)
+        loss = loss_function(outputs, input_data)
+
+        # 单样本Loss
+        loss_sum_test = (loss_sum_test + loss.item())
+
+        # 输出
+        if show_count < 5:
+            show_tensor_data(input_data, outputs, loss)
+            show_count += 1
+
+    print(f'平均单样本(正例) loss:{loss_sum_test / i}')  # 平均单样本 loss
+
+    show.show_me_data0(every_simple_loss)

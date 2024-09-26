@@ -162,8 +162,6 @@ def get_child_part_action(slide_window_length, train_action=None):
         data = pd.read_csv(file_name)
         appended_data.append(data)
 
-    # 初始化 MinMaxScaler
-    scaler = MinMaxScaler()
     big_df = pd.concat(appended_data, ignore_index=True)
 
     # 对 DataFrame 的每一列进行归一化
