@@ -205,7 +205,9 @@ def get_child_part_action(slide_window_length, train_action=None):
     tensor_not_walk = data_tensor[~condition[:, 0]]
 
     # TODO long lat
-    return tensor_walk[:, :, :20], tensor_not_walk[:, :, :20]
+    return tensor_walk[:, :, :10], tensor_not_walk[:, :, :10]
+    # TODO all features
+    # return tensor_walk[:, :, :20], tensor_not_walk[:, :, :20]
 
 
 def get_child_2024_all_features(slide_window_length):
