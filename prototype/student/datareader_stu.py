@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
 
+from utils.config_utils import get_value_from_config
 from utils.slidewindow import slide_window2
 
 # 2024年7月26日 研究室 5名大学生行动数据
@@ -29,7 +30,7 @@ scaler = MinMaxScaler()
 
 
 def get_stu_data(slide_window_length):
-    base_path = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/accelerometers_label.csv'
+    base_path = get_value_from_config('stu_data_set')
 
     acc_file = glob.glob(base_path)
     final_data = []

@@ -1,8 +1,10 @@
 import pandas as pd
 import os
 
+from utils.config_utils import get_value_from_config
+
 # 文件夹路径
-folder_path = '/Users/jiashurui/Desktop/Dataset_labeled'
+folder_path = get_value_from_config('child_origin_data')
 
 # 获取文件名列表
 # 获取文件夹中所有文件和文件夹的名字

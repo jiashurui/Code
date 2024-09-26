@@ -35,4 +35,4 @@ def get_value_from_config(key, default=None):
 
 if __name__ == "__main__":
     # 使用示例
-    print(get_value_from_config('child_data_set'))
+    print(get_value_from_config('child_origin_data'))
