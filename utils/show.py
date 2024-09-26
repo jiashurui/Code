@@ -88,7 +88,7 @@ def show_me_mh_hotmap(mat, show=True):
 
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
-    plt.title('Heatmap using Matplotlib')
+    plt.title('mHealth-Confusion-Matrix-1D-CNN')
     # 在每个单元格的中心显示数字
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
