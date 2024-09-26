@@ -99,7 +99,7 @@ def get_mh_data(slide_window_length):
     return train_data, train_labels, test_data, test_labels
 
 def get_mh_data_1d_3ch(slide_window_length):
-    file_list = glob.glob('../../data/mHealth/mHealth_*.log')
+    file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
     appended_data = []
 

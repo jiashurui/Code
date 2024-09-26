@@ -3,7 +3,8 @@ import platform
 import configparser
 
 
-def set_env_from_property_file(file_path):
+def get_value_from_config(key, default=None):
+    file_path = '../config.ini'
     # 创建configparser对象
     config = configparser.ConfigParser()
 
@@ -22,17 +23,16 @@ def set_env_from_property_file(file_path):
         os_name = "Windows"
     else:
         print("Unknown OS. No environment variables set.")
-        return
+        return None
 
     # 检查配置文件中是否有该平台的配置
     if os_name in config:
-        for key in config[os_name]:
-            # 设置环境变量
-            os.environ[key] = config[os_name][key]
-            print(f"Set {key} = {config[os_name][key]} for {os_name}")
+        return config[os_name].get(key, default)
     else:
         print(f"No configuration found for {os_name} in the property file.")
+        return default
 
 
-# 使用示例
-set_env_from_property_file('config.properties')
+if __name__ == "__main__":
+    # 使用示例
+    print(get_value_from_config('child_origin_data'))

@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 
 from prototype.constant import Constant
+from utils.config_utils import get_value_from_config
 from utils.slidewindow import slide_window2
 
 stop_simple = 500  # 数据静止的个数
@@ -276,7 +277,7 @@ def get_origin_data(slide_window_length):
 
     return x, y, z, labels,actions,who
 def get_data_1d_3ch_child(slide_window_length):
-    labeled_path = '/Users/jiashurui/Desktop/Dataset_labeled/merged_data/*.csv'
+    labeled_path = get_value_from_config('child_data_set')
 
     file_list = glob.glob(labeled_path)
     final_data = []
