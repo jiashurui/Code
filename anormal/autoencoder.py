@@ -12,11 +12,11 @@ from utils.show import GradientUtils
 
 # Hyperparameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-hidden_dim = 256  # Hidden state size
-latent_dim = 128  # Latent space size
+hidden_dim = 1024  # Hidden state size
+latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
-learning_rate = 0.01  # Learning rate
-epochs = 20  # Number of training epochs
+learning_rate = 0.0001  # Learning rate
+epochs = 10  # Number of training epochs
 slide_window_length = 40  # 序列长度
 batch_size = 16
 
