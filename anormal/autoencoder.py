@@ -5,10 +5,11 @@ import torch.optim as optim
 from matplotlib import pyplot as plt
 
 from anormal.AEModel import LSTMFCAutoencoder
-from datareader.child_datareader import get_child_all_features, get_child_part_action
+from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 from utils.show import GradientUtils
+from utils.uci_datareader import get_data_1d_uci_all_features
 
 # Hyperparameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,7 +26,10 @@ torch.manual_seed(3407)
 
 # (simple_size, window_length, features_num)
 # train_data = get_child_all_features(slide_window_length)
-train_data, test_data = get_child_part_action(slide_window_length)
+# train_data, test_data = get_child_part_action(slide_window_length)
+# train_data, test_data = get_child_2024_all_features(slide_window_length)
+
+train_data, test_data = get_data_1d_uci_all_features(slide_window_length)
 input_dim = train_data.size(2)  # Dimensionality of input sequence
 
 # LSTM Autoencoder Model
@@ -40,6 +44,10 @@ gradient_utils = GradientUtils(model)
 model.train()
 lost_arr = []
 lost_avg_arr = []
+# 梯度裁剪
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
+
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
 
@@ -117,7 +125,7 @@ with torch.no_grad():
 
         every_simple_loss.append(loss.item())
 
-    print(f'平均单样本(反例) loss: {loss_sum_test / i}')  # 平均单样本 loss
+    print(f'平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
 

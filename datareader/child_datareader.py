@@ -7,6 +7,7 @@ import torch
 from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
+from utils.config_utils import get_value_from_config
 from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -211,11 +212,63 @@ def get_child_part_action(slide_window_length, train_action=None):
 
 
 def get_child_2024_all_features(slide_window_length):
+    # 读取数据
+    labeled_path = get_value_from_config('child_new_data')
 
+    file_list = glob.glob(labeled_path)
+    final_data = []
+    appended_data = []
 
-    print('hi')
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+        appended_data.append(data)
+
+    big_df = pd.concat(appended_data, ignore_index=True)
+
+    # 对 DataFrame
+    big_df.iloc[:, 1:22] = scaler.fit_transform(big_df.iloc[:, 1:22])
+
+    # big_df['Label_X'] = big_df['Label_X'].apply(transform_column)
+
+    record_diff = []
+    pre_val = -1
+    for index, value in big_df['Label_X'].items():
+        if value != pre_val:
+            record_diff.append(index)
+        pre_val = value
+
+    sliced_list = []
+    for i in range(1, len(record_diff)):
+        start = record_diff[i - 1]
+        end = record_diff[i]
+        sliced_df = big_df.iloc[start:end]
+        # if sliced_df['Label_X'].array[0] != 'なし':
+        sliced_list.append(sliced_df)
+
+    for df in sliced_list:
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+
+    # shuffle data
+    random.shuffle(final_data)
+    data = np.array([arr[:, 1:23].astype(np.float64) for arr in final_data])
+    # 将NumPy数组转换为Tensor
+    data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
+
+    # 根据标签,分割数据
+    condition = data_tensor[:, :, 21] == 3.0
+
+    # 使用布尔索引进行分割
+    tensor_walk = data_tensor[condition[:, 0]]
+    tensor_not_walk = data_tensor[~condition[:, 0]]
+
+    # TODO long lat
+    return tensor_walk[:, :, :9], tensor_not_walk[:, :, :9]
 
 
 
 if __name__ == '__main__':
-    print(get_child_all_features(slide_window_length=20))
+    print(get_child_2024_all_features(slide_window_length=20))

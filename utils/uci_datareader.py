@@ -7,6 +7,7 @@ import torch
 from matplotlib import pyplot as plt
 
 from utils.slidewindow import slide_window2
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def get_change_points_excluding_first(file_path):
@@ -60,3 +61,31 @@ def get_data_1d_uci():
     test_data = torch.tensor(np.array(final_list), dtype=torch.float32).transpose(1, 2)
     labels = torch.zeros(test_data.shape[0], dtype=torch.long)
     return test_data,labels
+
+def get_data_1d_uci_all_features(slide_window_length):
+
+    file = '../data/UCI/train/X_train.txt'
+    label_file = '../data/UCI/train/y_train.txt'
+
+    data_x = pd.read_csv(file, sep='\s+', header=None)
+    data_l = pd.read_csv(label_file, sep='\s+', header=None)
+    data_x['label'] = data_l
+
+    # test value TODO cross validate
+    train_values = data_x[(data_x['label'] == 1)]
+
+    filtered_values = data_x[(data_x['label'] != 1)]
+
+    normal_data = slide_window2(train_values,slide_window_length,0.5)
+    abnormal_data = slide_window2(filtered_values,slide_window_length,0.5)
+
+    train_data_tensor = torch.tensor(np.array(normal_data), dtype=torch.float32).to(device)
+    test_data_tensor = torch.tensor(np.array(abnormal_data), dtype=torch.float32).to(device)
+
+    return train_data_tensor[:,:,:561], test_data_tensor[:,:,:561]
+
+
+
+if __name__ == '__main__':
+    normal,abnormal = get_data_1d_uci_all_features(20)
+    print()
