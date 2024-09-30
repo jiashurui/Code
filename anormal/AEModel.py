@@ -151,7 +151,8 @@ class VAE(nn.Module):
     def __init__(self, input_dim, z_dim):
         super().__init__()
         # Class Param
-        self.relu = nn.ReLU()
+        # self.relu = nn.LeakyReLU
+        self.tanh = nn.Tanh()
 
         # Encoder
         self.lr = nn.Linear(input_dim, 300)
@@ -167,9 +168,9 @@ class VAE(nn.Module):
     def forward(self, x):
         # Encoder
         x = self.lr(x)
-        x = self.relu(x)
+        x = self.tanh(x)
         x = self.lr2(x)
-        x = self.relu(x)
+        x = self.tanh(x)
         u = self.lr_ave(x)  # average μ
         log_sigma2 = self.lr_dev(x)  # log(sigma^2)
 
@@ -178,9 +179,9 @@ class VAE(nn.Module):
 
         #
         x = self.lr3(z)
-        x = self.relu(x)
+        x = self.tanh(x)
         x = self.lr4(x)
-        x = self.relu(x)
+        x = self.tanh(x)
         x = self.lr5(x)
         # for reconstruction
         return x, z, u, log_sigma2
