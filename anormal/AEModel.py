@@ -1,4 +1,5 @@
 from torch import nn
+import torch.nn.functional as F
 
 
 class LSTMAutoencoder(nn.Module):
@@ -84,62 +85,53 @@ class LSTMFCAutoencoder(nn.Module):
 
 # CAE
 class ConvAutoencoder(nn.Module):
-    def __init__(self, input_dim, hidden_dim, latent_dim, sequence_length, num_layers=3):
+    def __init__(self, input_dim):
         super(ConvAutoencoder, self).__init__()
 
         kernel_size = 3
         stride = 1
         padding = 1
-        self.relu = nn.ReLU()
+        self.relu = nn.LeakyReLU()
         self.pool = nn.MaxPool1d(2)
+        self.upool = nn.MaxPool1d(2)
 
-        # Encoder
-        self.conv1d = nn.Conv1d(in_channels=input_dim, out_channels=256, kernel_size=3, stride=stride,
-                                padding=padding)
-        self.conv1d2 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=kernel_size, stride=stride,
-                                 padding=padding)
-        self.conv1d3 = nn.Conv1d(in_channels=512, out_channels=1024, kernel_size=kernel_size, stride=stride,
-                                 padding=padding)
-
-        self.encoder_fc = nn.Linear(hidden_dim, latent_dim)
+        # Encoder 516 dim
+        self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=256, kernel_size=3, stride=stride, padding=padding)
+        self.conv2 = nn.Conv1d(in_channels=256, out_channels=128, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv3 = nn.Conv1d(in_channels=128, out_channels=64, kernel_size=kernel_size, stride=stride, padding=padding)
+        # self.encoder_fc = nn.Linear(hidden_dim, latent_dim)
 
         # Decoder
-        self.conv4d = nn.Conv1d(in_channels=1024, out_channels=512, kernel_size=3, stride=stride,
-                                padding=padding)
-        self.conv5d = nn.Conv1d(in_channels=1024, out_channels=512, kernel_size=3, stride=stride,
-                                padding=padding)
-        self.conv6d = nn.Conv1d(in_channels=1024, out_channels=512, kernel_size=3, stride=stride,
-                                padding=padding)
+        self.conv4 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=stride, padding=padding)
+        self.conv5 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=3, stride=stride, padding=padding)
+        self.conv6 = nn.Conv1d(in_channels=256, out_channels=input_dim, kernel_size=3, stride=stride, padding=padding)
+        # self.decoder_fc = nn.Linear(hidden_dim, latent_dim)
 
-        self.decoder_fc = nn.Linear(hidden_dim, latent_dim)
-
+    def upsample(self, x):
+        # 图像的上采样是双线性插值(mode='bilinear')
+        return F.interpolate(x, scale_factor=2, mode='linear', align_corners=False)
     def forward(self, x):
         # Encoder
-        encoder_output, (encoder_h, encoder_c) = self.encoder_lstm(x)
-        latent_vector = self.encoder_fc(encoder_output)
-        latent_vector = self.relu(latent_vector)
-        latent_vector = self.encoder_fc2(latent_vector)
-        latent_vector = self.relu(latent_vector)
-        latent_vector = self.encoder_fc3(latent_vector)
-        latent_vector = self.relu(latent_vector)
-        latent_vector = self.encoder_fc4(latent_vector)
-        latent_vector = self.relu(latent_vector)
-
-
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.conv2(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.conv3(x)
+        x = self.relu(x)
+        x = self.pool(x)
 
         # Decoder
-        latent_vector_out = self.decoder_fc(latent_vector)
-        latent_vector_out = self.relu(latent_vector_out)
-        latent_vector_out = self.decoder_fc2(latent_vector_out)
-        latent_vector_out = self.relu(latent_vector_out)
-        latent_vector_out = self.decoder_fc3(latent_vector_out)
-        latent_vector_out = self.relu(latent_vector_out)
-        latent_vector_out = self.decoder_fc4(latent_vector_out)
-        latent_vector_out = self.relu(latent_vector_out)
-
-
-
-        decoder_output, (decoder_h, decoder_c) = self.decoder_lstm(latent_vector_out)
-
+        # 使用线性插值上采样
+        x = self.conv4(x)
+        x = self.relu(x)
+        x = self.upsample(x)
+        x = self.conv5(x)
+        x = self.relu(x)
+        x = self.upsample(x)
+        x = self.conv6(x)
+        x = self.relu(x)
+        x = self.upsample(x)
         # Result
-        return decoder_output
+        return x

@@ -4,12 +4,12 @@ import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
 
-from anormal.AEModel import LSTMFCAutoencoder
+from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 from utils.show import GradientUtils
-from utils.uci_datareader import get_data_1d_uci_all_features
+from utils.uci_datareader import get_data_1d_uci_all_features, get_data_1d_uci_all_data
 
 # Hyperparameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,8 +17,8 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 100  # Number of training epochs
-slide_window_length = 40  # 序列长度
+epochs = 1  # Number of training epochs
+slide_window_length = 128  # 序列长度
 batch_size = 8
 
 # https://arxiv.org/abs/2109.08203
@@ -29,13 +29,21 @@ torch.manual_seed(3407)
 # train_data, test_data = get_child_part_action(slide_window_length)
 # train_data, test_data = get_child_2024_all_features(slide_window_length)
 
-train_data, test_data = get_data_1d_uci_all_features(slide_window_length)
-input_dim = train_data.size(2)  # Dimensionality of input sequence
+train_data, test_data = get_data_1d_uci_all_data()
+train_data = train_data.transpose(1, 2)
+test_data = test_data.transpose(1, 2)
+
+input_dim = train_data.size(1)  # Dimensionality of input sequence
 
 # LSTM Autoencoder Model
 # Forward Input (batch_size, seq_length, dim)
-model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
-model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+# model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+# model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+
+# Conv Autoencoder Model
+model = ConvAutoencoder(input_dim).to(device)
+model_load = ConvAutoencoder(input_dim).to(device)
+
 loss_function = nn.MSELoss()  # We use MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 gradient_utils = GradientUtils(model)
