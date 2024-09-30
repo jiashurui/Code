@@ -17,9 +17,9 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 100  # Number of training epochs
+epochs = 30  # Number of training epochs
 slide_window_length = 128  # 序列长度
-batch_size = 8
+batch_size = 64
 dataset_name = 'uci'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
@@ -105,8 +105,8 @@ print("Training complete.")
 
 # save my model
 torch.save(model.state_dict(), '../model/autoencoder.pth')
-loss_plot = show.show_me_data0(lost_arr)
-loss_avg_plot = show.show_me_data0(lost_avg_arr)
+loss_plot = show.show_me_data0(lost_arr[1:len(lost_arr)-1])
+loss_avg_plot = show.show_me_data0(lost_avg_arr[1:len(lost_avg_arr)-1])
 
 # 展示梯度数据
 gradient_utils.show()
