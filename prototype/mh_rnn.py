@@ -10,10 +10,10 @@ from utils import show, report
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # param
-slide_window_length = 400  # 序列长度
+slide_window_length = 50  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
-epochs = 100
-batch_size = 12  # 或其他合适的批次大小
+epochs = 500
+batch_size = 128  # 或其他合适的批次大小
 learning_rate = 0.00001
 label_map = Constant.mHealth.action_map
 
