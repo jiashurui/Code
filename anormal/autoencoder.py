@@ -17,7 +17,7 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 40  # Number of training epochs
+epochs = 100  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 8
 dataset_name = 'uci'
@@ -48,8 +48,8 @@ input_dim = train_normal.size(2)  # Dimensionality of input sequence
 # VAE
 
 
-model = VAE(input_dim,10).to(device)
-model_load = VAE(input_dim, 10).to(device)
+model = VAE(input_dim,50).to(device)
+model_load = VAE(input_dim, 50).to(device)
 
 # loss_function = nn.MSELoss()  # MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
