@@ -45,7 +45,8 @@ class LSTMFCAutoencoder(nn.Module):
         self.encoder_fc3 = nn.Linear(256, 128)
         self.encoder_fc4 = nn.Linear(128, 64)
 
-        self.relu = nn.ReLU()
+        self.relu = nn.LeakyReLU()
+        # self.relu = nn.ReLU()
         # Decoder LSTM
         self.decoder_fc = nn.Linear(64, 128)
         self.decoder_fc2 = nn.Linear(128, 256)
