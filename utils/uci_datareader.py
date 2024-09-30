@@ -120,8 +120,8 @@ def get_data_1d_uci_part_data(data_type):
         data_gyro_z.to_numpy()
     ), axis=-1)
 
-    selected_data = data_combined[labels != 1]
-    not_selected_data = data_combined[labels == 1]
+    selected_data = data_combined[(labels == 1) | (labels == 2)]
+    not_selected_data = data_combined[(labels != 1) & (labels != 2)]
 
     train_data_tensor = torch.tensor(np.array(selected_data), dtype=torch.float32).to(device)
     test_data_tensor = torch.tensor(np.array(not_selected_data), dtype=torch.float32).to(device)
