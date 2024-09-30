@@ -51,7 +51,7 @@ def show_child_2024(path):
 
 
 # (batch_size , seq , feature)
-def show_tensor_data(tensor_before, tensor_after, loss, dataset='child'):
+def show_tensor_data(tensor_before, tensor_after, loss, dataset='child', title='showcase-reconstruction'):
     numpy_data = tensor_before.cpu().numpy()
     numpy_data_after = tensor_after.cpu().numpy()
 
@@ -80,7 +80,7 @@ def show_tensor_data(tensor_before, tensor_after, loss, dataset='child'):
     plt.xlabel('time')
     plt.ylabel('acc data')
     plt.legend()
-    plt.title('Data before and after')
+    plt.title(title)
     plt.show()
 
 

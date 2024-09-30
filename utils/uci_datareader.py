@@ -89,16 +89,19 @@ def get_data_1d_uci_all_features(slide_window_length):
     return train_data_tensor[:, :, :561], test_data_tensor[:, :, :561]
 
 
-def get_data_1d_uci_all_data():
-    file_acc_x = '../data/UCI/train/Inertial Signals/total_acc_x_train.txt'
-    file_acc_y = '../data/UCI/train/Inertial Signals/total_acc_y_train.txt'
-    file_acc_z = '../data/UCI/train/Inertial Signals/total_acc_z_train.txt'
+# 按照需求,返回训练数据(指定某一种标签)
+# 用于做异常检测
+# @Param: data_type:{'train'|'test'}
+def get_data_1d_uci_part_data(data_type):
+    file_acc_x = f'../data/UCI/{data_type}/Inertial Signals/total_acc_x_{data_type}.txt'
+    file_acc_y = f'../data/UCI/{data_type}/Inertial Signals/total_acc_y_{data_type}.txt'
+    file_acc_z = f'../data/UCI/{data_type}/Inertial Signals/total_acc_z_{data_type}.txt'
 
-    file_gyro_x = '../data/UCI/train/Inertial Signals/body_gyro_x_train.txt'
-    file_gyro_y = '../data/UCI/train/Inertial Signals/body_gyro_y_train.txt'
-    file_gyro_z = '../data/UCI/train/Inertial Signals/body_gyro_z_train.txt'
+    file_gyro_x = f'../data/UCI/{data_type}/Inertial Signals/body_gyro_x_{data_type}.txt'
+    file_gyro_y = f'../data/UCI/{data_type}/Inertial Signals/body_gyro_y_{data_type}.txt'
+    file_gyro_z = f'../data/UCI/{data_type}/Inertial Signals/body_gyro_z_{data_type}.txt'
 
-    label_file = '../data/UCI/train/y_train.txt'
+    label_file = f'../data/UCI/{data_type}/y_{data_type}.txt'
     data_l = pd.read_csv(label_file, sep='\\s+', header=None)
 
     data_acc_x = pd.read_csv(file_acc_x, sep='\\s+', header=None)
@@ -123,9 +126,17 @@ def get_data_1d_uci_all_data():
     train_data_tensor = torch.tensor(np.array(selected_data), dtype=torch.float32).to(device)
     test_data_tensor = torch.tensor(np.array(not_selected_data), dtype=torch.float32).to(device)
 
-    return train_data_tensor,test_data_tensor
+    return train_data_tensor, test_data_tensor
+
+
+# 返回UCI数据集所有数据
+def get_data_1d_uci_all_data():
+    train_data_normal, train_data_abnormal = get_data_1d_uci_part_data('train')
+    test_data_normal, test_data_abnormal = get_data_1d_uci_part_data('test')
+
+    return train_data_normal, train_data_abnormal, test_data_normal, test_data_abnormal
 
 
 if __name__ == '__main__':
-    normal, abnormal = get_data_1d_uci_all_data()
+    normal, abnormal , t_n, t_a= get_data_1d_uci_all_data()
     print()

@@ -17,7 +17,7 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 20  # Number of training epochs
+epochs = 1  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 8
 dataset_name = 'uci'
@@ -29,8 +29,8 @@ torch.manual_seed(3407)
 # train_data, test_data = get_child_part_action(slide_window_length)
 # train_data, test_data = get_child_2024_all_features(slide_window_length)
 
-train_data, test_data = get_data_1d_uci_all_data()
-input_dim = train_data.size(2)  # Dimensionality of input sequence
+train_normal, train_abnormal, test_normal, test_abnormal = get_data_1d_uci_all_data()
+input_dim = train_normal.size(2)  # Dimensionality of input sequence
 
 # LSTM Autoencoder Model
 # Forward Input (batch_size, seq_length, dim)
@@ -64,15 +64,15 @@ torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
 
 for epoch in range(epochs):
-    permutation = torch.randperm(train_data.size()[0])
+    permutation = torch.randperm(train_normal.size()[0])
 
     loss_per_epoch = 0.0
     loss_sum = 0.0
 
-    for i in range(0, train_data.size()[0], batch_size):
+    for i in range(0, train_normal.size()[0], batch_size):
         optimizer.zero_grad()
         indices = permutation[i:i + batch_size]
-        input_data = train_data[indices]
+        input_data = train_normal[indices]
 
         # 输入长度不符合模型要求,则跳过这个输入
         if input_data.size(0) != batch_size:
@@ -117,15 +117,15 @@ gradient_utils.show()
 model_load.load_state_dict(torch.load('../model/autoencoder.pth'))
 model_load.eval()
 
-# 测试Ground_truth 的反例
+# 测试异常
 with torch.no_grad():
 
     loss_sum_test = 0.0  #
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
 
-    for i in range(0, test_data.size()[0], batch_size):
-        input_data = test_data[i: i + batch_size]
+    for i in range(0, train_abnormal.size()[0], batch_size):
+        input_data = train_abnormal[i: i + batch_size]
 
         if input_data.size(0) != batch_size:
             continue
@@ -138,23 +138,23 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name)
+            show_tensor_data(input_data, outputs, loss, dataset_name, title='train-abnormal-showcase')
             show_count += 1
 
         every_simple_loss.append(loss.item())
 
-    print(f'平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
+    print(f'训练集(没参加训练)平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
 
-# 测试Ground_truth 的正例
+# 测试正例
 with torch.no_grad():
     loss_sum_test = 0.0  #
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
 
-    for i in range(0, train_data.size()[0], batch_size):
-        input_data = train_data[i: i + batch_size]
+    for i in range(0, test_normal.size()[0], batch_size):
+        input_data = test_normal[i: i + batch_size]
 
         if input_data.size(0) != batch_size:
             continue
@@ -166,9 +166,35 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss,dataset_name)
+            show_tensor_data(input_data, outputs, loss,dataset_name, title='test-normal-showcase')
             show_count += 1
 
-    print(f'平均单样本(正例) loss:{loss_sum_test / i}')  # 平均单样本 loss
+    print(f'测试集平均单样本(正例) loss:{loss_sum_test / i}')  # 平均单样本 loss
+
+    show.show_me_data0(every_simple_loss)
+
+# 测试反例
+with torch.no_grad():
+    loss_sum_test = 0.0  #
+    every_simple_loss = []  # 每个样本的loss(batch)
+    show_count = 0
+
+    for i in range(0, test_abnormal.size()[0], batch_size):
+        input_data = test_abnormal[i: i + batch_size]
+
+        if input_data.size(0) != batch_size:
+            continue
+        outputs, _, u, sigma = model_load(input_data)
+        loss = model_load.loss_function(outputs, input_data,u, sigma)
+
+        # 单样本Loss
+        loss_sum_test = (loss_sum_test + loss.item())
+
+        # 输出
+        if show_count < 5:
+            show_tensor_data(input_data, outputs, loss,dataset_name, title='test-abnormal-showcase')
+            show_count += 1
+
+    print(f'测试集平均单样本(反例) loss:{loss_sum_test / i}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
