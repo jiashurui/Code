@@ -3,3 +3,4 @@ logs
 model
 .idea/*
 *.png
+.idea
