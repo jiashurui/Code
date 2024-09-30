@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 import torch.nn.functional as F
 
@@ -26,6 +27,7 @@ class LSTMAutoencoder(nn.Module):
 
         # Result
         return decoder_output
+
 
 class LSTMFCAutoencoder(nn.Module):
     def __init__(self, input_dim, hidden_dim, latent_dim, sequence_length, num_layers=3):
@@ -64,8 +66,6 @@ class LSTMFCAutoencoder(nn.Module):
         latent_vector = self.encoder_fc4(latent_vector)
         latent_vector = self.relu(latent_vector)
 
-
-
         # Decoder
         latent_vector_out = self.decoder_fc(latent_vector)
         latent_vector_out = self.relu(latent_vector_out)
@@ -76,18 +76,18 @@ class LSTMFCAutoencoder(nn.Module):
         latent_vector_out = self.decoder_fc4(latent_vector_out)
         latent_vector_out = self.relu(latent_vector_out)
 
-
-
         decoder_output, (decoder_h, decoder_c) = self.decoder_lstm(latent_vector_out)
 
         # Result
         return decoder_output
+
 
 # CAE
 class ConvAutoencoder(nn.Module):
     def __init__(self, input_dim):
         super(ConvAutoencoder, self).__init__()
 
+        # Class Parameter
         kernel_size = 3
         stride = 1
         padding = 1
@@ -97,8 +97,10 @@ class ConvAutoencoder(nn.Module):
 
         # Encoder 516 dim
         self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=256, kernel_size=3, stride=stride, padding=padding)
-        self.conv2 = nn.Conv1d(in_channels=256, out_channels=128, kernel_size=kernel_size, stride=stride, padding=padding)
-        self.conv3 = nn.Conv1d(in_channels=128, out_channels=64, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv2 = nn.Conv1d(in_channels=256, out_channels=128, kernel_size=kernel_size, stride=stride,
+                               padding=padding)
+        self.conv3 = nn.Conv1d(in_channels=128, out_channels=64, kernel_size=kernel_size, stride=stride,
+                               padding=padding)
         # self.encoder_fc = nn.Linear(hidden_dim, latent_dim)
 
         # Decoder
@@ -110,6 +112,7 @@ class ConvAutoencoder(nn.Module):
     def upsample(self, x):
         # 图像的上采样是双线性插值(mode='bilinear')
         return F.interpolate(x, scale_factor=2, mode='linear', align_corners=False)
+
     def forward(self, x):
         # Encoder
         x = self.conv1(x)
@@ -135,3 +138,56 @@ class ConvAutoencoder(nn.Module):
         x = self.upsample(x)
         # Result
         return x
+
+
+class ConvLSTMAutoencoder(nn.Module):
+    def __init__(self, input_dim, hidden_dim, latent_dim, sequence_length, num_layers=3):
+        super(ConvLSTMAutoencoder, self).__init__()
+
+
+# VAE based on MLP
+# https://qiita.com/gensal/items/613d04b5ff50b6413aa0
+class VAE(nn.Module):
+    def __init__(self, input_dim, z_dim):
+        super().__init__()
+        # Class Param
+        self.relu = nn.ReLU()
+
+        # Encoder
+        self.lr = nn.Linear(input_dim, 300)
+        self.lr2 = nn.Linear(300, 100)
+        self.lr_ave = nn.Linear(100, z_dim)  # average
+        self.lr_dev = nn.Linear(100, z_dim)  # log(sigma^2)
+
+        # Decoder
+        self.lr3 = nn.Linear(z_dim, 100)
+        self.lr4 = nn.Linear(100, 300)
+        self.lr5 = nn.Linear(300, input_dim)
+
+    def forward(self, x):
+        # Encoder
+        x = self.lr(x)
+        x = self.relu(x)
+        x = self.lr2(x)
+        x = self.relu(x)
+        u = self.lr_ave(x)  # average μ
+        log_sigma2 = self.lr_dev(x)  # log(sigma^2)
+
+        ep = torch.randn_like(u)  # 平均0分散1の正規分布に従い生成されるz_dim次元の乱数
+        z = u + torch.exp(log_sigma2 / 2) * ep  # 再パラメータ化トリック
+
+        #
+        x = self.lr3(z)
+        x = self.relu(x)
+        x = self.lr4(x)
+        x = self.relu(x)
+        x = self.lr5(x)
+        return x, z, u, log_sigma2
+
+    def loss_function(self, recon, origin, ave, log_dev):
+        # 重建Loss (reconstruction Loss)
+        recon_loss = nn.MSELoss()(recon, origin)
+        # KL散度 (KL)
+        kl_loss = -0.5 * torch.sum(1 + log_dev - ave ** 2 - log_dev.exp())
+        loss = recon_loss + kl_loss
+        return loss
