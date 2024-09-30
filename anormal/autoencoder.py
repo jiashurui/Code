@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
 
-from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder
+from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -17,7 +17,7 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 50  # Number of training epochs
+epochs = 20  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 8
 dataset_name = 'uci'
@@ -30,10 +30,7 @@ torch.manual_seed(3407)
 # train_data, test_data = get_child_2024_all_features(slide_window_length)
 
 train_data, test_data = get_data_1d_uci_all_data()
-train_data = train_data.transpose(1, 2)
-test_data = test_data.transpose(1, 2)
-
-input_dim = train_data.size(1)  # Dimensionality of input sequence
+input_dim = train_data.size(2)  # Dimensionality of input sequence
 
 # LSTM Autoencoder Model
 # Forward Input (batch_size, seq_length, dim)
@@ -41,10 +38,20 @@ input_dim = train_data.size(1)  # Dimensionality of input sequence
 # model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
 
 # Conv Autoencoder Model
-model = ConvAutoencoder(input_dim).to(device)
-model_load = ConvAutoencoder(input_dim).to(device)
+# Forward Input (batch_size, dim(channel), data_dim(length/height & width))
+# train_data = train_data.transpose(1, 2)
+# test_data = test_data.transpose(1, 2)
+# input_dim = train_data.size(1)  # dim for CNN is changed
+# model = ConvAutoencoder(input_dim).to(device)
+# model_load = ConvAutoencoder(input_dim).to(device)
 
-loss_function = nn.MSELoss()  # We use MSE loss for reconstruction
+# VAE
+
+
+model = VAE(input_dim,10).to(device)
+model_load = VAE(input_dim, 10).to(device)
+
+# loss_function = nn.MSELoss()  # MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 gradient_utils = GradientUtils(model)
 
@@ -72,10 +79,12 @@ for epoch in range(epochs):
             continue
 
         # 模型输出
-        output = model(input_data)
+        # output = model(input_data)
+        output, _, u, sigma = model(input_data)
 
         # 自己和重构后的自己比较
-        loss = loss_function(output, input_data)
+        # loss = loss_function(output, input_data)
+        loss = model.loss_function(output, input_data, u, sigma)
 
         # 样本Loss
         loss_per_epoch = loss_per_epoch + loss.item() / batch_size  # 每一轮epoch的样本总loss
@@ -120,8 +129,9 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        outputs = model_load(input_data)
-        loss = loss_function(outputs, input_data)
+        outputs, _, u, sigma= model_load(input_data)
+        # loss = loss_function(outputs, input_data)
+        loss = model_load.loss_function(outputs, input_data, u, sigma)
 
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())
@@ -148,8 +158,8 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        outputs = model_load(input_data)
-        loss = loss_function(outputs, input_data)
+        outputs, _, u, sigma = model_load(input_data)
+        loss = model_load.loss_function(outputs, input_data,u, sigma)
 
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())
