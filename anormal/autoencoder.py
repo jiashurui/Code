@@ -17,10 +17,10 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 30  # Number of training epochs
+epochs = 20  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 8
-
+dataset_name = 'uci'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
@@ -128,7 +128,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss)
+            show_tensor_data(input_data, outputs, loss, dataset_name)
             show_count += 1
 
         every_simple_loss.append(loss.item())
@@ -156,7 +156,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss)
+            show_tensor_data(input_data, outputs, loss,dataset_name)
             show_count += 1
 
     print(f'平均单样本(正例) loss:{loss_sum_test / i}')  # 平均单样本 loss

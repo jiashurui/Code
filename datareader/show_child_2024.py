@@ -51,14 +51,19 @@ def show_child_2024(path):
 
 
 # (batch_size , seq , feature)
-def show_tensor_data(tensor_before, tensor_after, loss):
+def show_tensor_data(tensor_before, tensor_after, loss, dataset='child'):
     numpy_data = tensor_before.cpu().numpy()
     numpy_data_after = tensor_after.cpu().numpy()
 
     seq_data = numpy_data[0]
     seq_data_after = numpy_data_after[0]
-    df = pd.DataFrame(seq_data[:,:3], columns=['x', 'y', 'z'])
-    df_after = pd.DataFrame(seq_data_after[:,:3], columns=['x_after', 'y_after', 'z_after'])
+
+    if dataset == 'uci':
+        seq_data= seq_data.T
+        seq_data_after = seq_data_after.T
+
+    df = pd.DataFrame(seq_data[:, :3], columns=['x', 'y', 'z'])
+    df_after = pd.DataFrame(seq_data_after[:, :3], columns=['x_after', 'y_after', 'z_after'])
 
     plt.figure(figsize=(10, 10))
     plt.plot(df.index, df['x'], label='x', color='red')
