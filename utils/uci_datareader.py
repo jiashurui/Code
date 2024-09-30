@@ -127,5 +127,5 @@ def get_data_1d_uci_all_data():
 
 
 if __name__ == '__main__':
-    normal, abnormal = get_data_1d_uci_all_data(20)
+    normal, abnormal = get_data_1d_uci_all_data()
     print()
