@@ -87,6 +87,7 @@ def visualize_reconstruction():
 
         fig, axes = plt.subplots(2, 10, figsize=(15, 3))
         for i in range(10):
+            test_data = test_data.to('cpu')
             axes[0, i].imshow(test_data[i], cmap='gray')
             axes[0, i].axis('off')
             axes[1, i].imshow(recon_data[i], cmap='gray')
