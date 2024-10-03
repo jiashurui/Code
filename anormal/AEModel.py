@@ -189,15 +189,16 @@ class VAE(nn.Module):
 
     def loss_function(self, recon, origin, ave, log_sigma2):
         # 重建Loss (reconstruction Loss)
-        recon_loss = nn.MSELoss()(recon, origin)
+        # TODO 记住,这里要用差值总和,不能用平均值,人类数据偏向非线性,用平均值会导致VAE重建糟糕,重建图像的时候会很模糊
+        recon_loss = nn.MSELoss(reduction='sum')(recon, origin)
         # recon_loss = nn.BCELoss(reduction='sum')(recon, origin)
 
         # KL散度 (KL)
         kl_loss = -0.5 * torch.sum(1 + log_sigma2 - ave ** 2 - log_sigma2.exp())
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
-        #  print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
-        loss = recon_loss + kl_loss * 0.0001
+        # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
+        loss = recon_loss + kl_loss
         return loss
 
 class DeepVAE(VAE):
