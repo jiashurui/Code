@@ -46,6 +46,7 @@ def train_vae():
     for epoch in range(num_epochs):
         train_loss = 0
         for batch_idx, (data, _) in enumerate(train_loader):
+            data = data.to(device)
             optimizer.zero_grad()
 
 
@@ -77,7 +78,7 @@ def visualize_reconstruction():
 
         # 重构图像
         # recon_data,_, _, _ = model(test_data)
-
+        test_data = test_data.to(device)
         recon_data = model(test_data)
 
         # 可视化原始图像和重构图像
