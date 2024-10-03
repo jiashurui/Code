@@ -70,5 +70,5 @@ def get_realworld_for_abnormal(slide_window_length):
     return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
 
 if __name__ == '__main__':
-    walk,stand = get_data(128)
+    walk,stand = get_realworld_for_abnormal(128)
     print(walk.shape)
