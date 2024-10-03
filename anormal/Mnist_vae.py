@@ -38,7 +38,7 @@ model = ConvAutoencoder(input_dim = 1)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-
+print('start train')
 # 训练 VAE 模型
 def train_vae():
     model.train()
