@@ -4,12 +4,14 @@ import random
 import numpy as np
 import pandas as pd
 import torch
+from sklearn.preprocessing import MinMaxScaler
 
-from prototype.dataReader import merge_data_to_1D
 from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 flag_if_show_image = False
+scaler = MinMaxScaler(feature_range=(-1, 1))
+
 def get_mh_data(slide_window_length):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
@@ -242,3 +244,81 @@ def get_mh_data_1d_3ch_for_test(slide_window_length):
     label = torch.tensor(labels, dtype=torch.long).to(device)
 
     return data, label
+
+# 获取mHealth异常数据,把walk作为正常,walk以外为异常进行检测
+def get_mh_data_for_abnormal_test(slide_window_length):
+    file_list = glob.glob('../../data/mHealth/mHealth_*.log')
+    final_data = []
+    appended_data = []
+
+    for file_name in file_list:
+        data = pd.read_csv(file_name, sep='\t', header=None)
+
+        data.columns = ['chest_x', 'chest_y', 'chest_z',
+                        'electrocardiogram_1', 'electrocardiogram_2',
+                        'ankle_x', 'ankle_y', 'ankle_z',
+                        'gyro_x', 'gyro_y', 'gyro_z',
+                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
+                        'arm_x', 'arm_y', 'arm_z',
+                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
+                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
+                        'label']
+
+        # filter 1:standing 4:walking 11:running
+        # filtered_df = data[data['label'].isin([1, 4, 11])]
+        # filtered_df.loc[:, 'label'] = filtered_df['label'].replace({1: 2, 4: 1, 11: 3})
+
+        appended_data.append(data)
+
+    big_df = pd.concat(appended_data, ignore_index=True)
+
+    # 归一化
+    big_df.iloc[:, :23] = scaler.fit_transform(big_df.iloc[:, :23])
+
+    record_diff = []
+    pre_val = -1
+    for index, value in big_df['label'].items():
+        if value != pre_val:
+            record_diff.append(index)
+        pre_val = value
+
+    sliced_list = []
+    for i in range(1, len(record_diff)):
+        start = record_diff[i - 1]
+        end = record_diff[i]
+        sliced_df = big_df.iloc[start:end]
+        if sliced_df['label'].array[0] != 0:
+            sliced_list.append(sliced_df)
+
+    for df in sliced_list:
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+
+    # shuffle data
+    random.shuffle(final_data)
+
+    # 提取XYZ加速度,合成一个三维向量, 提取标签
+    x = np.array([arr[:, 0].astype(np.float64) for arr in final_data])
+    y = np.array([arr[:, 1].astype(np.float64) for arr in final_data])
+    z = np.array([arr[:, 2].astype(np.float64) for arr in final_data])
+    label = np.array([arr[:, 23].astype(np.float64) for arr in final_data])
+    xyz = np.stack((x, y, z, label), axis=1)
+
+    # 提取数据和标签
+    data = torch.tensor(xyz, dtype=torch.float32).to(device)
+
+    # 根据标签,分割数据
+    # 4.0 WALK
+    condition = data[:, 3, :] == 4.0
+
+    # 使用布尔索引进行分割
+    tensor_walk = data[condition[:, 0]].transpose(1,2)
+    tensor_not_walk = data[~condition[:, 0]].transpose(1,2)
+
+    return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
+
+if __name__ == '__main__':
+    get_mh_data_for_abnormal_test(128)

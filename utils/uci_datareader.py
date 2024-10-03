@@ -119,13 +119,17 @@ def get_data_1d_uci_part_data(data_type):
         data_acc_x.to_numpy(),
         data_acc_y.to_numpy(),
         data_acc_z.to_numpy(),
-        data_gyro_x.to_numpy(),
-        data_gyro_y.to_numpy(),
-        data_gyro_z.to_numpy()
+
+        # TODO 当前只用加速度数据,因为其他论文数据无法对齐,用不了角速度数据
+
+        # data_gyro_x.to_numpy(),
+        # data_gyro_y.to_numpy(),
+        # data_gyro_z.to_numpy()
     ), axis=-1)
 
-    selected_data = data_combined[(labels == 1) | (labels == 2)]
-    not_selected_data = data_combined[(labels != 1) & (labels != 2)]
+    # 1 WALKING
+    selected_data = data_combined[(labels == 1)]
+    not_selected_data = data_combined[(labels != 1)]
 
     # 归一化处理，将值缩放到 [-1, 1] 范围
     selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
