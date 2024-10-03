@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
 from utils.slidewindow import slide_window2
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 scaler = MinMaxScaler(feature_range=(-1, 1))
 
 def get_data_1d_cha():
@@ -60,7 +61,7 @@ def get_cha_data_for_abnormal(slide_window):
     data_sliced_list = slide_window2(combined_array, slide_window, 0.5)
     random.shuffle(data_sliced_list)
 
-    data_tensor = torch.tensor(np.array(data_sliced_list), dtype=torch.float32)
+    data_tensor = torch.tensor(np.array(data_sliced_list), dtype=torch.float32).to(device)
 
     # 按照标签,分割出来数据
     condition_walk = data_tensor[:, :, 3] == 11111  # walk
