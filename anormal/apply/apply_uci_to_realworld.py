@@ -91,7 +91,8 @@ with torch.no_grad():
         if show_count < 5:
             show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-abnormal-showcase')
             show_count += 1
-
+        # 单样本Loss
+        loss_sum_test = (loss_sum_test + loss.item())
         every_simple_loss.append(loss.item())
 
     print(f'测试集({dataset_name})平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
