@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
 from anormal.AEModel import VAE, ConvAutoencoder
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 数据准备
 # transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])
@@ -34,7 +35,7 @@ num_epochs = 10
 # input_dim = train_data.size(2)  # dim for CNN is changed
 loss_function = nn.MSELoss()  # MSE loss for reconstruction
 
-model = ConvAutoencoder(input_dim = 1)
+model = ConvAutoencoder(input_dim = 1).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
