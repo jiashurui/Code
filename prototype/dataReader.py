@@ -12,6 +12,8 @@ from utils.slidewindow import slide_window2
 
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Realworld 数据集
 def get_data(slide_window_length):
     # 创建示例输入数据 TODO
     file_list = glob.glob('../data/realworld/*/acc_*.csv')

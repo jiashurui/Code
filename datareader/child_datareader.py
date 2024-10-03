@@ -12,7 +12,7 @@ from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 mapping = Constant.ChildWalk.action_map
-# 初始化 MinMaxScaler(Normalization [0,1])
+# 初始化 MinMaxScaler(Normalization [-1,1])
 scaler = MinMaxScaler(feature_range=(-1, 1))
 
 

@@ -8,8 +8,6 @@ from utils.report import save_report, save_plot
 def show_me_data0(np_arr):
     fig, ax = plt.subplots()
     ax.plot(np_arr)
-    ax.legend()
-
     plt.show()
     return plt
 def show_me_acc(np_arr):
