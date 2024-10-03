@@ -152,12 +152,14 @@ with torch.no_grad():
             outputs = model(input_data)
             loss = loss_function(outputs, input_data)
 
+        # 单样本Loss
+        loss_sum_test = (loss_sum_test + loss.item())
+        every_simple_loss.append(loss.item())
+
         # 输出
         if show_count < 5:
             show_tensor_data(input_data, outputs, loss, dataset_name, title='train-abnormal-showcase')
             show_count += 1
-
-        every_simple_loss.append(loss.item())
 
     print(f'训练集(没参加训练)平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
 
@@ -214,6 +216,10 @@ with torch.no_grad():
         else:
             outputs = model(input_data)
             loss = loss_function(outputs, input_data)
+
+        # 单样本Loss
+        loss_sum_test = (loss_sum_test + loss.item())
+        every_simple_loss.append(loss.item())
 
         # 输出
         if show_count < 5:
