@@ -14,9 +14,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 初始化 MinMaxScaler(Normalization [-1,1])
 scaler = MinMaxScaler(feature_range=(-1, 1))
 
-def get_data(slide_window_length):
+def get_realworld_for_abnormal(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../data/realworld/*/acc_*_waist.csv')
+    file_list = glob.glob('../../data/realworld/*/acc_*_waist.csv')
     final_data = []
 
     # make label by fileName (walking)
