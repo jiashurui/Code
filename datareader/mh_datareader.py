@@ -311,12 +311,13 @@ def get_mh_data_for_abnormal_test(slide_window_length):
     data = torch.tensor(xyz, dtype=torch.float32).to(device)
 
     # 根据标签,分割数据
-    # 4.0 WALK
+    # 1.0 STANDING 4.0 WALK
     condition = data[:, 3, :] == 4.0
+    condition_abnormal = data[:, 3, :] == 1.0
 
     # 使用布尔索引进行分割
     tensor_walk = data[condition[:, 0]].transpose(1,2)
-    tensor_not_walk = data[~condition[:, 0]].transpose(1,2)
+    tensor_not_walk = data[condition_abnormal[:, 0]].transpose(1,2)
 
     return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
 

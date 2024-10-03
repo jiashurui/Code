@@ -127,9 +127,9 @@ def get_data_1d_uci_part_data(data_type):
         # data_gyro_z.to_numpy()
     ), axis=-1)
 
-    # 1 WALKING
+    # 1 WALKING 5 STANDING
     selected_data = data_combined[(labels == 1)]
-    not_selected_data = data_combined[(labels != 1)]
+    not_selected_data = data_combined[(labels != 5)]
 
     # 归一化处理，将值缩放到 [-1, 1] 范围
     selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
