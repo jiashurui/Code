@@ -43,7 +43,7 @@ with torch.no_grad():
 
         every_simple_loss.append(loss.item())
 
-    print(f'测试集(mHealth)平均单样本(正例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
+    print(f'测试集({dataset_name})平均单样本(正例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
 
@@ -73,6 +73,6 @@ with torch.no_grad():
 
         every_simple_loss.append(loss.item())
 
-    print(f'测试集(mHealth)平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
+    print(f'测试集({dataset_name})平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
