@@ -1,16 +1,16 @@
 import torch
 
 from anormal.AEModel import VAE
-from datareader.realworld_datareader import get_realworld_for_abnormal
+from datareader.cha_datareader import get_cha_data_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slide_window_length = 128  # 序列长度
-normal_data, abnormal_data = get_realworld_for_abnormal(slide_window_length)
+normal_data, abnormal_data = get_cha_data_for_abnormal(slide_window_length)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
-dataset_name = 'realworld'
+dataset_name = 'cha'
 model_load = VAE(input_dim, 50).to(device)
 batch_size = 64
 
