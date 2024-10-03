@@ -57,7 +57,7 @@ def get_realworld_for_abnormal(slide_window_length):
     input_features = np.array([arr[:, :4] for arr in final_data])
 
     # 将NumPy数组转换为Tensor
-    data_tensor = torch.tensor(input_features, dtype=torch.float32)  # 添加通道维度
+    data_tensor = torch.tensor(input_features, dtype=torch.float32).to(device)  # 添加通道维度
 
     # 根据标签,分割数据
     condition = data_tensor[:, :, 3] == 7.0  # walking
