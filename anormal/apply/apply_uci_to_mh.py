@@ -24,8 +24,8 @@ with torch.no_grad():
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
 
-    for i in range(0, abnormal_data.size()[0], batch_size):
-        input_data = abnormal_data[i: i + batch_size]
+    for i in range(0, normal_data.size()[0], batch_size):
+        input_data = normal_data[i: i + batch_size]
 
         if input_data.size(0) != batch_size:
             continue
@@ -38,7 +38,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name, title='train-abnormal-showcase')
+            show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-normal-showcase')
             show_count += 1
 
         every_simple_loss.append(loss.item())
@@ -54,8 +54,8 @@ with torch.no_grad():
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
 
-    for i in range(0, normal_data.size()[0], batch_size):
-        input_data = normal_data[i: i + batch_size]
+    for i in range(0, abnormal_data.size()[0], batch_size):
+        input_data = abnormal_data[i: i + batch_size]
 
         if input_data.size(0) != batch_size:
             continue
@@ -68,7 +68,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name, title='train-abnormal-showcase')
+            show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-abnormal-showcase')
             show_count += 1
 
         every_simple_loss.append(loss.item())
