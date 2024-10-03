@@ -152,38 +152,40 @@ class VAE(nn.Module):
     def __init__(self, input_dim, z_dim):
         super().__init__()
         # Class Param
-        # self.relu = nn.LeakyReLU
-        self.tanh = nn.Tanh()
+        self.relu = nn.LeakyReLU()
+        # self.tanh = nn.Tanh()
 
         # Encoder
-        self.lr = nn.Linear(input_dim, 300)
-        self.lr2 = nn.Linear(300, 100)
-        self.lr_ave = nn.Linear(100, z_dim)  # average
-        self.lr_dev = nn.Linear(100, z_dim)  # log(sigma^2)
+        self.lr = nn.Linear(input_dim, 1000)
+        self.lr2 = nn.Linear(1000, 500)
+        self.lr_ave = nn.Linear(500, z_dim)  # average
+        self.lr_dev = nn.Linear(500, z_dim)  # log(sigma^2)
 
         # Decoder
-        self.lr3 = nn.Linear(z_dim, 100)
-        self.lr4 = nn.Linear(100, 300)
-        self.lr5 = nn.Linear(300, input_dim)
+        self.lr3 = nn.Linear(z_dim, 500)
+        self.lr4 = nn.Linear(500, 1000)
+        self.lr5 = nn.Linear(1000, input_dim)
 
     def forward(self, x):
         # Encoder
         x = self.lr(x)
-        x = self.tanh(x)
+        x = self.relu(x)
         x = self.lr2(x)
-        x = self.tanh(x)
+        x = self.relu(x)
         u = self.lr_ave(x)  # average μ
         log_sigma2 = self.lr_dev(x)  # log(sigma^2)
 
         ep = torch.randn_like(u)  # 平均0分散1の正規分布に従い生成されるz_dim次元の乱数
         z = u + torch.exp(log_sigma2 / 2) * ep  # 再パラメータ化トリック
 
-        #
+        # Decoder
         x = self.lr3(z)
-        x = self.tanh(x)
+        x = self.relu(x)
         x = self.lr4(x)
-        x = self.tanh(x)
+        x = self.relu(x)
         x = self.lr5(x)
+        x = self.relu(x)
+
         # for reconstruction
         return x, z, u, log_sigma2
 
@@ -196,3 +198,12 @@ class VAE(nn.Module):
         kl_loss = -0.5 * torch.sum(1 + log_dev - ave ** 2 - log_dev.exp())
         loss = recon_loss + kl_loss
         return loss
+
+class DeepVAE(VAE):
+    def __init__(self, input_dim, z_dim):
+        super().__init__()
+
+
+    def forward(self, x):
+        print(x.shape)
+        return self.forward(x)

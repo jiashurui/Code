@@ -5,10 +5,12 @@ import numpy as np
 import pandas as pd
 import torch
 from matplotlib import pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+scaler = MinMaxScaler(feature_range=(-1, 1))
 
 
 def get_change_points_excluding_first(file_path):
@@ -110,6 +112,8 @@ def get_data_1d_uci_part_data(data_type):
     data_gyro_x = pd.read_csv(file_gyro_x, sep='\\s+', header=None)
     data_gyro_y = pd.read_csv(file_gyro_y, sep='\\s+', header=None)
     data_gyro_z = pd.read_csv(file_gyro_z, sep='\\s+', header=None)
+    # big_df.iloc[:, 1:21] = scaler.fit_transform(big_df.iloc[:, 1:21])
+
     labels = data_l.to_numpy().ravel()
     data_combined = np.stack((
         data_acc_x.to_numpy(),
@@ -122,6 +126,11 @@ def get_data_1d_uci_part_data(data_type):
 
     selected_data = data_combined[(labels == 1) | (labels == 2)]
     not_selected_data = data_combined[(labels != 1) & (labels != 2)]
+
+    # 归一化处理，将值缩放到 [-1, 1] 范围
+    selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
+    not_selected_data = 2 * (not_selected_data - not_selected_data.min()) / (not_selected_data.max() - not_selected_data.min()) - 1
+
 
     train_data_tensor = torch.tensor(np.array(selected_data), dtype=torch.float32).to(device)
     test_data_tensor = torch.tensor(np.array(not_selected_data), dtype=torch.float32).to(device)
