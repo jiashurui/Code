@@ -184,19 +184,20 @@ class VAE(nn.Module):
         x = self.lr4(x)
         x = self.relu(x)
         x = self.lr5(x)
-        x = self.relu(x)
-
         # for reconstruction
         return x, z, u, log_sigma2
 
-    def loss_function(self, recon, origin, ave, log_dev):
+    def loss_function(self, recon, origin, ave, log_sigma2):
         # 重建Loss (reconstruction Loss)
         recon_loss = nn.MSELoss()(recon, origin)
         # recon_loss = nn.BCELoss(reduction='sum')(recon, origin)
 
         # KL散度 (KL)
-        kl_loss = -0.5 * torch.sum(1 + log_dev - ave ** 2 - log_dev.exp())
-        loss = recon_loss + kl_loss
+        kl_loss = -0.5 * torch.sum(1 + log_sigma2 - ave ** 2 - log_sigma2.exp())
+
+        #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
+        #  print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
+        loss = recon_loss + kl_loss * 0.0001
         return loss
 
 class DeepVAE(VAE):
