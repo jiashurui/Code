@@ -1,25 +1,37 @@
 import torch
+from torch import nn
 
-from anormal.AEModel import VAE
+from anormal.AEModel import VAE, LSTMFCAutoencoder
 from datareader.cha_datareader import get_cha_data_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slide_window_length = 128  # 序列长度
+batch_size = 64
 normal_data, abnormal_data = get_cha_data_for_abnormal(slide_window_length)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
 dataset_name = 'cha'
-model_load = VAE(input_dim, 50).to(device)
-batch_size = 64
+model_name = 'lstm'
+
+if model_name == 'lstm':
+    hidden_dim = 1024  # Hidden state size
+    latent_dim = 512  # Latent space size
+    num_layers = 3  # Number of LSTM layers
+    model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+    model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+    loss_function = nn.MSELoss()  # MSE loss for reconstruction
+
+elif model_name == 'vae':
+    model_load = VAE(input_dim, 50).to(device)
 
 model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
 model_load.eval()
 
 # 测试正常
 with torch.no_grad():
-
     loss_sum_test = 0.0  #
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
@@ -29,12 +41,13 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        outputs, _, u, sigma = model_load(input_data)
-        # loss = loss_function(outputs, input_data)
-        loss = model_load.loss_function(outputs, input_data, u, sigma)
-
-        # 单样本Loss
-        loss_sum_test = (loss_sum_test + loss.item())
+        # VAE
+        if model_name == 'vae':
+            outputs, _, u, sigma = model_load(input_data)
+            loss = model_load.loss_function(outputs, input_data, u, sigma)
+        else:
+            outputs = model_load(input_data)
+            loss = loss_function(outputs, input_data)
 
         # 输出
         if show_count < 5:
@@ -43,13 +56,12 @@ with torch.no_grad():
 
         every_simple_loss.append(loss.item())
 
-    print(f'测试集({dataset_name})平均单样本(正例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
+    print(f'测试集({dataset_name})平均单样本(正例) loss: {loss_sum_test / (i + 1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
 
 # 测试异常
 with torch.no_grad():
-
     loss_sum_test = 0.0  #
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
@@ -59,9 +71,14 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        outputs, _, u, sigma = model_load(input_data)
-        # loss = loss_function(outputs, input_data)
-        loss = model_load.loss_function(outputs, input_data, u, sigma)
+
+        # VAE
+        if model_name == 'vae':
+            outputs, _, u, sigma = model_load(input_data)
+            loss = model_load.loss_function(outputs, input_data, u, sigma)
+        else:
+            outputs = model_load(input_data)
+            loss = loss_function(outputs, input_data)
 
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())
@@ -73,6 +90,6 @@ with torch.no_grad():
 
         every_simple_loss.append(loss.item())
 
-    print(f'测试集({dataset_name})平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
+    print(f'测试集({dataset_name})平均单样本(反例) loss: {loss_sum_test / (i + 1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)

@@ -21,6 +21,7 @@ epochs = 20  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
+model_name = 'lstm'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
@@ -34,8 +35,19 @@ input_dim = train_normal.size(2)  # Dimensionality of input sequence
 
 # LSTM Autoencoder Model
 # Forward Input (batch_size, seq_length, dim)
-# model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
-# model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+
+if model_name == 'lstm':
+    hidden_dim = 1024  # Hidden state size
+    latent_dim = 512  # Latent space size
+    num_layers = 3  # Number of LSTM layers
+    model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+    model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
+    loss_function = nn.MSELoss()  # MSE loss for reconstruction
+
+elif model_name == 'vae':
+    model = VAE(input_dim,50).to(device)
+    model_load = VAE(input_dim, 50).to(device)
+
 
 # Conv Autoencoder Model
 # Forward Input (batch_size, dim(channel), data_dim(length/height & width))
@@ -46,8 +58,8 @@ input_dim = train_normal.size(2)  # Dimensionality of input sequence
 # model_load = ConvAutoencoder(input_dim).to(device)
 
 # VAE
-model = VAE(input_dim,50).to(device)
-model_load = VAE(input_dim, 50).to(device)
+# model = VAE(input_dim,50).to(device)
+# model_load = VAE(input_dim, 50).to(device)
 
 loss_function = nn.MSELoss()  # MSE loss for reconstruction
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -77,12 +89,14 @@ for epoch in range(epochs):
             continue
 
         # 模型输出
-        # output = model(input_data)
-        output, _, u, sigma = model(input_data)
-
         # 自己和重构后的自己比较
-        # loss = loss_function(output, input_data)
-        loss = model.loss_function(output, input_data, u, sigma)
+        # VAE
+        if model_name == 'vae':
+            output, _, u, sigma = model(input_data)
+            loss = model.loss_function(output, input_data, u, sigma)
+        else:
+            output = model(input_data)
+            loss = loss_function(output, input_data)
 
         # 样本Loss
         loss_per_epoch = loss_per_epoch + loss.item() / batch_size  # 每一轮epoch的样本总loss
@@ -127,13 +141,16 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        # outputs = model_load(input_data)
-        outputs, _, u, sigma = model_load(input_data)
-        # loss = loss_function(outputs, input_data)
-        loss = model_load.loss_function(outputs, input_data, u, sigma)
 
-        # 单样本Loss
-        loss_sum_test = (loss_sum_test + loss.item())
+        # 模型输出
+        # 自己和重构后的自己比较
+        # VAE
+        if model_name == 'vae':
+            outputs, _, u, sigma = model(input_data)
+            loss = model.loss_function(outputs, input_data, u, sigma)
+        else:
+            outputs = model(input_data)
+            loss = loss_function(outputs, input_data)
 
         # 输出
         if show_count < 5:
@@ -157,10 +174,14 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        outputs, _, u, sigma = model_load(input_data)
-        loss = model_load.loss_function(outputs, input_data,u, sigma)
-        # outputs = model_load(input_data)
-        # loss = loss_function(outputs, input_data)
+
+        # VAE
+        if model_name == 'vae':
+            outputs, _, u, sigma = model(input_data)
+            loss = model.loss_function(outputs, input_data, u, sigma)
+        else:
+            outputs = model(input_data)
+            loss = loss_function(outputs, input_data)
 
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())
@@ -186,14 +207,13 @@ with torch.no_grad():
 
         if input_data.size(0) != batch_size:
             continue
-        outputs, _, u, sigma = model_load(input_data)
-        loss = model_load.loss_function(outputs, input_data,u, sigma)
-        # outputs = model_load(input_data)
-        # loss = loss_function(outputs, input_data)
-
-        # 单样本Loss
-        loss_sum_test = (loss_sum_test + loss.item())
-        every_simple_loss.append(loss.item())
+        # VAE
+        if model_name == 'vae':
+            outputs, _, u, sigma = model(input_data)
+            loss = model.loss_function(outputs, input_data, u, sigma)
+        else:
+            outputs = model(input_data)
+            loss = loss_function(outputs, input_data)
 
         # 输出
         if show_count < 5:
