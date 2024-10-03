@@ -5,10 +5,15 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
-from anormal.AEModel import VAE
+from anormal.AEModel import VAE, ConvAutoencoder
 
 # 数据准备
-transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])
+# transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])
+
+# For CAE
+# transform = transforms.Compose([transforms.ToTensor()])
+transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(1, -1))])
+
 train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
@@ -20,19 +25,35 @@ learning_rate = 1e-3
 num_epochs = 10
 
 # 初始化模型和优化器
-vae = VAE(input_dim=input_dim, z_dim=20)
-optimizer = optim.Adam(vae.parameters(), lr=learning_rate)
+# model = VAE(input_dim=input_dim, z_dim=20)
+
+
+# CAE
+# train_data = train_normal.transpose(1, 2)
+# test_data = train_abnormal.transpose(1, 2)
+# input_dim = train_data.size(2)  # dim for CNN is changed
+loss_function = nn.MSELoss()  # MSE loss for reconstruction
+
+model = ConvAutoencoder(input_dim = 1)
+
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 
 # 训练 VAE 模型
 def train_vae():
-    vae.train()
+    model.train()
     for epoch in range(num_epochs):
         train_loss = 0
         for batch_idx, (data, _) in enumerate(train_loader):
             optimizer.zero_grad()
-            recon_batch,_, mu, logvar = vae(data)
-            loss = vae.loss_function(recon_batch, data, mu, logvar)
+
+
+            # recon_batch,_, mu, logvar = model(data)
+            # loss = model.loss_function(recon_batch, data, mu, logvar)
+
+            output = model(data)
+            loss = loss_function(output, data)
+
             loss.backward()
             train_loss += loss.item()
             optimizer.step()
@@ -46,7 +67,7 @@ train_vae()
 
 # 重构测试数据并可视化
 def visualize_reconstruction():
-    vae.eval()
+    model.eval()
     with torch.no_grad():
         # 获取一个batch的测试数据
         test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
@@ -54,7 +75,9 @@ def visualize_reconstruction():
         test_data, _ = next(iter(test_loader))
 
         # 重构图像
-        recon_data,_, _, _ = vae(test_data)
+        # recon_data,_, _, _ = model(test_data)
+
+        recon_data = model(test_data)
 
         # 可视化原始图像和重构图像
         test_data = test_data.view(-1, 28, 28)
