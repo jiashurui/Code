@@ -13,7 +13,7 @@ normal_data, abnormal_data = get_mh_data_for_abnormal_test(slide_window_length)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
 dataset_name = 'mHealth'
-model_name = 'lstm'
+model_name = 'vae'
 
 if model_name == 'lstm':
     hidden_dim = 1024  # Hidden state size

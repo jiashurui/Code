@@ -9,11 +9,11 @@ from anormal.AEModel import VAE, ConvAutoencoder
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 数据准备
-# transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])
+transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])
 
 # For CAE
 # transform = transforms.Compose([transforms.ToTensor()])
-transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(1, -1))])
+# transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(1, -1))])
 
 train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
@@ -26,16 +26,16 @@ learning_rate = 1e-3
 num_epochs = 10
 
 # 初始化模型和优化器
-# model = VAE(input_dim=input_dim, z_dim=20)
+model = VAE(input_dim=input_dim, z_dim=20)
 
 
 # CAE
 # train_data = train_normal.transpose(1, 2)
 # test_data = train_abnormal.transpose(1, 2)
 # input_dim = train_data.size(2)  # dim for CNN is changed
-loss_function = nn.MSELoss()  # MSE loss for reconstruction
-
-model = ConvAutoencoder(input_dim = 1).to(device)
+# loss_function = nn.MSELoss()  # MSE loss for reconstruction
+#
+# model = ConvAutoencoder(input_dim = 1).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -50,11 +50,11 @@ def train_vae():
             optimizer.zero_grad()
 
 
-            # recon_batch,_, mu, logvar = model(data)
-            # loss = model.loss_function(recon_batch, data, mu, logvar)
+            recon_batch,_, mu, logvar = model(data)
+            loss = model.loss_function(recon_batch, data, mu, logvar)
 
-            output = model(data)
-            loss = loss_function(output, data)
+            # output = model(data)
+            # loss = loss_function(output, data)
 
             loss.backward()
             train_loss += loss.item()
@@ -77,9 +77,9 @@ def visualize_reconstruction():
         test_data, _ = next(iter(test_loader))
 
         # 重构图像
-        # recon_data,_, _, _ = model(test_data)
+        recon_data,_, _, _ = model(test_data)
         test_data = test_data.to(device)
-        recon_data = model(test_data)
+        # recon_data = model(test_data)
 
         # 可视化原始图像和重构图像
         test_data = test_data.view(-1, 28, 28)

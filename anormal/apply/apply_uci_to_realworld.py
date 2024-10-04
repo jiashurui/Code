@@ -10,7 +10,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 batch_size = 64
 
-model_name = 'lstm'
+model_name = 'vae'
 
 normal_data, abnormal_data = get_realworld_for_abnormal(slide_window_length)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence

@@ -21,7 +21,7 @@ epochs = 20  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
-model_name = 'lstm'
+model_name = 'vae'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 

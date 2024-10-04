@@ -209,3 +209,9 @@ class DeepVAE(VAE):
     def forward(self, x):
         print(x.shape)
         return self.forward(x)
+
+class LSTM_VAE(VAE):
+    def __init__(self, input_dim, hidden_dim, latent_dim, sequence_length, num_layers=3):
+        super().__init__()
+        self.encoder_lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)
+        self.decoder_lstm = nn.LSTM(hidden_dim, input_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)

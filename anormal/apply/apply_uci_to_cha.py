@@ -14,7 +14,7 @@ normal_data, abnormal_data = get_cha_data_for_abnormal(slide_window_length)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
 dataset_name = 'cha'
-model_name = 'lstm'
+model_name = 'vae'
 
 if model_name == 'lstm':
     hidden_dim = 1024  # Hidden state size
