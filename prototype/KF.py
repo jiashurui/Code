@@ -2,17 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# 读取数据
-file_path = '../data/mHealth/mHealth_subject1.log'
-column_names = [
-    'acc_chest_x', 'acc_chest_y', 'acc_chest_z', 'ecg_1', 'ecg_2',
-    'acc_ankle_x', 'acc_ankle_y', 'acc_ankle_z', 'gyro_ankle_x', 'gyro_ankle_y', 'gyro_ankle_z',
-    'mag_ankle_x', 'mag_ankle_y', 'mag_ankle_z',
-    'acc_arm_x', 'acc_arm_y', 'acc_arm_z', 'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
-    'mag_arm_x', 'mag_arm_y', 'mag_arm_z', 'label'
-]
-
-data = pd.read_csv(file_path, delim_whitespace=True, header=None, names=column_names)
 
 
 # 状态转移函数 f
@@ -77,6 +66,9 @@ def kalman_filter(x, P, omega, acc, mag, dt):
     return x_upd, P_upd
 
 
+
+
+# 转换前和转换后的加速度存储
 # 设置过程噪声和测量噪声协方差矩阵
 Q = np.eye(3) * 0.01  # 过程噪声协方差矩阵
 R = np.eye(3) * 0.1  # 测量噪声协方差矩阵
@@ -88,11 +80,23 @@ P = np.eye(3)
 # 时间步长
 dt = 1 / 50  # 50 Hz
 
-# 转换前和转换后的加速度存储
-acc_local = data[['acc_chest_x', 'acc_chest_y', 'acc_chest_z']].values
-acc_global = []
 
-for i in range(len(acc_local)):
+# 读取数据
+file_path = '../data/mHealth/mHealth_subject1.log'
+column_names = [
+    'acc_chest_x', 'acc_chest_y', 'acc_chest_z', 'ecg_1', 'ecg_2',
+    'acc_ankle_x', 'acc_ankle_y', 'acc_ankle_z', 'gyro_ankle_x', 'gyro_ankle_y', 'gyro_ankle_z',
+    'mag_ankle_x', 'mag_ankle_y', 'mag_ankle_z',
+    'acc_arm_x', 'acc_arm_y', 'acc_arm_z', 'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
+    'mag_arm_x', 'mag_arm_y', 'mag_arm_z', 'label'
+]
+
+data = pd.read_csv(file_path, delim_whitespace=True, header=None, names=column_names)
+acc_local = data[['acc_chest_x', 'acc_chest_y', 'acc_chest_z']].values
+
+acc_global = []
+rpy = []
+for i in range(len(acc_local[:1000, :])):
     omega = data[['gyro_ankle_x', 'gyro_ankle_y', 'gyro_ankle_z']].values[i:i + 1].T
     acc = acc_local[i]
     mag = data[['mag_ankle_x', 'mag_ankle_y', 'mag_ankle_z']].values[i]
@@ -126,16 +130,16 @@ for i in range(len(acc_local)):
 
     # 转换到全局加速度
     a_global = R_matrix @ acc
-    acc_global.append(a_global)
+    acc_global.append(np.append(a_global,[roll, pitch, yaw]))
 
 # 转换为numpy数组
 acc_global = np.array(acc_global)
-
+rpy = np.array(rpy)
 # 绘图
 plt.figure(figsize=(12, 6))
 
 # 原始加速度
-plt.subplot(2, 1, 1)
+plt.subplot(3, 1, 1)
 plt.plot(acc_local[0:1000, 0], label='X-axis')
 plt.plot(acc_local[0:1000, 1], label='Y-axis')
 plt.plot(acc_local[0:1000, 2], label='Z-axis')
@@ -143,16 +147,28 @@ plt.title('Local Acceleration (Chest)')
 plt.xlabel('Time Steps')
 plt.ylabel('Acceleration (m/s^2)')
 plt.legend()
-
 # 全局加速度
-plt.subplot(2, 1, 2)
+plt.subplot(3, 1, 2)
 plt.plot(acc_global[0:1000, 0], label='X-axis')
 plt.plot(acc_global[0:1000, 1], label='Y-axis')
 plt.plot(acc_global[0:1000, 2], label='Z-axis')
+
 plt.title('Global Acceleration')
 plt.xlabel('Time Steps')
 plt.ylabel('Acceleration (m/s^2)')
 plt.legend()
+
+# roll pitch yaw
+plt.subplot(3, 1, 3)
+plt.plot(rpy[0:1000, 0], label='X-axis')
+plt.plot(rpy[0:1000, 1], label='Y-axis')
+plt.plot(rpy[0:1000, 2], label='Z-axis')
+
+plt.title('Roll Pitch Yaw')
+plt.xlabel('Time Steps')
+plt.ylabel('degree (m/s^2)')
+plt.legend()
+
 
 plt.tight_layout()
 plt.show()
