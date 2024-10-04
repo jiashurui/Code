@@ -198,7 +198,7 @@ class VAE(nn.Module):
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
         # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
-        loss = recon_loss + kl_loss
+        loss = recon_loss + 0.1 * kl_loss
         return loss
 
 class DeepVAE(VAE):
