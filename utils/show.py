@@ -1,9 +1,5 @@
+import matplotlib.pyplot as plt
 import numpy as np
-#
-from matplotlib import pyplot as plt
-
-from utils.report import save_report, save_plot
-
 
 def show_me_data0(np_arr):
     fig, ax = plt.subplots()
@@ -183,14 +179,7 @@ class GradientUtils:
                 self.gradient_norms[name].append(grad_norm)
 
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-
 # 实时展示数据的函数，接收一个二维数组 float_matrix，并展示前三列
-import matplotlib.pyplot as plt
-import numpy as np
-
 
 def real_time_show_phone_data(float_matrix ,transformed_data):
     plt.ion()  # 开启交互模式
