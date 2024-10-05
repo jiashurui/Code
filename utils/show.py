@@ -181,3 +181,80 @@ class GradientUtils:
             if param.grad is not None:
                 grad_norm = param.grad.norm().item()  # 计算梯度范数
                 self.gradient_norms[name].append(grad_norm)
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+# 实时展示数据的函数，接收一个二维数组 float_matrix，并展示前三列
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def real_time_show_phone_data(float_matrix ,transformed_data):
+    plt.ion()  # 开启交互模式
+    # 获取当前数据的前三列
+    x_data = np.arange(float_matrix.shape[0])
+    y1_data = float_matrix[:, 0]  # 第一列
+    y2_data = float_matrix[:, 1]  # 第二列
+    y3_data = float_matrix[:, 2]  # 第三列
+
+    y1_data_2 = transformed_data[:, 0]  # 数据集2的第一列
+    y2_data_2 = transformed_data[:, 1]  # 数据集2的第二列
+    y3_data_2 = transformed_data[:, 2]  # 数据集2的第三列
+
+    # 如果是第一次调用，初始化图表
+    if not hasattr(real_time_show_phone_data, 'initialized'):
+        real_time_show_phone_data.fig, real_time_show_phone_data.ax = plt.subplots()
+        plt.title('acc_data')
+        real_time_show_phone_data.line1, = real_time_show_phone_data.ax.plot(x_data, y1_data, label='acc_x',color='red')
+        real_time_show_phone_data.line2, = real_time_show_phone_data.ax.plot(x_data, y2_data, label='acc_y',color='green')
+        real_time_show_phone_data.line3, = real_time_show_phone_data.ax.plot(x_data, y3_data, label='acc_z',color='blue')
+
+        # 初始化第二组数据的线条
+        real_time_show_phone_data.line2_1, = real_time_show_phone_data.ax.plot(x_data, y1_data_2,
+                                                                                     label='acc_x_t',
+                                                                                     color='#8B0000'
+                                                                               , linestyle='--'
+                                                                               )
+        real_time_show_phone_data.line2_2, = real_time_show_phone_data.ax.plot(x_data, y2_data_2,
+                                                                                     label='acc_x_t',
+                                                                                     color='#006400'
+                                                                               , linestyle='--'
+                                                                               )
+        real_time_show_phone_data.line2_3, = real_time_show_phone_data.ax.plot(x_data, y3_data_2,
+                                                                                     label='acc_x_t',
+                                                                                     color='#00008B'
+                                                                               , linestyle='--')
+
+
+        real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0])
+        real_time_show_phone_data.ax.set_ylim(np.min(float_matrix[:, :3]), np.max(float_matrix[:, :3]))
+        real_time_show_phone_data.ax.legend()
+
+        real_time_show_phone_data.initialized = True
+    else:
+        # 更新数据而不是重新绘制图表
+        real_time_show_phone_data.line1.set_xdata(x_data)
+        real_time_show_phone_data.line1.set_ydata(y1_data)
+        real_time_show_phone_data.line2.set_xdata(x_data)
+        real_time_show_phone_data.line2.set_ydata(y2_data)
+        real_time_show_phone_data.line3.set_xdata(x_data)
+        real_time_show_phone_data.line3.set_ydata(y3_data)
+
+        # 更新第二组数据的线条
+        real_time_show_phone_data.line2_1.set_xdata(x_data)
+        real_time_show_phone_data.line2_1.set_ydata(y1_data_2)
+        real_time_show_phone_data.line2_2.set_xdata(x_data)
+        real_time_show_phone_data.line2_2.set_ydata(y2_data_2)
+        real_time_show_phone_data.line2_3.set_xdata(x_data)
+        real_time_show_phone_data.line2_3.set_ydata(y3_data_2)
+
+        # 重新调整 x 和 y 轴的范围
+        real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0])
+        real_time_show_phone_data.ax.set_ylim(np.min(float_matrix[:, :3]), np.max(float_matrix[:, :3]))
+
+    plt.draw()  # 重绘当前图表
+    plt.pause(0.01)  # 短暂停以确保图表刷新
+
