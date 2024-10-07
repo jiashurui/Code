@@ -84,18 +84,18 @@ def start_server():
                         transformed = global_tramsform.transform_sensor_data_to_np(float_matrix)
                         # 模型预测
                         pred = apply_1d_cnn(transformed)
-
+                        pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
                         transformed = transformed[:,:3]
                         all_transormed_data = np.vstack([all_transormed_data, transformed])[-1024:, :]
 
                         # 实时展示数据（仅展示最新数据）
-                        real_time_show_phone_data(all_data,all_transormed_data)
+                        real_time_show_phone_data(all_data,all_transormed_data, pred_label)
 
                         # use origin data to test
                         # 将预测结果发送回客户端
                         response = struct.pack('>f', float(pred))  # 将预测结果转换为字节流
                         conn.sendall(response)  # 返回结果给客户端
-                        print(f"Response sent to client, time:{datetime.now()} response:{constant.Constant.RealWorld.action_map_reverse.get(pred.item())}")  # 打印日志，确认已发送
+                        print(f"Response sent to client, time:{datetime.now()} response:{pred_label}")  # 打印日志，确认已发送
 
                 except Exception as e:
                     print(f"Error handling connection from {addr}: {e}")

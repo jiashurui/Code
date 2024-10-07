@@ -176,7 +176,7 @@ class GradientUtils:
 
 # 实时展示数据的函数，接收一个二维数组 float_matrix，并展示前三列
 
-def real_time_show_phone_data(float_matrix ,transformed_data):
+def real_time_show_phone_data(float_matrix ,transformed_data, model_pred):
     plt.ion()  # 开启交互模式
     # 获取当前数据的前三列
     x_data = np.arange(float_matrix.shape[0])
@@ -238,6 +238,7 @@ def real_time_show_phone_data(float_matrix ,transformed_data):
         # 重新调整 x 和 y 轴的范围
         real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0])
         real_time_show_phone_data.ax.set_ylim(np.min(float_matrix[:, :3]), np.max(float_matrix[:, :3]))
+        real_time_show_phone_data.ax.set_title(f'acc_data, model_pred: {model_pred}')
 
     plt.draw()  # 重绘当前图表
     plt.pause(0.01)  # 短暂停以确保图表刷新
