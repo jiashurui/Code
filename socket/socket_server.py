@@ -77,14 +77,17 @@ def start_server():
                         all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
 
                         # TODO: 调用数据处理函数
-                        transformed = global_tramsform.transform_sensor_data(float_matrix)[:,:3]
+                        transformed = global_tramsform.transform_sensor_data_to_np(float_matrix)
+                        # 模型预测
+                        pred = apply_1d_cnn(transformed)
+
+                        transformed = transformed[:,:3]
                         all_transormed_data = np.vstack([all_transormed_data, transformed])[-1024:, :]
 
                         # 实时展示数据（仅展示最新数据）
                         real_time_show_phone_data(all_data,all_transormed_data)
 
                         # use origin data to test
-                        pred = apply_1d_cnn(float_matrix)
                         # 将预测结果发送回客户端
                         response = struct.pack('>f', float(pred))  # 将预测结果转换为字节流
                         conn.sendall(response)  # 返回结果给客户端
