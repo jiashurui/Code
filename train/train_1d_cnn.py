@@ -60,7 +60,7 @@ torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
 
 model_load = DeepOneDimCNN().to(device)
 model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
-label_map = Constant.RealWorld.label_map
+label_map = Constant.RealWorld.action_map
 
 model_load.eval()
 num_sum = 0
