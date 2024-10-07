@@ -24,16 +24,17 @@ def apply_1d_cnn(test_data):
     return pred
 
 def standlize(arr):
-    # 对每一列进行归一化
+    # 对每一列进行标准化到 [-1, 1]
     arr_min = np.min(arr, axis=0)  # 计算每一列的最小值
     arr_max = np.max(arr, axis=0)  # 计算每一列的最大值
 
-    # 如果最大值和最小值相等，归一化结果会出现问题，做检查
-    normalized_arr = np.zeros_like(arr)
+    # 如果最大值和最小值相等，标准化会出现问题，需要检查
+    standardized_arr = np.zeros_like(arr)
     for i in range(arr.shape[1]):
         if arr_max[i] - arr_min[i] != 0:
-            normalized_arr[:, i] = (arr[:, i] - arr_min[i]) / (arr_max[i] - arr_min[i])
+            # 标准化公式：2 * (x - min) / (max - min) - 1
+            standardized_arr[:, i] = 2 * (arr[:, i] - arr_min[i]) / (arr_max[i] - arr_min[i]) - 1
         else:
-            normalized_arr[:, i] = 0  # 如果列中最大值等于最小值，全部置0
+            standardized_arr[:, i] = 0  # 如果列中最大值等于最小值，全部置0
 
-    return normalized_arr
+    return standardized_arr
