@@ -11,7 +11,7 @@ from utils.uci_datareader import get_data_1d_uci
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # param
-slide_window_length = 200  # 序列长度
+slide_window_length = 128  # 序列长度
 stripe = int(slide_window_length * 0.5)  # overlap 50%
 batch_size = 128  # 或其他合适的批次大小
 learning_rate: float = 0.0001

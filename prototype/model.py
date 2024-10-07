@@ -125,3 +125,45 @@ class LSTM(nn.Module):
     def init_hidden(self, batch_size):
         return (torch.zeros(self.layer_size, batch_size, self.hidden_layer_size),
                 torch.zeros(self.layer_size, batch_size, self.hidden_layer_size))
+
+
+class ConvLSTM(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes):
+        super(ConvLSTM, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+
+        # 1D 卷积层
+        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, padding=1)
+        self.relu = nn.ReLU()
+        self.pool = nn.MaxPool1d(kernel_size=2)
+
+        # LSTM 层
+        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
+
+        # 全连接层
+        self.fc = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        # x 的形状: (batch_size, seq_length, input_size)
+        x = x.permute(0, 2, 1)  # 调整为 (batch_size, input_size, seq_length)
+
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.pool(x)
+
+        x = x.permute(0, 2, 1)  # 调整回 (batch_size, seq_length, features)
+
+        # 初始化 LSTM 隐状态和细胞状态
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(
+            x.device)  # (num_layers, batch_size, hidden_size)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+
+        # LSTM 层
+        out, (h0, c0) = self.lstm(x, (h0, c0))  # out: (batch_size, seq_length, hidden_size)
+
+        # 取最后一个时间步的输出
+        out = out[:, -1, :]  # (batch_size, hidden_size)
+
+        out = self.fc(out)  # (batch_size, num_classes)
+        return out

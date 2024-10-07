@@ -69,6 +69,73 @@ def get_realworld_for_abnormal(slide_window_length):
 
     return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
 
+#
+def get_realworld_for_recon(slide_window_length):
+    # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
+    file_list = glob.glob('../data/realworld/*/acc_*_waist.csv')
+    final_data = []
+
+    # make label by fileName
+    # 'climbingdown': 0,
+    # 'climbingup': 1,
+    # 'jumping': 2,
+    # 'lying': 3,
+    # 'running': 4,
+    # 'sitting': 5,
+    # 'standing': 6,
+    # 'walking': 7,
+    label_map = Constant.RealWorld.action_map
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+
+        # 对于每一个dataframe , 按照文件名给其打上标签
+        matched_substrings = [label for label in label_map.keys() if label in file_name]
+
+        if not matched_substrings or len(matched_substrings) != 1:
+            raise KeyError("无法生成标签")
+        else:
+            data['label'] = label_map.get(matched_substrings[0])
+        ########################################################
+
+        # 去除头部
+        data = data[stop_simple: len(data)]
+
+        # 去除不要的数据(时间和ID)
+        data = data.iloc[:, 2:]
+
+        # 归一化
+        data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
+
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+        print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
+
+    # shuffle data
+    random.shuffle(final_data)
+
+    # 提取输入和标签
+    input_features = np.array([arr[:, :3] for arr in final_data])
+    labels = np.array([arr[:, 3] for arr in final_data])[:, 0]
+
+    # 将NumPy数组转换为Tensor
+    data_tensor = torch.tensor(input_features, dtype=torch.float32).to(device)
+    data_label = torch.tensor(labels, dtype=torch.long).to(device)
+
+    # 计算分割点 7:3
+    split_point = int(0.7 * len(data_tensor))
+
+    # train data/label   test data/label
+    train_data = data_tensor[:split_point].to(device)
+    test_data = data_tensor[split_point:].to(device)
+    train_labels = data_label[:split_point].to(device)
+    test_labels = data_label[split_point:].to(device)
+
+
+    return train_data,train_labels,test_data,test_labels
+
 if __name__ == '__main__':
-    walk,stand = get_realworld_for_abnormal(128)
-    print(walk.shape)
+    train_data, test_data,train_labels,test_labels = get_realworld_for_recon(128)
+    print()
