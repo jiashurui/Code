@@ -3,6 +3,8 @@ import struct
 import traceback
 import numpy as np
 import sys
+
+from apply.apply_1d_cnn import apply_1d_cnn
 from utils.show import real_time_show_phone_data
 
 # 定义服务器地址和端口
@@ -81,6 +83,14 @@ def start_server():
 
                         # 实时展示数据（仅展示最新数据）
                         real_time_show_phone_data(all_data,all_transormed_data)
+
+                        # use origin data to test
+                        pred = apply_1d_cnn(float_matrix)
+
+                        # 将预测结果发送回客户端
+                        response = struct.pack('>f', float(pred))  # 将预测结果转换为字节流
+                        conn.sendall(response)  # 返回结果给客户端
+                        print(f"Response sent to client, response:{pred}")  # 打印日志，确认已发送
 
                 except Exception as e:
                     print(f"Error handling connection from {addr}: {e}")
