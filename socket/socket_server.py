@@ -11,7 +11,7 @@ from utils.show import real_time_show_phone_data
 HOST = '192.168.11.2'  # 本地 IP 地址
 PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
-from prototype import global_tramsform
+from prototype import global_tramsform, constant
 
 
 # 接收完整数据的函数
@@ -73,12 +73,11 @@ def start_server():
                         # 转换为二维数组并截取前三列
                         float_matrix = np.array([list(float_array[i:i + 9]) for i in range(0, len(float_array), 9)])
 
-                        # TODO: 调用数据处理函数
-                        transformed = global_tramsform.transform_sensor_data(float_matrix)[:,:3]
-
                         # 拼接新数据到 `all_data`，保留最新的 1024 行
                         all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
 
+                        # TODO: 调用数据处理函数
+                        transformed = global_tramsform.transform_sensor_data(float_matrix)[:,:3]
                         all_transormed_data = np.vstack([all_transormed_data, transformed])[-1024:, :]
 
                         # 实时展示数据（仅展示最新数据）
@@ -86,11 +85,10 @@ def start_server():
 
                         # use origin data to test
                         pred = apply_1d_cnn(float_matrix)
-
                         # 将预测结果发送回客户端
                         response = struct.pack('>f', float(pred))  # 将预测结果转换为字节流
                         conn.sendall(response)  # 返回结果给客户端
-                        print(f"Response sent to client, response:{pred}")  # 打印日志，确认已发送
+                        print(f"Response sent to client, response:{constant.Constant.RealWorld.action_map_reverse.get(pred)}")  # 打印日志，确认已发送
 
                 except Exception as e:
                     print(f"Error handling connection from {addr}: {e}")

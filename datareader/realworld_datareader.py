@@ -85,6 +85,8 @@ def get_realworld_for_recon(slide_window_length):
     # 'standing': 6,
     # 'walking': 7,
     label_map = Constant.RealWorld.action_map
+
+
     for file_name in file_list:
         data = pd.read_csv(file_name)
 
@@ -102,6 +104,9 @@ def get_realworld_for_recon(slide_window_length):
 
         # 去除不要的数据(时间和ID)
         data = data.iloc[:, 2:]
+
+        # TODO Global transform
+
 
         # 归一化
         data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
@@ -135,6 +140,8 @@ def get_realworld_for_recon(slide_window_length):
 
 
     return train_data,train_labels,test_data,test_labels
+
+
 
 if __name__ == '__main__':
     train_data, test_data,train_labels,test_labels = get_realworld_for_recon(128)

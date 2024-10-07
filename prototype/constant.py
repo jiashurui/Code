@@ -19,6 +19,16 @@ class Constant:
             'standing': 6,
             'walking': 7,
         }
+        action_map_reverse = {
+            0: 'climbingdown',
+            1: 'climbingup',
+            2: 'jumping',
+            3: 'lying',
+            4: 'running',
+            5: 'sitting',
+            6: 'standing',
+            7: 'walking'
+        }
 
     class UCI:
         place_map = {}  # waist

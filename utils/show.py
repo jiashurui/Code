@@ -203,12 +203,12 @@ def real_time_show_phone_data(float_matrix ,transformed_data):
                                                                                , linestyle='--'
                                                                                )
         real_time_show_phone_data.line2_2, = real_time_show_phone_data.ax.plot(x_data, y2_data_2,
-                                                                                     label='acc_x_t',
+                                                                                     label='acc_y_t',
                                                                                      color='#006400'
                                                                                , linestyle='--'
                                                                                )
         real_time_show_phone_data.line2_3, = real_time_show_phone_data.ax.plot(x_data, y3_data_2,
-                                                                                     label='acc_x_t',
+                                                                                     label='acc_z_t',
                                                                                      color='#00008B'
                                                                                , linestyle='--')
 
