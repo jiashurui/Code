@@ -8,7 +8,7 @@ from apply.apply_1d_cnn import apply_1d_cnn
 from utils.show import real_time_show_phone_data
 
 # 定义服务器地址和端口
-HOST = '192.168.11.2'  # 本地 IP 地址
+HOST = '192.168.11.44'  # 本地 IP 地址
 PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
 from prototype import global_tramsform, constant
@@ -91,7 +91,7 @@ def start_server():
                         # 将预测结果发送回客户端
                         response = struct.pack('>f', float(pred))  # 将预测结果转换为字节流
                         conn.sendall(response)  # 返回结果给客户端
-                        print(f"Response sent to client, response:{constant.Constant.RealWorld.action_map_reverse.get(pred)}")  # 打印日志，确认已发送
+                        print(f"Response sent to client, response:{constant.Constant.RealWorld.action_map_reverse.get(pred.item())}")  # 打印日志，确认已发送
 
                 except Exception as e:
                     print(f"Error handling connection from {addr}: {e}")
