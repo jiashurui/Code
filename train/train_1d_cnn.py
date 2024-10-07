@@ -29,6 +29,8 @@ model.train()
 lost_arr = []
 for epoch in range(epochs):
     permutation = torch.randperm(train_data.size()[0])
+    correct_train = 0
+    num_sum_train = 0
 
     loss_per_epoch = 0.0
     for i in range(0, train_data.size()[0], batch_size):
@@ -43,12 +45,19 @@ for epoch in range(epochs):
         loss = loss_function(outputs, label)
         loss_per_epoch = loss_per_epoch + loss.item()/batch_size
 
+        # 训练过程中 预测分类结果
+        pred = outputs.argmax(dim=1, keepdim=True) # 获取概率最大的索引
+        correct_train += pred.eq(label.view_as(pred)).sum().item()
+        num_sum_train += batch_size
+
         # BP
         loss.backward()
         optimizer.step()
 
     lost_arr.append(loss_per_epoch)
     print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
+    print(f'Accuracy: {correct_train}/{num_sum_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
+
 
 loss_plot = show.show_me_data0(lost_arr)
 report.save_plot(loss_plot, 'learn-loss')
