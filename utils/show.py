@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from prototype import constant
+
+
 def show_me_data0(np_arr):
     fig, ax = plt.subplots()
     ax.plot(np_arr)
@@ -38,15 +41,7 @@ def show_me_data2(df_list, col_name):
     for df in df_list[0:5]:
         show_me_data1(df, col_name)
 def show_me_hotmap(mat, show=True):
-    label_map = {
-        'waist': 0,
-        'chest': 1,
-        'forearm': 2,
-        'head': 3,
-        'shin': 4,
-        'thigh': 5,
-        'upperarm': 6
-    }
+    label_map = constant.RealWorld.action_map
 
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
