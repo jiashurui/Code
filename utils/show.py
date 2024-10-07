@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from prototype import constant
+from prototype.constant import Constant
 
 
 def show_me_data0(np_arr):
@@ -41,7 +41,7 @@ def show_me_data2(df_list, col_name):
     for df in df_list[0:5]:
         show_me_data1(df, col_name)
 def show_me_hotmap(mat, show=True):
-    label_map = constant.RealWorld.action_map
+    label_map = Constant.RealWorld.action_map
 
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
