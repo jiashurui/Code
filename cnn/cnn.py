@@ -10,7 +10,7 @@ class DeepOneDimCNN(nn.Module):
         self.kernel_size = 3
         self.stride = 1
         self.padding = 1
-        self.in_channels = 9
+        self.in_channels = 6
         self.out_label = 8
 
         self.conv1d = nn.Conv1d(in_channels=self.in_channels, out_channels=128, kernel_size=self.kernel_size, stride=self.stride,
