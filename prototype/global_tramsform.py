@@ -133,3 +133,9 @@ def transform_sensor_data(data):
 
     acc_global= np.array(acc_global)
     return acc_global
+
+def transform_sensor_data_to_df(data):
+    np_acc = transform_sensor_data(data)
+    data.iloc[:, :3] = np_acc[:,:3]
+
+    return data

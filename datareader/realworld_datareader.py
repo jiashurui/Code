@@ -7,6 +7,7 @@ import torch
 from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
+from prototype.global_tramsform import transform_sensor_data, transform_sensor_data_to_df
 from utils.slidewindow import slide_window2
 
 stop_simple = 500  # 数据静止的个数
@@ -72,7 +73,7 @@ def get_realworld_for_abnormal(slide_window_length):
 #
 def get_realworld_for_recon(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../data/realworld/*/acc_*_waist.csv')
+    file_list = glob.glob('../data/realworld/*/waist_merged.csv')
     final_data = []
 
     # make label by fileName
@@ -90,23 +91,12 @@ def get_realworld_for_recon(slide_window_length):
     for file_name in file_list:
         data = pd.read_csv(file_name)
 
-        # 对于每一个dataframe , 按照文件名给其打上标签
-        matched_substrings = [label for label in label_map.keys() if label in file_name]
 
-        if not matched_substrings or len(matched_substrings) != 1:
-            raise KeyError("无法生成标签")
-        else:
-            data['label'] = label_map.get(matched_substrings[0])
-        ########################################################
+        # TODO Global transform
+        data = transform_sensor_data_to_df(data)
 
         # 去除头部
         data = data[stop_simple: len(data)]
-
-        # 去除不要的数据(时间和ID)
-        data = data.iloc[:, 2:]
-
-        # TODO Global transform
-
 
         # 归一化
         data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
