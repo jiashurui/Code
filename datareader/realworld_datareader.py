@@ -91,7 +91,6 @@ def get_realworld_for_recon(slide_window_length):
     for file_name in file_list:
         data = pd.read_csv(file_name)
 
-
         # TODO Global transform
         data = transform_sensor_data_to_df(data)
 
@@ -99,7 +98,7 @@ def get_realworld_for_recon(slide_window_length):
         data = data[stop_simple: len(data)]
 
         # 归一化
-        data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
+        data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
 
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
@@ -112,8 +111,8 @@ def get_realworld_for_recon(slide_window_length):
     random.shuffle(final_data)
 
     # 提取输入和标签
-    input_features = np.array([arr[:, :3] for arr in final_data])
-    labels = np.array([arr[:, 3] for arr in final_data])[:, 0]
+    input_features = np.array([arr[:, :9] for arr in final_data])
+    labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor
     data_tensor = torch.tensor(input_features, dtype=torch.float32).to(device)
