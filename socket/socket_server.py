@@ -1,6 +1,8 @@
 import socket
 import struct
 import traceback
+from datetime import datetime
+
 import numpy as np
 import sys
 
@@ -66,6 +68,7 @@ def start_server():
                         if len(data) != data_size:
                             print(f"Expected {data_size} bytes but got {len(data)} bytes")
                             continue  # 打印日志，继续等待下一轮接收
+                        print(f"Received data, time: {datetime.now()}")
 
                         # 将字节流解析为 float[] (确保使用与客户端一致的字节序)
                         float_array = struct.unpack(f'>{9 * 128}f', data)  # Big-endian 字节序
@@ -91,7 +94,7 @@ def start_server():
                         # 将预测结果发送回客户端
                         response = struct.pack('>f', float(pred))  # 将预测结果转换为字节流
                         conn.sendall(response)  # 返回结果给客户端
-                        print(f"Response sent to client, response:{constant.Constant.RealWorld.action_map_reverse.get(pred.item())}")  # 打印日志，确认已发送
+                        print(f"Response sent to client, time:{datetime.now()} response:{constant.Constant.RealWorld.action_map_reverse.get(pred.item())}")  # 打印日志，确认已发送
 
                 except Exception as e:
                     print(f"Error handling connection from {addr}: {e}")

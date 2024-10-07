@@ -1,4 +1,6 @@
 # 实例化模型(加载模型参数)
+from datetime import time, datetime
+
 import numpy as np
 import torch
 
@@ -12,8 +14,12 @@ label_map = Constant.RealWorld.action_map
 
 def apply_1d_cnn(test_data):
     # (128, 3)
+
+    start_time = datetime.now()
+
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :9, :]
     outputs = model_load(data)
     pred = outputs.argmax(dim=1, keepdim=True)
+    print(f"Model predict finished, start: {start_time} , end: {datetime.now()}")
     return pred
