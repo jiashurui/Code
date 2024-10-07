@@ -17,7 +17,7 @@ def apply_1d_cnn(test_data):
     # 归一化(128, 9)
     test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
-    data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :6, :]
+    data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :3, :]
     outputs = model_load(data)
     pred = outputs.argmax(dim=1, keepdim=True)
     print(f"Model predict finished, start: {start_time} , end: {datetime.now()}")

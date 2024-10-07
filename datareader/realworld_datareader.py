@@ -73,7 +73,7 @@ def get_realworld_for_abnormal(slide_window_length):
 #
 def get_realworld_for_recon(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../data/realworld/*/waist_merged.csv')
+    file_list = glob.glob('../data/realworld/*/upperarm_merged.csv')
     final_data = []
 
     # make label by fileName
@@ -98,7 +98,7 @@ def get_realworld_for_recon(slide_window_length):
         data = data[stop_simple: len(data)]
 
         # 归一化
-        data.iloc[:, :6] = scaler.fit_transform(data.iloc[:, :6])
+        data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
 
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
@@ -111,7 +111,7 @@ def get_realworld_for_recon(slide_window_length):
     random.shuffle(final_data)
 
     # 提取输入和标签
-    input_features = np.array([arr[:, :6] for arr in final_data])
+    input_features = np.array([arr[:, :3] for arr in final_data])
     labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor
