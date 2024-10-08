@@ -16,10 +16,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 100
+epochs = 30
 dataset = 'mh'
 label_map = constant.Constant.mHealth.action_map
-in_channel = 6
+in_channel = 3
 out_channel = len(label_map)
 
 model = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
@@ -124,7 +124,7 @@ def train_model():
 def apply_1d_cnn(test_data):
     start_time = datetime.now()
     # 归一化(128, 9)
-    test_data = standlize(test_data)
+    # test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :in_channel, :]
     outputs = model_load(data)
@@ -147,3 +147,6 @@ def standlize(arr):
             standardized_arr[:, i] = 0  # 如果列中最大值等于最小值，全部置0
 
     return standardized_arr
+
+if __name__ == '__main__':
+    train_model()
