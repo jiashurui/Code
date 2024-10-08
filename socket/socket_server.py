@@ -82,9 +82,14 @@ def start_server():
 
                         # TODO: 调用数据处理函数
                         transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
+
                         # 模型预测
                         pred = apply_1d_cnn(transformed)
-                        pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
+
+                        # 预测结果转换文字
+                        # pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
+                        pred_label = constant.Constant.mHealth.action_map_reverse.get(pred.item())
+
                         transformed = transformed[:,:3]
                         all_transormed_data = np.vstack([all_transormed_data, transformed])[-1024:, :]
 

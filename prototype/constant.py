@@ -66,6 +66,20 @@ class Constant:
             'Running': 11,
             'Jump front & back': 12
         }
+        action_map_reverse = {
+            1: 'STANDING',
+            2:'Sitting',
+            3:'Lying',
+            4:'Walking',
+            5:'Climbing stairs',
+            6:'Waist bends forward',
+            7:'Frontal elevation of arms',
+            8:'Knees bending',
+            9:'Cycling',
+            10:'Jogging',
+            11:'Running',
+            12:'Jump front & back'
+        }
     class ChildWalk:
         place_map = {}
         action_map = {

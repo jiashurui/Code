@@ -189,9 +189,9 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
     if not hasattr(real_time_show_phone_data, 'initialized'):
         real_time_show_phone_data.fig, real_time_show_phone_data.ax = plt.subplots()
         plt.title('acc_data')
-        real_time_show_phone_data.line1, = real_time_show_phone_data.ax.plot(x_data, y1_data, label='acc_x',color='red')
-        real_time_show_phone_data.line2, = real_time_show_phone_data.ax.plot(x_data, y2_data, label='acc_y',color='green')
-        real_time_show_phone_data.line3, = real_time_show_phone_data.ax.plot(x_data, y3_data, label='acc_z',color='blue')
+        # real_time_show_phone_data.line1, = real_time_show_phone_data.ax.plot(x_data, y1_data, label='acc_x',color='red')
+        # real_time_show_phone_data.line2, = real_time_show_phone_data.ax.plot(x_data, y2_data, label='acc_y',color='green')
+        # real_time_show_phone_data.line3, = real_time_show_phone_data.ax.plot(x_data, y3_data, label='acc_z',color='blue')
 
         # 初始化第二组数据的线条
         real_time_show_phone_data.line2_1, = real_time_show_phone_data.ax.plot(x_data, y1_data_2,
@@ -217,12 +217,12 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
         real_time_show_phone_data.initialized = True
     else:
         # 更新数据而不是重新绘制图表
-        real_time_show_phone_data.line1.set_xdata(x_data)
-        real_time_show_phone_data.line1.set_ydata(y1_data)
-        real_time_show_phone_data.line2.set_xdata(x_data)
-        real_time_show_phone_data.line2.set_ydata(y2_data)
-        real_time_show_phone_data.line3.set_xdata(x_data)
-        real_time_show_phone_data.line3.set_ydata(y3_data)
+        # real_time_show_phone_data.line1.set_xdata(x_data)
+        # real_time_show_phone_data.line1.set_ydata(y1_data)
+        # real_time_show_phone_data.line2.set_xdata(x_data)
+        # real_time_show_phone_data.line2.set_ydata(y2_data)
+        # real_time_show_phone_data.line3.set_xdata(x_data)
+        # real_time_show_phone_data.line3.set_ydata(y3_data)
 
         # 更新第二组数据的线条
         real_time_show_phone_data.line2_1.set_xdata(x_data)

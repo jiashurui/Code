@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
 
+from prototype.global_tramsform import transform_sensor_data_to_df
 from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -100,6 +101,7 @@ def get_mh_data(slide_window_length):
 
     return train_data, train_labels, test_data, test_labels
 
+# mHealth 3维度加速度数据
 def get_mh_data_1d_3ch(slide_window_length):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
@@ -174,8 +176,84 @@ def get_mh_data_1d_3ch(slide_window_length):
 
     return train_data, train_labels, test_data, test_labels
 
-# 使用别的数据集,在 mhealth数据集上面进行测试
+def get_mh_data_1d_9ch(slide_window_length):
+    file_list = glob.glob('../data/mHealth/mHealth_*.log')
+    final_data = []
+    appended_data = []
 
+    for file_name in file_list:
+        print(file_name)
+        data = pd.read_csv(file_name,sep='\t',header=None)
+
+        data.columns = ['chest_x', 'chest_y', 'chest_z',
+                        'electrocardiogram_1', 'electrocardiogram_2',
+                        'ankle_x', 'ankle_y', 'ankle_z',
+                        'gyro_x', 'gyro_y', 'gyro_z',
+                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
+                        'arm_x', 'arm_y', 'arm_z',
+                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
+                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
+                        'label']
+        appended_data.append(data)
+
+    big_df = pd.concat(appended_data, ignore_index=True)
+
+    # forearm data
+    big_df = big_df.iloc[:, 14:24]
+
+    # Global Transformed
+    big_df = transform_sensor_data_to_df(big_df)
+
+    # 归一化
+    big_df.iloc[:, :9] = scaler.fit_transform(big_df.iloc[:, :9])
+
+    record_diff = []
+    pre_val = -1
+    for index, value in big_df['label'].items():
+        if value != pre_val:
+            record_diff.append(index)
+        pre_val = value
+
+    sliced_list = []
+    for i in range(1, len(record_diff)):
+        start = record_diff[i-1]
+        end = record_diff[i]
+        sliced_df = big_df.iloc[start:end]
+        if sliced_df['label'].array[0] != 0:
+            sliced_list.append(sliced_df)
+
+    for df in sliced_list:
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+
+    # shuffle data
+    random.shuffle(final_data)
+
+    # 提取输入和标签
+    features = np.array([arr[:, :9] for arr in final_data])
+    labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
+
+    # 将NumPy数组转换为Tensor
+    inputs_tensor = torch.tensor(features, dtype=torch.float32)  # 添加通道维度
+    labels_tensor = torch.tensor(labels, dtype=torch.long)
+
+    # 计算分割点 7:3
+    split_point = int(0.7 * len(inputs_tensor))
+
+    # train data/label   test data/label
+    train_data = inputs_tensor[:split_point].to(device)
+    test_data = inputs_tensor[split_point:].to(device)
+    train_labels = labels_tensor[:split_point].to(device)
+    test_labels = labels_tensor[split_point:].to(device)
+
+    return train_data, train_labels, test_data, test_labels
+
+
+
+# 使用别的数据集,在 mhealth数据集上面进行测试
 # walking waiting running
 def get_mh_data_1d_3ch_for_test(slide_window_length):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
@@ -322,4 +400,4 @@ def get_mh_data_for_abnormal_test(slide_window_length):
     return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
 
 if __name__ == '__main__':
-    get_mh_data_for_abnormal_test(128)
+    get_mh_data_1d_9ch(128)

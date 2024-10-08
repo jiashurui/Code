@@ -8,9 +8,11 @@ from cnn.cnn import DeepOneDimCNN
 from prototype.constant import Constant
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model_load = DeepOneDimCNN().to(device)
-model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
-label_map = Constant.RealWorld.action_map
+# model_load = DeepOneDimCNN().to(device)
+# model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+
+model_load = DeepOneDimCNN(out_channel=12).to(device)
+model_load.load_state_dict(torch.load('../model/1D-CNN-mh-12CH.pth'))
 
 def apply_1d_cnn(test_data):
     start_time = datetime.now()

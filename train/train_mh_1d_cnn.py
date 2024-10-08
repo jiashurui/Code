@@ -3,26 +3,40 @@ import torch
 from torch import nn
 
 from cnn.cnn import DeepOneDimCNN
+from datareader.mh_datareader import get_mh_data_1d_9ch
 from datareader.realworld_datareader import get_realworld_for_recon
+from prototype import constant
 from prototype.constant import Constant
 from utils import show, report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 50
-# realworld
-train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length)
+epochs = 100
+# mHealth
+train_data, train_labels, test_data, test_labels = get_mh_data_1d_9ch(slide_window_length)
+train_labels -= 1
+test_labels -= 1
 
+dataset = 'mh'
+label_map = constant.Constant.mHealth.action_map
+in_channel = len(train_data[1])
+out_channel = len(label_map)
+
+# CNN need transformed
 train_data = train_data.transpose(1, 2)
 test_data = test_data.transpose(1, 2)
 
 # model instance
-model = DeepOneDimCNN().to(device)
+model = DeepOneDimCNN(out_channel=out_channel).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,weight_decay=0.01)
 loss_function = nn.CrossEntropyLoss()
+
+
 
 # train
 model.train()
@@ -47,7 +61,9 @@ for epoch in range(epochs):
         loss_per_epoch = loss_per_epoch + loss.item()/batch_size
 
         # 训练过程中 预测分类结果
-        pred = outputs.argmax(dim=1, keepdim=True) # 获取概率最大的索引
+        # TODO mh_Health 索引需要加一
+        pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
+
         correct_train += pred.eq(label.view_as(pred)).sum().item()
         num_sum_train += batch_size
 
@@ -64,19 +80,18 @@ loss_plot = show.show_me_data0(lost_arr)
 report.save_plot(loss_plot, 'learn-loss')
 
 # save my model
-torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
+torch.save(model.state_dict(), f'../model/1D-CNN-{dataset}-{out_channel}CH.pth')
 
 
 
-model_load = DeepOneDimCNN().to(device)
-model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
-label_map = Constant.RealWorld.action_map
+model_load = DeepOneDimCNN(out_channel=out_channel).to(device)
+model_load.load_state_dict(torch.load(f'../model/1D-CNN-{dataset}-{out_channel}CH.pth'))
 
 model_load.eval()
 num_sum = 0
 correct = 0
 test_loss = 0
-confusion_matrix = np.zeros((len(label_map), len(label_map)))
+confusion_matrix = np.zeros((out_channel, out_channel))
 
 with torch.no_grad():
     for i in range(0, test_data.size()[0], batch_size):
@@ -96,6 +111,6 @@ with torch.no_grad():
 
 print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-heatmap_plot = show.show_me_hotmap(confusion_matrix)
+heatmap_plot = show.show_me_mh_hotmap(confusion_matrix)
 fig = heatmap_plot.gcf()
 report.save_plot(heatmap_plot, 'heat-map')
