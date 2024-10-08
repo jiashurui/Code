@@ -6,9 +6,7 @@ from torch import nn
 
 from cnn.cnn import DeepOneDimCNN
 from datareader.mh_datareader import get_mh_data_1d_9ch
-from datareader.realworld_datareader import get_realworld_for_recon
 from prototype import constant
-from prototype.constant import Constant
 from utils import show, report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
