@@ -129,7 +129,7 @@ def transform_sensor_data(data):
 
         # 转换到全局加速度
         a_global = R_matrix @ acc
-        acc_global.append(np.append(a_global, [roll, pitch, yaw]))
+        acc_global.append(np.append(a_global, [roll, yaw, pitch]))
 
     acc_global= np.array(acc_global)
     return acc_global
@@ -144,4 +144,5 @@ def transform_sensor_data_to_np(data):
     np_acc = transform_sensor_data(data)
     data[:, :3] = np_acc[:,:3]
 
-    return data
+    # np(128,9) , np(roll,yaw,pitch)
+    return data,np_acc[:,3:]

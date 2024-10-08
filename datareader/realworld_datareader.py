@@ -73,7 +73,7 @@ def get_realworld_for_abnormal(slide_window_length):
 #
 def get_realworld_for_recon(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../data/realworld/*/upperarm_merged.csv')
+    file_list = glob.glob('../data/realworld/*/waist_merged.csv')
     final_data = []
     label_map = Constant.RealWorld.action_map
 
