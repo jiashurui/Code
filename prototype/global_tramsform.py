@@ -1,26 +1,25 @@
 # 状态转移函数 f
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 
 def f(x, u):
-    roll, pitch, yaw = x.flatten()
-    wx, wy, wz = u.flatten()
+    quat = x.flatten()
+    omega = u.flatten()
+    dt = 1 / 50  # 假设时间步长为 50Hz
 
-    # 计算角速度对欧拉角的影响
-    roll_dot = wx + np.tan(pitch) * (wy * np.sin(roll) + wz * np.cos(roll))
-    pitch_dot = wy * np.cos(roll) - wz * np.sin(roll)
-    yaw_dot = (wy * np.sin(roll) + wz * np.cos(roll)) / np.cos(pitch)
+    # 计算四元数的变化
+    r_delta = Rotation.from_rotvec(omega * dt)
+    r_current = Rotation.from_quat(quat)
+    r_new = r_delta * r_current
 
-    # 预测新的状态
-    roll += roll_dot
-    pitch += pitch_dot
-    yaw += yaw_dot
-
-    return np.array([[roll], [pitch], [yaw]])
+    # 返回更新后的四元数
+    return r_new.as_quat().reshape((4, 1))
 
 
 # 测量函数 h
 def h(acc, mag):
+    # 从加速度计和磁力计计算 roll, pitch, yaw
     roll = np.arctan2(acc[1], acc[2])
     pitch = np.arctan2(-acc[0], np.sqrt(acc[1] ** 2 + acc[2] ** 2))
     yaw = np.arctan2(
@@ -28,31 +27,31 @@ def h(acc, mag):
         mag[0] * np.cos(pitch) + mag[1] * np.sin(pitch) * np.sin(roll)
         + mag[2] * np.sin(pitch) * np.cos(roll)
     )
-    return np.array([[roll], [pitch], [yaw]])
+    # 从欧拉角转换为四元数
+    r = Rotation.from_euler('xyz', [roll, pitch, yaw], degrees=False)
+    return r.as_quat().reshape((4, 1))
 
 
 # 预测步骤
 def predict_state(x, P, omega, dt):
     u = omega * dt
     x_pred = f(x, u)
-    F = np.eye(3) + dt * np.array([
-        [1, np.tan(x[1, 0]) * np.sin(x[0, 0]), np.tan(x[1, 0]) * np.cos(x[0, 0])],
-        [0, np.cos(x[0, 0]), -np.sin(x[0, 0])],
-        [0, np.sin(x[0, 0]) / np.cos(x[1, 0]), np.cos(x[0, 0]) / np.cos(x[1, 0])]
-    ])
+    # 线性化状态转移函数的雅可比矩阵
+    F = np.eye(4)  # 对于四元数的近似，这里使用单位矩阵
     P_pred = F @ P @ F.T + Q
     return x_pred, P_pred
 
 
 # 更新步骤
 def update_state(x_pred, P_pred, acc, mag):
+    # 测量值
     z = h(acc, mag)
-    H = np.eye(3)
+    H = np.eye(4)
     y = z - H @ x_pred
     S = H @ P_pred @ H.T + R
     K = P_pred @ H.T @ np.linalg.inv(S)
     x_upd = x_pred + K @ y
-    P_upd = (np.eye(3) - K @ H) @ P_pred
+    P_upd = (np.eye(4) - K @ H) @ P_pred
     return x_upd, P_upd
 
 
@@ -62,39 +61,37 @@ def kalman_filter(x, P, omega, acc, mag, dt):
     x_upd, P_upd = update_state(x_pred, P_pred, acc, mag)
     return x_upd, P_upd
 
+
 # 设置过程噪声和测量噪声协方差矩阵
-Q = np.eye(3) * 0.01  # 过程噪声协方差矩阵
-R = np.eye(3) * 0.1  # 测量噪声协方差矩阵
+Q = np.eye(4) * 0.01  # 过程噪声协方差矩阵
+R = np.eye(4) * 0.1  # 测量噪声协方差矩阵
 
 # 初始状态和协方差
-x = np.zeros((3, 1))
-P = np.eye(3)
+x = np.array([[0], [0], [0], [1]])  # 初始四元数，表示无旋转
+P = np.eye(4)
 
 # 时间步长
 dt = 1 / 50  # 50 Hz
 
 # 转换前和转换后的加速度存储
-
 def transform_sensor_data(data):
-
-    Q = np.eye(3) * 0.01  # 过程噪声协方差矩阵
-    R = np.eye(3) * 0.1  # 测量噪声协方差矩阵
+    global Q, R
+    Q = np.eye(4) * 0.01  # 过程噪声协方差矩阵
+    R = np.eye(4) * 0.12  # 测量噪声协方差矩阵
 
     # 初始状态和协方差
-    x = np.zeros((3, 1))
-    P = np.eye(3)
+    x = np.array([[0], [0], [0], [1]])  # 初始四元数，表示无旋转
+    P = np.eye(4)
 
     # 时间步长
     dt = 1 / 50  # 50 Hz
     data = np.array(data)
-    arr_acc = data[:,0:3]
-    arr_gyo = data[:,3:6]
-    arr_mag = data[:,6:9]
+    arr_acc = data[:, 0:3]
+    arr_gyo = data[:, 3:6]
+    arr_mag = data[:, 6:9]
 
     # Global 変換後
     acc_global = []
-    rpy = []
-
     for i in range(len(arr_acc)):
         acc = arr_acc[i]
         gyo = arr_gyo[i]
@@ -104,45 +101,29 @@ def transform_sensor_data(data):
         x, P = kalman_filter(x, P, gyo, acc, mag, dt)
 
         # 获取姿态估计
-        roll, pitch, yaw = x.flatten()
+        r = Rotation.from_quat(x.flatten())
+        roll, pitch, yaw = r.as_euler('xyz', degrees=False)
 
         # 构造旋转矩阵
-        R_x = np.array([
-            [1, 0, 0],
-            [0, np.cos(roll), -np.sin(roll)],
-            [0, np.sin(roll), np.cos(roll)]
-        ])
-
-        R_y = np.array([
-            [np.cos(pitch), 0, np.sin(pitch)],
-            [0, 1, 0],
-            [-np.sin(pitch), 0, np.cos(pitch)]
-        ])
-
-        R_z = np.array([
-            [np.cos(yaw), -np.sin(yaw), 0],
-            [np.sin(yaw), np.cos(yaw), 0],
-            [0, 0, 1]
-        ])
-
-        R_matrix = R_z @ R_y @ R_x
+        R_matrix = r.as_matrix()
 
         # 转换到全局加速度
-        a_global = R_matrix @ acc
-        acc_global.append(np.append(a_global, [roll, yaw, pitch]))
+        a_global = R_matrix @ acc.reshape((3, 1))
+        acc_global.append(np.append(a_global.flatten(), [roll, pitch, yaw]))
 
-    acc_global= np.array(acc_global)
+    acc_global = np.array(acc_global)
     return acc_global
+
 
 def transform_sensor_data_to_df(data):
     np_acc = transform_sensor_data(data)
-    data.iloc[:, :3] = np_acc[:,:3]
-
+    data.iloc[:, :3] = np_acc[:, :3]
     return data
+
 
 def transform_sensor_data_to_np(data):
     np_acc = transform_sensor_data(data)
-    data[:, :3] = np_acc[:,:3]
+    data[:, :3] = np_acc[:, :3]
 
-    # np(128,9) , np(roll,yaw,pitch)
-    return data,np_acc[:,3:]
+    # np(128,9) , np(roll,pitch,yaw)
+    return data, np_acc[:, 3:]

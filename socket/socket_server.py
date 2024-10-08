@@ -81,7 +81,7 @@ def start_server():
                         all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
 
                         # TODO: 调用数据处理函数
-                        transformed,ryp = global_tramsform.transform_sensor_data_to_np(float_matrix)
+                        transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
                         # 模型预测
                         pred = apply_1d_cnn(transformed)
                         pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
@@ -89,7 +89,7 @@ def start_server():
                         all_transormed_data = np.vstack([all_transormed_data, transformed])[-1024:, :]
 
                         # 实时展示数据（仅展示最新数据）
-                        real_time_show_phone_data(all_data,all_transormed_data, pred_label,ryp)
+                        real_time_show_phone_data(all_data,all_transormed_data, pred_label,rpy)
 
                         # use origin data to test
                         # 将预测结果发送回客户端

@@ -239,8 +239,8 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
         real_time_show_phone_data.ax.set_title(f'acc_data, '
                                                f'model_pred: {model_pred},\n'
                                                f'roll:{np.degrees(rpy[-1,0]):.2f},'
-                                               f'yaw:{np.degrees(rpy[-1,1]):.2f},'
-                                               f'pitch:{np.degrees(rpy[-1,2]):.2f}.')
+                                               f'pitch:{np.degrees(rpy[-1,1]):.2f},'
+                                               f'yaw:{np.degrees(rpy[-1,2]):.2f}.')
 
     plt.draw()  # 重绘当前图表
     plt.pause(0.01)  # 短暂停以确保图表刷新

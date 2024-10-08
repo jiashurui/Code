@@ -4,6 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import torch
+from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
@@ -79,11 +80,34 @@ def get_realworld_for_recon(slide_window_length):
 
 
     for file_name in file_list:
-        data = pd.read_csv(file_name)
+        data = pd.read_csv(file_name)[:500]
+        fig, ax = plt.subplots()
+        # 绘制每条线
+        ax.plot(data.index, data['acc_attr_x'], label='X')
+        ax.plot(data.index, data['acc_attr_y'], label='Y')
+        ax.plot(data.index, data['acc_attr_z'], label='Z')
+
 
         # TODO Global transform
-        data = transform_sensor_data_to_df(data)
+        data_transformed = transform_sensor_data_to_df(data)[:500]
+        ##########################################################################################
 
+
+
+        ax.plot(data.index, data_transformed['acc_attr_x'], label='X_t',linestyle='--')
+        ax.plot(data.index, data_transformed['acc_attr_y'], label='Y_t',linestyle='--')
+        ax.plot(data.index, data_transformed['acc_attr_z'], label='Z_t',linestyle='--')
+
+        # 设置图例
+        ax.legend()
+
+        # 设置标题和标签
+        ax.set_xlabel('time')
+        ax.set_ylabel('value')
+        fig.autofmt_xdate()
+        # 显示图形
+        plt.show()
+######################################################################
         # 去除头部
         data = data[stop_simple: len(data)]
 
