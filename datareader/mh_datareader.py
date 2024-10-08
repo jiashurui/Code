@@ -176,7 +176,7 @@ def get_mh_data_1d_3ch(slide_window_length):
 
     return train_data, train_labels, test_data, test_labels
 
-def get_mh_data_1d_9ch(slide_window_length):
+def get_mh_data_1d_9ch(slide_window_length, features_num):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
     appended_data = []
@@ -202,10 +202,10 @@ def get_mh_data_1d_9ch(slide_window_length):
     big_df = big_df.iloc[:, 14:24]
 
     # Global Transformed
-    big_df = transform_sensor_data_to_df(big_df)
+    # big_df = transform_sensor_data_to_df(big_df)
 
     # 归一化
-    big_df.iloc[:, :9] = scaler.fit_transform(big_df.iloc[:, :9])
+    big_df.iloc[:, :features_num] = scaler.fit_transform(big_df.iloc[:, :features_num])
 
     record_diff = []
     pre_val = -1
@@ -233,7 +233,7 @@ def get_mh_data_1d_9ch(slide_window_length):
     random.shuffle(final_data)
 
     # 提取输入和标签
-    features = np.array([arr[:, :9] for arr in final_data])
+    features = np.array([arr[:, :features_num] for arr in final_data])
     labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor

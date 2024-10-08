@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 import sys
 
-from apply.apply_1d_cnn import apply_1d_cnn
+from train.train_mh_1d_cnn import apply_1d_cnn
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data
 
@@ -81,7 +81,7 @@ def start_server():
                         all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
 
                         # TODO: 调用数据处理函数
-                        transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
+                        transformed,rpy = global_tramsform.fake_transform_sensor_data_to_np(float_matrix)
 
                         # 模型预测
                         pred = apply_1d_cnn(transformed)

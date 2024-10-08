@@ -3,14 +3,14 @@ import torch.nn as nn
 
 
 class DeepOneDimCNN(nn.Module):
-    def __init__(self, out_channel = 8):
+    def __init__(self, in_channels = 9, out_channel = 8):
         super(DeepOneDimCNN, self).__init__()
 
         # Class param
         self.kernel_size = 7
         self.stride = 1
         self.padding = 3
-        self.in_channels = 9
+        self.in_channels = in_channels
         self.out_label = out_channel
 
         self.conv1d = nn.Conv1d(in_channels=self.in_channels, out_channels=32, kernel_size=self.kernel_size, stride=self.stride,

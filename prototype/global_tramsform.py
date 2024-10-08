@@ -127,3 +127,7 @@ def transform_sensor_data_to_np(data):
 
     # np(128,9) , np(roll,pitch,yaw)
     return data, np_acc[:, 3:]
+
+def fake_transform_sensor_data_to_np(data):
+    np_acc = np.zeros((128,3))
+    return data,np_acc
