@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class DeepOneDimCNN(nn.Module):
-    def __init__(self, in_channels = 9, out_channel = 8):
+    def __init__(self, in_channels=9, out_channel=8):
         super(DeepOneDimCNN, self).__init__()
 
         # Class param

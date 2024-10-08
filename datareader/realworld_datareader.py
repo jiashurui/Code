@@ -78,13 +78,15 @@ def get_realworld_for_recon(slide_window_length):
     final_data = []
     for file_name in file_list:
         data = pd.read_csv(file_name)
+
+        # Global Transformed
         data = transform_sensor_data_to_df(data)
 
         # 去除头部
         data = data[stop_simple: len(data)]
 
         # 归一化
-        data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
+        # data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
 
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)

@@ -19,12 +19,14 @@ batch_size = 64
 epochs = 30
 dataset = 'mh'
 label_map = constant.Constant.mHealth.action_map
-in_channel = 3
+in_channel = 9
 out_channel = len(label_map)
 
 model = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
 model_load = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
-
+# model instance
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     # mHealth
@@ -32,21 +34,12 @@ def train_model():
     train_labels -= 1
     test_labels -= 1
 
-
-
     # CNN need transformed
     train_data = train_data.transpose(1, 2)
     test_data = test_data.transpose(1, 2)
 
-    # model instance
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,weight_decay=0.01)
-    loss_function = nn.CrossEntropyLoss()
-
-
-
     # train
     model.train()
-
     lost_arr = []
     for epoch in range(epochs):
         permutation = torch.randperm(train_data.size()[0])
@@ -67,7 +60,7 @@ def train_model():
             loss_per_epoch = loss_per_epoch + loss.item()/batch_size
 
             # 训练过程中 预测分类结果
-            # TODO mh_Health 索引需要加一
+            # mh_Health 索引需要加一
             pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
 
             correct_train += pred.eq(label.view_as(pred)).sum().item()
@@ -89,7 +82,7 @@ def train_model():
     torch.save(model.state_dict(), f'../model/1D-CNN-{dataset}-{out_channel}CH.pth')
 
 
-
+    # Test Model
     model_load.load_state_dict(torch.load(f'../model/1D-CNN-{dataset}-{out_channel}CH.pth'))
 
     model_load.eval()
@@ -122,6 +115,8 @@ def train_model():
 
 
 def apply_1d_cnn(test_data):
+    model_load.load_state_dict(torch.load(f'../model/1D-CNN-{dataset}-{out_channel}CH.pth'))
+
     start_time = datetime.now()
     # 归一化(128, 9)
     # test_data = standlize(test_data)

@@ -202,7 +202,7 @@ def get_mh_data_1d_9ch(slide_window_length, features_num):
     big_df = big_df.iloc[:, 14:24]
 
     # Global Transformed
-    # big_df = transform_sensor_data_to_df(big_df)
+    big_df = transform_sensor_data_to_df(big_df)
 
     # 归一化
     # big_df.iloc[:, :features_num] = scaler.fit_transform(big_df.iloc[:, :features_num])

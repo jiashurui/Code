@@ -6,7 +6,8 @@ from datetime import datetime
 import numpy as np
 import sys
 
-from train.train_mh_1d_cnn import apply_1d_cnn
+import train.train_1d_cnn
+from train import train_1d_cnn, train_mh_1d_cnn
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data
 
@@ -14,6 +15,10 @@ from utils.show import real_time_show_phone_data
 HOST = get_value_from_config('ip')  # 本地 IP 地址
 PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
+apply_model = 'realworld'
+# apply_model = 'mHealth'
+
+
 from prototype import global_tramsform, constant
 
 
@@ -47,7 +52,7 @@ def start_server():
 
         # 初始化一个存储最新数据的数组 (限制为最新的 1024 行数据)
         all_data = np.zeros((128, 3), np.float32)
-        all_transormed_data = np.zeros((128, 3), np.float32)
+        all_transformed_data = np.zeros((128, 3), np.float32)
 
         while True:
             conn, addr = server_socket.accept()  # 等待客户端连接
@@ -80,21 +85,21 @@ def start_server():
                         # 拼接新数据到 `all_data`，保留最新的 1024 行
                         all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
 
-                        # TODO: 调用数据处理函数
-                        transformed,rpy = global_tramsform.fake_transform_sensor_data_to_np(float_matrix)
+                        # Global Transformed
+                        transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
 
                         # 模型预测
-                        pred = apply_1d_cnn(transformed)
+                        if apply_model == 'realworld':
+                            pred = train_1d_cnn.apply_1d_cnn(transformed)
+                            pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
 
-                        # 预测结果转换文字
-                        # pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
-                        pred_label = constant.Constant.mHealth.action_map_reverse.get(pred.item())
-
-                        transformed = transformed[:,:3]
-                        all_transormed_data = np.vstack([all_transormed_data, transformed])[-1024:, :]
+                        elif apply_model == 'mHealth':
+                            pred = train_mh_1d_cnn.apply_1d_cnn(transformed)
+                            pred_label = constant.Constant.mHealth.action_map_reverse.get(pred.item())
 
                         # 实时展示数据（仅展示最新数据）
-                        real_time_show_phone_data(all_data,all_transormed_data, pred_label,rpy)
+                        all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[-1024:, :]
+                        real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy)
 
                         # use origin data to test
                         # 将预测结果发送回客户端

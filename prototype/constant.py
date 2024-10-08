@@ -29,7 +29,6 @@ class Constant:
             6: 'standing',
             7: 'walking'
         }
-
     class UCI:
         place_map = {}  # waist
         action_map = {
@@ -80,6 +79,15 @@ class Constant:
             11:'Running',
             12:'Jump front & back'
         }
+        data_columns = ['chest_x', 'chest_y', 'chest_z',
+                        'electrocardiogram_1', 'electrocardiogram_2',
+                        'ankle_x', 'ankle_y', 'ankle_z',
+                        'gyro_x', 'gyro_y', 'gyro_z',
+                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
+                        'arm_x', 'arm_y', 'arm_z',
+                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
+                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
+                        'label']
     class ChildWalk:
         place_map = {}
         action_map = {
