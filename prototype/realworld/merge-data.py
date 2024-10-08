@@ -25,7 +25,7 @@ def merge_data(index):
     }
 
     # 正则表达式用于提取动作、部位、编号等信息
-    pattern = re.compile(r'(\w+)_(\w+)_(\w+)(?:_(\d+))?')  # e.g., acc_standing_waist_1 or acc_standing_waist (没有编号)
+    pattern = re.compile(r'(\w+)_(\w+)(?:_(\d+)_(\w+))?')  # e.g., acc_standing_waist_1 or acc_standing_waist (没有编号)
 
     # 遍历每个身体位置
     for body_part in body_parts:

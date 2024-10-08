@@ -75,16 +75,6 @@ def get_realworld_for_recon(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
     file_list = glob.glob('../data/realworld/*/upperarm_merged.csv')
     final_data = []
-
-    # make label by fileName
-    # 'climbingdown': 0,
-    # 'climbingup': 1,
-    # 'jumping': 2,
-    # 'lying': 3,
-    # 'running': 4,
-    # 'sitting': 5,
-    # 'standing': 6,
-    # 'walking': 7,
     label_map = Constant.RealWorld.action_map
 
 
@@ -126,7 +116,6 @@ def get_realworld_for_recon(slide_window_length):
     test_data = data_tensor[split_point:].to(device)
     train_labels = data_label[:split_point].to(device)
     test_labels = data_label[split_point:].to(device)
-
 
     return train_data,train_labels,test_data,test_labels
 

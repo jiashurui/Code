@@ -11,7 +11,7 @@ from utils import show, report
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slide_window_length = 128  # 序列长度
-learning_rate: float = 0.001
+learning_rate: float = 0.0001
 batch_size = 64
 epochs = 50
 train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length)
