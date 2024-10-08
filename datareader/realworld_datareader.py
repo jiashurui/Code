@@ -76,43 +76,15 @@ def get_realworld_for_recon(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
     file_list = glob.glob('../data/realworld/*/waist_merged.csv')
     final_data = []
-    label_map = Constant.RealWorld.action_map
-
-
     for file_name in file_list:
-        data = pd.read_csv(file_name)[:500]
-        fig, ax = plt.subplots()
-        # 绘制每条线
-        ax.plot(data.index, data['acc_attr_x'], label='X')
-        ax.plot(data.index, data['acc_attr_y'], label='Y')
-        ax.plot(data.index, data['acc_attr_z'], label='Z')
+        data = pd.read_csv(file_name)
+        data = transform_sensor_data_to_df(data)
 
-
-        # TODO Global transform
-        data_transformed = transform_sensor_data_to_df(data)[:500]
-        ##########################################################################################
-
-
-
-        ax.plot(data.index, data_transformed['acc_attr_x'], label='X_t',linestyle='--')
-        ax.plot(data.index, data_transformed['acc_attr_y'], label='Y_t',linestyle='--')
-        ax.plot(data.index, data_transformed['acc_attr_z'], label='Z_t',linestyle='--')
-
-        # 设置图例
-        ax.legend()
-
-        # 设置标题和标签
-        ax.set_xlabel('time')
-        ax.set_ylabel('value')
-        fig.autofmt_xdate()
-        # 显示图形
-        plt.show()
-######################################################################
         # 去除头部
         data = data[stop_simple: len(data)]
 
         # 归一化
-        data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
+        data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :9])
 
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
@@ -125,7 +97,7 @@ def get_realworld_for_recon(slide_window_length):
     random.shuffle(final_data)
 
     # 提取输入和标签
-    input_features = np.array([arr[:, :3] for arr in final_data])
+    input_features = np.array([arr[:, :9] for arr in final_data])
     labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor
