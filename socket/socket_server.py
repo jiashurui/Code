@@ -83,7 +83,7 @@ def start_server():
                         all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
 
                         # Global Transformed
-                        transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
+                        transformed,rpy = global_tramsform.fake_transform_sensor_data_to_np(float_matrix)
 
                         # 模型预测
                         if apply_model == 'realworld':

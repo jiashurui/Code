@@ -104,11 +104,11 @@ class Simple3DCNN(nn.Module):
         return x
 
 class LSTM(nn.Module):
-    def __init__(self, input_size=1, hidden_layer_size=256, output_size=3):
+    def __init__(self, input_size=1, hidden_layer_size=128, output_size=3):
         super(LSTM, self).__init__()
         self.layer_size = input_size
         self.hidden_layer_size = hidden_layer_size
-        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=3, batch_first=True, dropout=0.1)
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=6, batch_first=True, dropout=0.1)
         self.linear = nn.Linear(hidden_layer_size, output_size)
         self.dropout = nn.Dropout(0.1)
     def forward(self, input_seq):

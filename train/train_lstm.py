@@ -4,9 +4,9 @@ import numpy as np
 import torch
 from torch import nn
 
-from cnn.cnn import DeepOneDimCNN
 from datareader.realworld_datareader import get_realworld_for_recon
 from prototype.constant import Constant
+from prototype.model import LSTM
 from utils import show, report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -14,12 +14,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 10
+epochs = 50
 in_channel = 6
 out_channel = 8
+model_path = '../model/LSTM.pth'
 # realworld
-model = DeepOneDimCNN(in_channels=in_channel,out_channel=out_channel).to(device)
-model_load = DeepOneDimCNN(in_channels=in_channel,out_channel=out_channel).to(device)
+model = LSTM(input_size=in_channel,output_size=out_channel).to(device)
+model_load = LSTM(input_size=in_channel,output_size=out_channel).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 loss_function = nn.CrossEntropyLoss()
 label_map = Constant.RealWorld.action_map
@@ -27,10 +28,6 @@ label_map = Constant.RealWorld.action_map
 
 def train_model():
     train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length,in_channel)
-    print(train_labels.min(), train_labels.max())
-
-    train_data = train_data.transpose(1, 2)
-    test_data = test_data.transpose(1, 2)
 
     # train
     model.train()
@@ -72,11 +69,11 @@ def train_model():
     report.save_plot(loss_plot, 'learn-loss')
 
     # save my model
-    torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
+    torch.save(model.state_dict(), model_path)
 
 
 
-    model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+    model_load.load_state_dict(torch.load(model_path))
 
     model_load.eval()
     num_sum = 0
@@ -108,12 +105,12 @@ def train_model():
 
 model_load_flag = False
 
-def apply_1d_cnn(test_data):
+def apply_lstm(test_data):
     global model_load_flag
-    model_apply = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
+    model_apply = LSTM(input_size=in_channel,output_size=out_channel).to(device)
 
     if not model_load_flag:
-        model_apply.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+        model_apply.load_state_dict(torch.load(model_path))
         model_apply.eval()
 
     start_time = datetime.now()

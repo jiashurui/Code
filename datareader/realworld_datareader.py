@@ -80,7 +80,7 @@ def get_realworld_for_recon(slide_window_length, features_num):
         data = pd.read_csv(file_name)
 
         # Global Transformed
-        data = transform_sensor_data_to_df(data)
+        # data = transform_sensor_data_to_df(data)
 
         # 去除头部
         data = data[stop_simple: len(data)]
