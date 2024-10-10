@@ -244,8 +244,8 @@ latent_abnormal_tensor = torch.cat(latent_abnormal, dim=0)
 origin_normal_tensor_2d = test_normal.view(-1, input_dim)
 origin_abnormal_tensor_2d = test_abnormal.view(-1, input_dim)
 
-latent_normal_tensor_2d = latent_normal_tensor.view(-1, input_dim)
-latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, input_dim)
+latent_normal_tensor_2d = latent_normal_tensor.view(-1, latent_normal_tensor.size(2))
+latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, latent_normal_tensor.size(2))
 
 # t-SNE 降维(进行AE提取前/提取之后)
 plot_tsne(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
