@@ -15,7 +15,7 @@ slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
 epochs = 50
-in_channel = 3
+in_channel = 6
 out_channel = 8
 model_path = '../model/LSTM.pth'
 # realworld
