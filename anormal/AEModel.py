@@ -54,6 +54,36 @@ class LSTMFCAutoencoder(nn.Module):
         self.decoder_fc4 = nn.Linear(latent_dim, hidden_dim)
 
         self.decoder_lstm = nn.LSTM(hidden_dim, input_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)
+        # 初始化模型权重
+        self.init_weights()
+
+    def init_weights(self):
+        # Xavier 初始化线性层
+        nn.init.xavier_normal_(self.encoder_fc.weight)
+        nn.init.xavier_normal_(self.encoder_fc2.weight)
+        nn.init.xavier_normal_(self.encoder_fc3.weight)
+        nn.init.xavier_normal_(self.encoder_fc4.weight)
+        nn.init.xavier_normal_(self.decoder_fc.weight)
+        nn.init.xavier_normal_(self.decoder_fc2.weight)
+        nn.init.xavier_normal_(self.decoder_fc3.weight)
+        nn.init.xavier_normal_(self.decoder_fc4.weight)
+
+        # 对LSTM层的权重进行Xavier初始化
+        for name, param in self.encoder_lstm.named_parameters():
+            if 'weight_ih' in name:
+                nn.init.xavier_normal_(param)
+            elif 'weight_hh' in name:
+                nn.init.orthogonal_(param)
+            elif 'bias' in name:
+                nn.init.zeros_(param)
+
+        for name, param in self.decoder_lstm.named_parameters():
+            if 'weight_ih' in name:
+                nn.init.xavier_normal_(param)
+            elif 'weight_hh' in name:
+                nn.init.orthogonal_(param)
+            elif 'bias' in name:
+                nn.init.zeros_(param)
 
     def forward(self, x):
         # Encoder
