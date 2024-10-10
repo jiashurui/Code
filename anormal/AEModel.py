@@ -185,6 +185,10 @@ class VAE(nn.Module):
         x = self.relu(x)
         x = self.lr5(x)
         # for reconstruction
+        # x: model_output(reconstructed data)
+        # z: encoder_output
+        # u: latent_space(mean of distribution)
+        # sigma2: standard deviation
         return x, z, u, log_sigma2
 
     def loss_function(self, recon, origin, ave, log_sigma2):
@@ -198,7 +202,7 @@ class VAE(nn.Module):
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
         # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
-        loss = recon_loss + 0.1 * kl_loss
+        loss = recon_loss + 0.000001 * kl_loss
         return loss
 
 class DeepVAE(VAE):

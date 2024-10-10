@@ -121,10 +121,10 @@ def get_data_1d_uci_part_data(data_type):
         data_acc_z.to_numpy(),
 
         # TODO 当前只用加速度数据,因为其他论文数据无法对齐,用不了角速度数据
-
-        # data_gyro_x.to_numpy(),
-        # data_gyro_y.to_numpy(),
-        # data_gyro_z.to_numpy()
+        # TODO #2 ?? 上面那个TODO 干啥的?
+        data_gyro_x.to_numpy(),
+        data_gyro_y.to_numpy(),
+        data_gyro_z.to_numpy()
     ), axis=-1)
 
     # 1 WALKING 5 STANDING

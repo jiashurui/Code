@@ -5,6 +5,7 @@ import torch.optim as optim
 from matplotlib import pyplot as plt
 
 from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE
+from anormal.t_SNE import plot_tsne
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -29,8 +30,9 @@ torch.manual_seed(3407)
 # train_data = get_child_all_features(slide_window_length)
 # train_data, test_data = get_child_part_action(slide_window_length)
 # train_data, test_data = get_child_2024_all_features(slide_window_length)
+if dataset_name == 'uci':
+    train_normal, train_abnormal, test_normal, test_abnormal = get_data_1d_uci_all_data()
 
-train_normal, train_abnormal, test_normal, test_abnormal = get_data_1d_uci_all_data()
 input_dim = train_normal.size(2)  # Dimensionality of input sequence
 
 # LSTM Autoencoder Model
@@ -72,7 +74,6 @@ lost_avg_arr = []
 # 梯度裁剪
 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
-
 for epoch in range(epochs):
     permutation = torch.randperm(train_normal.size()[0])
 
@@ -92,7 +93,7 @@ for epoch in range(epochs):
         # 自己和重构后的自己比较
         # VAE
         if model_name == 'vae':
-            output, _, u, sigma = model(input_data)
+            output, latent_vector, u, sigma = model(input_data)
             loss = model.loss_function(output, input_data, u, sigma)
         else:
             output = model(input_data)
@@ -146,7 +147,7 @@ with torch.no_grad():
         # 自己和重构后的自己比较
         # VAE
         if model_name == 'vae':
-            outputs, _, u, sigma = model(input_data)
+            outputs, latent_vector, u, sigma = model(input_data)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
             outputs = model(input_data)
@@ -170,6 +171,7 @@ with torch.no_grad():
     loss_sum_test = 0.0  #
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
+    latent_normal = []
 
     for i in range(0, test_normal.size()[0], batch_size):
         input_data = test_normal[i: i + batch_size]
@@ -179,7 +181,10 @@ with torch.no_grad():
 
         # VAE
         if model_name == 'vae':
-            outputs, _, u, sigma = model(input_data)
+            outputs, latent_vector, u, sigma = model(input_data)
+
+            # 潜在空間
+            latent_normal.append(latent_vector)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
             outputs = model(input_data)
@@ -191,7 +196,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss,dataset_name, title='test-normal-showcase')
+            show_tensor_data(input_data, outputs, loss, dataset_name, title='test-normal-showcase')
             show_count += 1
 
     print(f'测试集平均单样本(正例) loss:{loss_sum_test / i}')  # 平均单样本 loss
@@ -202,6 +207,7 @@ with torch.no_grad():
 with torch.no_grad():
     loss_sum_test = 0.0  #
     every_simple_loss = []  # 每个样本的loss(batch)
+    latent_abnormal = []
     show_count = 0
 
     for i in range(0, test_abnormal.size()[0], batch_size):
@@ -211,7 +217,8 @@ with torch.no_grad():
             continue
         # VAE
         if model_name == 'vae':
-            outputs, _, u, sigma = model(input_data)
+            outputs, latent_vector, u, sigma = model(input_data)
+            latent_abnormal.append(latent_vector)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
             outputs = model(input_data)
@@ -223,9 +230,23 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss,dataset_name, title='test-abnormal-showcase')
+            show_tensor_data(input_data, outputs, loss, dataset_name, title='test-abnormal-showcase')
             show_count += 1
 
     print(f'测试集平均单样本(反例) loss:{loss_sum_test / i}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
+
+latent_normal_tensor = torch.cat(latent_normal, dim=0)
+latent_abnormal_tensor = torch.cat(latent_abnormal, dim=0)
+
+# flatten (batch_size * seq_len, feature)
+origin_normal_tensor_2d = test_normal.view(-1, input_dim)
+origin_abnormal_tensor_2d = test_abnormal.view(-1, input_dim)
+
+latent_normal_tensor_2d = latent_normal_tensor.view(-1, input_dim)
+latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, input_dim)
+
+# t-SNE 降维(进行AE提取前/提取之后)
+plot_tsne(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
+plot_tsne(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'latent vector t-SNE Dimension Reduction')
