@@ -7,7 +7,7 @@ import numpy as np
 import sys
 
 import train.train_1d_cnn
-from train import train_1d_cnn, train_mh_1d_cnn
+from train import train_1d_cnn, train_mh_1d_cnn, train_lstm
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data
 from prototype import global_tramsform, constant
@@ -18,6 +18,7 @@ PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
 apply_model = 'realworld'
 # apply_model = 'mHealth'
+model = 'lstm'
 
 # 接收完整数据的函数
 def receive_data(conn, data_size):
@@ -87,7 +88,10 @@ def start_server():
 
                         # 模型预测
                         if apply_model == 'realworld':
-                            pred = train_1d_cnn.apply_1d_cnn(transformed)
+                            if model == 'cnn':
+                                pred = train_1d_cnn.apply_1d_cnn(transformed)
+                            elif model == 'lstm':
+                                pred = train_lstm.apply_lstm(transformed)
                             pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
 
                         elif apply_model == 'mHealth':
