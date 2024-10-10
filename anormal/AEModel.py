@@ -65,10 +65,10 @@ class LSTMFCAutoencoder(nn.Module):
         latent_vector = self.encoder_fc3(latent_vector)
         latent_vector = self.relu(latent_vector)
         latent_vector = self.encoder_fc4(latent_vector)
-        latent_vector = self.relu(latent_vector)
+        encoder_output = self.relu(latent_vector)
 
         # Decoder
-        latent_vector_out = self.decoder_fc(latent_vector)
+        latent_vector_out = self.decoder_fc(encoder_output)
         latent_vector_out = self.relu(latent_vector_out)
         latent_vector_out = self.decoder_fc2(latent_vector_out)
         latent_vector_out = self.relu(latent_vector_out)
@@ -80,7 +80,7 @@ class LSTMFCAutoencoder(nn.Module):
         decoder_output, (decoder_h, decoder_c) = self.decoder_lstm(latent_vector_out)
 
         # Result
-        return decoder_output
+        return decoder_output,encoder_output
 
 
 # CAE

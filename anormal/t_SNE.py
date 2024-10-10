@@ -46,7 +46,9 @@ def plot_pca(normal_data, abnormal_data, title):
     abnormal_result = pca.fit_transform(abnormal_latent)
 
     # Plot the result after dimension reduction
-    plt.scatter(normal_result[:, 0], normal_result[:, 1], color='blue')
-    plt.scatter(abnormal_result[:, 0], abnormal_result[:, 1], color='red')
+    plt.scatter(normal_result[:, 0], normal_result[:, 1],
+                color='lightblue', alpha=0.5, s=1)  # 淡蓝色, 半透明, 点大小为1
+    plt.scatter(abnormal_result[:, 0], abnormal_result[:, 1],
+                color='lightcoral', alpha=0.5, s=1)  # 淡红色, 半透明, 点大小为1
     plt.title(title)
     plt.show()

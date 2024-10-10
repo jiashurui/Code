@@ -18,11 +18,11 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 50  # Number of training epochs
+epochs = 5  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
-model_name = 'vae'
+model_name = 'lstm'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
@@ -96,7 +96,7 @@ for epoch in range(epochs):
             output, latent_vector, u, sigma = model(input_data)
             loss = model.loss_function(output, input_data, u, sigma)
         else:
-            output = model(input_data)
+            output, latent_vector = model(input_data)
             loss = loss_function(output, input_data)
 
         # 样本Loss
@@ -150,7 +150,7 @@ with torch.no_grad():
             outputs, latent_vector, u, sigma = model(input_data)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model(input_data)
+            outputs,_ = model(input_data)
             loss = loss_function(outputs, input_data)
 
         # 单样本Loss
@@ -187,7 +187,8 @@ with torch.no_grad():
             latent_normal.append(latent_vector)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model(input_data)
+            outputs,latent_vector = model(input_data)
+            latent_normal.append(latent_vector)
             loss = loss_function(outputs, input_data)
 
         # 单样本Loss
@@ -221,7 +222,8 @@ with torch.no_grad():
             latent_abnormal.append(latent_vector)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model(input_data)
+            outputs,latent_vector = model(input_data)
+            latent_abnormal.append(latent_vector)
             loss = loss_function(outputs, input_data)
 
         # 单样本Loss
