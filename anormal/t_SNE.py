@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
-t_sne = TSNE(n_components=2, random_state=3407)
+t_sne = TSNE(n_components=2, random_state=3407, perplexity=50)
 
 def plot_tsne(normal_data, abnormal_data, title):
     # Tensor to Numpy

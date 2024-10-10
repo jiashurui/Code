@@ -111,7 +111,7 @@ def apply_lstm(test_data):
     model_apply = LSTM(input_size=in_channel,output_size=out_channel).to(device)
 
     if not model_load_flag:
-        model_apply.load_state_dict(torch.load(model_path))
+        model_apply.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         model_apply.eval()
 
     start_time = datetime.now()
