@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 100
+epochs = 30
 in_channel = 6
 out_channel = 8
 model_path = '../model/LSTM.pth'
@@ -116,7 +116,7 @@ def apply_lstm(test_data):
 
     start_time = datetime.now()
     # 归一化(128, 9)
-    test_data = standlize(test_data)
+    # test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0)[:, :, :in_channel]
     outputs = model_apply(data)
