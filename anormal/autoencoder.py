@@ -5,7 +5,7 @@ import torch.optim as optim
 from matplotlib import pyplot as plt
 
 from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE
-from anormal.t_SNE import plot_tsne
+from anormal.t_SNE import plot_tsne, plot_pca
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -248,5 +248,5 @@ latent_normal_tensor_2d = latent_normal_tensor.view(-1, latent_normal_tensor.siz
 latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, latent_normal_tensor.size(2))
 
 # t-SNE 降维(进行AE提取前/提取之后)
-plot_tsne(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
-plot_tsne(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'latent vector t-SNE Dimension Reduction')
+plot_pca(origin_normal_tensor_2d, origin_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
+plot_pca(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'latent vector t-SNE Dimension Reduction')
