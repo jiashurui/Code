@@ -56,20 +56,8 @@ def show_me_hotmap(mat, show=True):
     return plt
 
 def show_me_mh_hotmap(mat, show=True):
-    label_map = {
-        'STANDING': 1,
-        'Sitting': 2,
-        'Lying': 3,
-        'Walking': 4,
-        'Climbing stairs': 5,
-        'Waist bends forward': 6,
-        'Frontal elevation of arms': 7,
-        'Knees bending': 8,
-        'Cycling': 9,
-        'Jogging': 10,
-        'Running': 11,
-        'Jump front & back': 12
-    }
+    del Constant.mHealth.action_map['Null']
+    label_map = Constant.mHealth.action_map
     plt.figure(figsize=(10,10))
 
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
@@ -245,3 +233,7 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
     plt.draw()  # 重绘当前图表
     plt.pause(0.01)  # 短暂停以确保图表刷新
 
+
+if __name__ == '__main__':
+
+    print(Constant.mHealth.action_map)

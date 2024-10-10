@@ -52,6 +52,7 @@ class Constant:
     class mHealth:
         place_map = {}  # pocket (thigh)
         action_map = {
+            'Null': 0,
             'STANDING': 1,
             'Sitting': 2,
             'Lying': 3,
@@ -66,6 +67,7 @@ class Constant:
             'Jump front & back': 12
         }
         action_map_reverse = {
+            0: 'Null',
             1: 'STANDING',
             2:'Sitting',
             3:'Lying',

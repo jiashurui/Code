@@ -72,9 +72,9 @@ def get_realworld_for_abnormal(slide_window_length):
     return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
 
 #
-def get_realworld_for_recon(slide_window_length):
+def get_realworld_for_recon(slide_window_length, features_num):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../data/realworld/*/waist_merged.csv')
+    file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
     final_data = []
     for file_name in file_list:
         data = pd.read_csv(file_name)
@@ -99,7 +99,7 @@ def get_realworld_for_recon(slide_window_length):
     random.shuffle(final_data)
 
     # 提取输入和标签
-    input_features = np.array([arr[:, :9] for arr in final_data])
+    input_features = np.array([arr[:, :features_num] for arr in final_data])
     labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor

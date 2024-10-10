@@ -10,6 +10,7 @@ import train.train_1d_cnn
 from train import train_1d_cnn, train_mh_1d_cnn
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data
+from prototype import global_tramsform, constant
 
 # 定义服务器地址和端口
 HOST = get_value_from_config('ip')  # 本地 IP 地址
@@ -17,10 +18,6 @@ PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
 apply_model = 'realworld'
 # apply_model = 'mHealth'
-
-
-from prototype import global_tramsform, constant
-
 
 # 接收完整数据的函数
 def receive_data(conn, data_size):

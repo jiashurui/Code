@@ -14,8 +14,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 50
-in_channel = 9
+epochs = 30
+in_channel = 3
 out_channel = 8
 # realworld
 model = DeepOneDimCNN(in_channels=in_channel,out_channel=out_channel).to(device)
@@ -26,7 +26,7 @@ label_map = Constant.RealWorld.action_map
 
 
 def train_model():
-    train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length)
+    train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length,in_channel)
     print(train_labels.min(), train_labels.max())
 
     train_data = train_data.transpose(1, 2)
@@ -106,17 +106,22 @@ def train_model():
     fig = heatmap_plot.gcf()
     report.save_plot(heatmap_plot, 'heat-map')
 
+model_load_flag = False
 
 def apply_1d_cnn(test_data):
-    model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
-    model_load.eval()
+    global model_load_flag
+    model_apply = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
+
+    if not model_load_flag:
+        model_apply.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+        model_apply.eval()
 
     start_time = datetime.now()
     # 归一化(128, 9)
     # test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :in_channel, :]
-    outputs = model_load(data)
+    outputs = model_apply(data)
     pred = outputs.argmax(dim=1, keepdim=True)
     print(f"Model predict finished, start: {start_time} , end: {datetime.now()}")
     return pred

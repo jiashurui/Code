@@ -10,15 +10,14 @@ from prototype import constant
 from utils import show, report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 30
+epochs = 10
 dataset = 'mh'
 label_map = constant.Constant.mHealth.action_map
-in_channel = 9
-out_channel = len(label_map)
+in_channel = 6
+out_channel = len(label_map) -1
 
 model = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
 model_load = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
@@ -29,9 +28,8 @@ loss_function = nn.CrossEntropyLoss()
 def train_model():
     # mHealth
     train_data, train_labels, test_data, test_labels = get_mh_data_1d_9ch(slide_window_length, in_channel)
-    train_labels -= 1
-    test_labels -= 1
-
+    train_labels = train_labels - 1
+    test_labels = test_labels - 1
     # CNN need transformed
     train_data = train_data.transpose(1, 2)
     test_data = test_data.transpose(1, 2)
@@ -112,15 +110,23 @@ def train_model():
     report.save_plot(heatmap_plot, 'heat-map')
 
 
+model_load_flag = False
 def apply_1d_cnn(test_data):
-    model_load.load_state_dict(torch.load(f'../model/1D-CNN-{dataset}-{out_channel}CH.pth'))
+    global model_load_flag
+    model_apply = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
+
+    if not model_load_flag:
+        model_apply.load_state_dict(torch.load(f'../model/1D-CNN-{dataset}-{out_channel}CH.pth'))
+        model_apply.eval()
+        model_load_flag = True
+        print('DeepOneDimCNN Model loaded.')
 
     start_time = datetime.now()
     # 归一化(128, 9)
     # test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :in_channel, :]
-    outputs = model_load(data)
+    outputs = model_apply(data)
     pred = outputs.argmax(dim=1, keepdim=True)
     print(f"Model predict finished, start: {start_time} , end: {datetime.now()}")
     return pred
