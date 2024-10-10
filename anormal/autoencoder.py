@@ -243,11 +243,12 @@ latent_normal_tensor = torch.cat(latent_normal, dim=0)
 latent_abnormal_tensor = torch.cat(latent_abnormal, dim=0)
 
 # flatten (batch_size * seq_len, feature)
-origin_normal_tensor_2d = test_normal.view(-1, input_dim)
-origin_abnormal_tensor_2d = test_abnormal.view(-1, input_dim)
+simple_num = 10000
+origin_normal_tensor_2d = test_normal.view(-1, input_dim)[torch.randperm(simple_num)]
+origin_abnormal_tensor_2d = test_abnormal.view(-1, input_dim)[torch.randperm(simple_num)]
 
-latent_normal_tensor_2d = latent_normal_tensor.view(-1, latent_normal_tensor.size(2))
-latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, latent_normal_tensor.size(2))
+latent_normal_tensor_2d = latent_normal_tensor.view(-1, latent_normal_tensor.size(2))[torch.randperm(simple_num)]
+latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, latent_normal_tensor.size(2))[torch.randperm(simple_num)]
 
 # t-SNE 降维(进行AE提取前/提取之后)
 plot_pca(origin_normal_tensor_2d, origin_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
