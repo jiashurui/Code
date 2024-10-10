@@ -7,6 +7,7 @@ from torch import nn
 from datareader.realworld_datareader import get_realworld_for_recon
 from prototype.constant import Constant
 from prototype.model import LSTM
+from train.train_mh_1d_cnn import standlize
 from utils import show, report
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -115,7 +116,7 @@ def apply_lstm(test_data):
 
     start_time = datetime.now()
     # 归一化(128, 9)
-    # test_data = standlize(test_data)
+    test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0)[:, :, :in_channel]
     outputs = model_apply(data)

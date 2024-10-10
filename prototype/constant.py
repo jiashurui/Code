@@ -97,6 +97,11 @@ class Constant:
             '止まる': 2,
             '走る': 3,
         }
+        action_map_en = {
+            '歩く': 'walk',
+            '止まる': 'stand',
+            '走る': 'run',
+        }
         orient_map = {
             '前を向く':0,
             '下を向く':1,
