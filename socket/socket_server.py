@@ -81,7 +81,7 @@ def start_server():
                         float_matrix = np.array([list(float_array[i:i + 9]) for i in range(0, len(float_array), 9)])
 
                         # 拼接新数据到 `all_data`，保留最新的 1024 行
-                        all_data = np.vstack([all_data, float_matrix[:,:3]])[-1024:, :]
+                        all_data = np.vstack([all_data, float_matrix[:, :3]])[-1024:, :]
 
                         # Global Transformed
                         transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
