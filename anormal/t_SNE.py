@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
-t_sne = TSNE(n_components=2, random_state=3407, perplexity=30, n_jobs=-1)
+t_sne = TSNE(n_components=2, random_state=3407, perplexity=50, n_jobs=-1)
 
 pca = PCA(n_components=2,random_state=3407)  # n_components specifies how many principal components to keep
 

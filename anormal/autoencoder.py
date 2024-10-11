@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
 
-from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE
+from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE, LSTMAutoencoder, LSTM_VAE
 from anormal.t_SNE import plot_tsne, plot_pca
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
@@ -18,11 +18,11 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 5  # Number of training epochs
+epochs = 1000  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
-model_name = 'lstm'
+model_name = 'lstm_vae'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
@@ -39,17 +39,22 @@ input_dim = train_normal.size(2)  # Dimensionality of input sequence
 # Forward Input (batch_size, seq_length, dim)
 
 if model_name == 'lstm':
-    hidden_dim = 1024  # Hidden state size
-    latent_dim = 512  # Latent space size
+    hidden_dim = 128  # Hidden state size
+    latent_dim = 64  # Latent space size
     num_layers = 3  # Number of LSTM layers
     model = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
     model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
-    loss_function = nn.MSELoss()  # MSE loss for reconstruction
+    loss_function = nn.MSELoss(reduction='sum')  # MSE loss for reconstruction
 
 elif model_name == 'vae':
-    model = VAE(input_dim,50).to(device)
-    model_load = VAE(input_dim, 50).to(device)
+    model = VAE(input_dim,2).to(device)
+    model_load = VAE(input_dim, 32).to(device)
 
+elif model_name == 'lstm_vae':
+    hidden_dim = 128 * 2  # Hidden state size
+    num_layers = 3  # Number of LSTM layers
+    model = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+    model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
 
 # Conv Autoencoder Model
 # Forward Input (batch_size, dim(channel), data_dim(length/height & width))
@@ -92,7 +97,7 @@ for epoch in range(epochs):
         # 模型输出
         # 自己和重构后的自己比较
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae' or model_name == 'lstm_vae':
             output, latent_vector, u, sigma = model(input_data)
             loss = model.loss_function(output, input_data, u, sigma)
         else:
@@ -146,7 +151,7 @@ with torch.no_grad():
         # 模型输出
         # 自己和重构后的自己比较
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae'or model_name == 'lstm_vae':
             outputs, latent_vector, u, sigma = model(input_data)
             loss = model.loss_function(outputs, input_data, u, sigma)
         else:
@@ -158,7 +163,7 @@ with torch.no_grad():
         every_simple_loss.append(loss.item())
 
         # 输出
-        if show_count < 5:
+        if show_count < 2:
             show_tensor_data(input_data, outputs, loss, dataset_name, title='train-abnormal-showcase')
             show_count += 1
 
@@ -180,7 +185,7 @@ with torch.no_grad():
             continue
 
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae'or model_name == 'lstm_vae':
             outputs, latent_vector, u, sigma = model(input_data)
 
             # 潜在空間
@@ -196,7 +201,7 @@ with torch.no_grad():
         every_simple_loss.append(loss.item())
 
         # 输出
-        if show_count < 5:
+        if show_count < 2:
             show_tensor_data(input_data, outputs, loss, dataset_name, title='test-normal-showcase')
             show_count += 1
 
@@ -217,7 +222,7 @@ with torch.no_grad():
         if input_data.size(0) != batch_size:
             continue
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae' or model_name == 'lstm_vae':
             outputs, latent_vector, u, sigma = model(input_data)
             latent_abnormal.append(latent_vector)
             loss = model.loss_function(outputs, input_data, u, sigma)
@@ -231,7 +236,7 @@ with torch.no_grad():
         every_simple_loss.append(loss.item())
 
         # 输出
-        if show_count < 5:
+        if show_count < 2:
             show_tensor_data(input_data, outputs, loss, dataset_name, title='test-abnormal-showcase')
             show_count += 1
 
@@ -243,7 +248,7 @@ latent_normal_tensor = torch.cat(latent_normal, dim=0)
 latent_abnormal_tensor = torch.cat(latent_abnormal, dim=0)
 
 # flatten (batch_size * seq_len, feature)
-simple_num = 10000
+simple_num = 5000
 origin_normal_tensor_2d = test_normal.view(-1, input_dim)[torch.randperm(simple_num)]
 origin_abnormal_tensor_2d = test_abnormal.view(-1, input_dim)[torch.randperm(simple_num)]
 
@@ -251,5 +256,8 @@ latent_normal_tensor_2d = latent_normal_tensor.view(-1, latent_normal_tensor.siz
 latent_abnormal_tensor_2d = latent_abnormal_tensor.view(-1, latent_normal_tensor.size(2))[torch.randperm(simple_num)]
 
 # t-SNE 降维(进行AE提取前/提取之后)
-plot_pca(origin_normal_tensor_2d, origin_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
-plot_pca(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'latent vector t-SNE Dimension Reduction')
+plot_pca(origin_normal_tensor_2d, origin_abnormal_tensor_2d,f'origin data PCA Dimension Reduction')
+plot_pca(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'latent vector PCA Dimension Reduction')
+
+plot_tsne(origin_normal_tensor_2d, origin_abnormal_tensor_2d,f'origin data t-SNE Dimension Reduction')
+plot_tsne(latent_normal_tensor_2d, latent_abnormal_tensor_2d,f'latent vector t-SNE Dimension Reduction')

@@ -26,7 +26,7 @@ class LSTMAutoencoder(nn.Module):
         decoder_output, (decoder_h, decoder_c) = self.decoder_lstm(encoder_output)
 
         # Result
-        return decoder_output
+        return decoder_output,encoder_output
 
 
 class LSTMFCAutoencoder(nn.Module):
@@ -41,16 +41,16 @@ class LSTMFCAutoencoder(nn.Module):
         # Encoder LSTM
         self.encoder_lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)
         self.encoder_fc = nn.Linear(hidden_dim, latent_dim)
-        self.encoder_fc2 = nn.Linear(512, 256)
-        self.encoder_fc3 = nn.Linear(256, 128)
-        self.encoder_fc4 = nn.Linear(128, 64)
+        self.encoder_fc2 = nn.Linear(64, 32)
+        self.encoder_fc3 = nn.Linear(32, 16)
+        self.encoder_fc4 = nn.Linear(16, 8)
 
         self.relu = nn.LeakyReLU()
         # self.relu = nn.ReLU()
         # Decoder LSTM
-        self.decoder_fc = nn.Linear(64, 128)
-        self.decoder_fc2 = nn.Linear(128, 256)
-        self.decoder_fc3 = nn.Linear(256, 512)
+        self.decoder_fc = nn.Linear(8, 16)
+        self.decoder_fc2 = nn.Linear(16, 32)
+        self.decoder_fc3 = nn.Linear(32, 64)
         self.decoder_fc4 = nn.Linear(latent_dim, hidden_dim)
 
         self.decoder_lstm = nn.LSTM(hidden_dim, input_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)
@@ -186,15 +186,15 @@ class VAE(nn.Module):
         # self.tanh = nn.Tanh()
 
         # Encoder
-        self.lr = nn.Linear(input_dim, 1000)
-        self.lr2 = nn.Linear(1000, 500)
-        self.lr_ave = nn.Linear(500, z_dim)  # average
-        self.lr_dev = nn.Linear(500, z_dim)  # log(sigma^2)
+        self.lr = nn.Linear(input_dim, 128)
+        self.lr2 = nn.Linear(128, 64)
+        self.lr_ave = nn.Linear(64, z_dim)  # average
+        self.lr_dev = nn.Linear(64, z_dim)  # log(sigma^2)
 
         # Decoder
-        self.lr3 = nn.Linear(z_dim, 500)
-        self.lr4 = nn.Linear(500, 1000)
-        self.lr5 = nn.Linear(1000, input_dim)
+        self.lr3 = nn.Linear(z_dim, 64)
+        self.lr4 = nn.Linear(64, 128)
+        self.lr5 = nn.Linear(128, input_dim)
 
     def forward(self, x):
         # Encoder
@@ -232,7 +232,7 @@ class VAE(nn.Module):
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
         # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
-        loss = recon_loss + 0.000001 * kl_loss
+        loss = recon_loss + 0.1 * kl_loss
         return loss
 
 class DeepVAE(VAE):
@@ -244,8 +244,73 @@ class DeepVAE(VAE):
         print(x.shape)
         return self.forward(x)
 
-class LSTM_VAE(VAE):
-    def __init__(self, input_dim, hidden_dim, latent_dim, sequence_length, num_layers=3):
+class LSTM_VAE(nn.Module):
+    def __init__(self, input_dim, hidden_dim, num_layers=3):
         super().__init__()
-        self.encoder_lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)
-        self.decoder_lstm = nn.LSTM(hidden_dim, input_dim, num_layers, batch_first=True, dropout=0, bidirectional=False)
+
+        # Class Param
+        self.relu = nn.LeakyReLU()
+        # self.tanh = nn.Tanh()
+
+        # Encoder
+        self.encoder_lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True, dropout=0,
+                                    bidirectional=True)
+
+        self.lr = nn.Linear(hidden_dim * 2, 128)
+        self.lr2 = nn.Linear(128, 64)
+        self.lr_ave = nn.Linear(64, 32)  # average
+        self.lr_dev = nn.Linear(64, 32)  # log(sigma^2)
+
+        # Decoder
+        self.lr3 = nn.Linear(32, 64)
+        self.lr4 = nn.Linear(64, 128)
+        self.lr5 = nn.Linear(128, hidden_dim)
+
+        self.decoder_lstm = nn.LSTM(hidden_dim, input_dim, num_layers, batch_first=True, dropout=0,
+                                    bidirectional=True)
+        self.output_player = nn.Linear(input_dim * 2, input_dim)
+
+    def forward(self, x):
+        # Encoder
+        x, (encoder_h, encoder_c) = self.encoder_lstm(x)
+
+        x = self.lr(x)
+        x = self.relu(x)
+        x = self.lr2(x)
+        x = self.relu(x)
+        u = self.lr_ave(x)  # average μ
+        log_sigma2 = self.lr_dev(x)  # log(sigma^2)
+
+        ep = torch.randn_like(u)  # 平均0分散1の正規分布に従い生成されるz_dim次元の乱数
+        z = u + torch.exp(log_sigma2 / 2) * ep  # 再パラメータ化トリック
+
+        # Decoder
+        x = self.lr3(z)
+        x = self.relu(x)
+        x = self.lr4(x)
+        x = self.relu(x)
+        x = self.lr5(x)
+        x = self.relu(x)
+
+        x, (decoder_h, decoder_c) = self.decoder_lstm(x)
+        x = self.output_player(x)
+        # for reconstruction
+        # x: model_output(reconstructed data)
+        # z: encoder_output
+        # u: latent_space(mean of distribution)
+        # sigma2: standard deviation
+        return x, z, u, log_sigma2
+
+    def loss_function(self, recon, origin, ave, log_sigma2):
+        # 重建Loss (reconstruction Loss)
+        # TODO 记住,这里要用差值总和,不能用平均值,人类数据偏向非线性,用平均值会导致VAE重建糟糕,重建图像的时候会很模糊
+        recon_loss = nn.MSELoss(reduction='sum')(recon, origin)
+        # recon_loss = nn.BCELoss(reduction='sum')(recon, origin)
+
+        # KL散度 (KL)
+        kl_loss = -0.5 * torch.sum(1 + log_sigma2 - ave ** 2 - log_sigma2.exp())
+
+        #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
+        # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
+        loss = recon_loss + 0.02 * kl_loss
+        return loss
