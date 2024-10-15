@@ -2,12 +2,15 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.stats import skew, kurtosis
+
 from prototype.constant import Constant
 from prototype.global_tramsform import transform_sensor_data_to_df, transform_sensor_data
 
 def radians_to_degree(radians):
     return np.degrees(radians)
 
+# 数据分布(X,Y,Z 加速度数据)
 def show_child_hist_stat():
     file_list = glob.glob('../data/child/2023_03/merged_data/*.csv')
     appended_data = []
@@ -30,7 +33,6 @@ def show_child_hist_stat():
     df = pd.concat([big_df, df_trans],axis=1)
 
     print()
+
 if __name__ == '__main__':
     show_child_hist_stat()
-
-
