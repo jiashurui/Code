@@ -18,7 +18,7 @@ test_normal = test_normal.cpu().numpy().reshape(-1, test_normal.shape[2])
 test_abnormal = test_abnormal.cpu().numpy().reshape(-1, test_abnormal.shape[2])
 
 # 训练 One-Class SVM 模型
-model = svm.OneClassSVM(kernel='rbf', gamma=0.1, nu=0.1)
+model = svm.OneClassSVM(kernel='sigmoid', gamma=0.5, nu=0.1)
 model.fit(train_normal)
 
 # 预测
@@ -43,16 +43,29 @@ test_fp = np.sum(test_abnormal_pred == 1)
 test_fn = np.sum(test_normal_pred == -1)
 
 # 合并测试集的预测结果和真实标签
-y_true = np.concatenate([np.ones(len(test_normal)), -np.ones(len(test_abnormal))])
-y_pred = np.concatenate([test_normal_pred, test_abnormal_pred])
+train_true = np.concatenate([np.ones(len(train_normal)), -np.ones(len(train_abnormal))])
+train_pred = np.concatenate([train_normal_pred, train_abnormal_pred])
+
+test_true = np.concatenate([np.ones(len(test_normal)), -np.ones(len(test_abnormal))])
+test_pred = np.concatenate([test_normal_pred, test_abnormal_pred])
 
 # 计算混淆矩阵
-cm = confusion_matrix(y_true, y_pred, labels=[1, -1])
+cm_train = confusion_matrix(train_true, train_pred, labels=[1, -1])
+cm_test = confusion_matrix(test_true, test_pred, labels=[1, -1])
 
-# 可视化混淆矩阵
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Normal', 'Abnormal'], yticklabels=['Normal', 'Abnormal'])
+# 可视化训练集和测试集的混淆矩阵
+plt.figure(figsize=(16, 6))
+plt.subplot(1, 2, 1)
+sns.heatmap(cm_train, annot=True, fmt='d', cmap='Blues', xticklabels=['Normal', 'Abnormal'], yticklabels=['Normal', 'Abnormal'])
 plt.xlabel('Predicted Label')
 plt.ylabel('True Label')
-plt.title('Confusion Matrix')
+plt.title('Confusion Matrix - Training Set')
+
+plt.subplot(1, 2, 2)
+sns.heatmap(cm_test, annot=True, fmt='d', cmap='Blues', xticklabels=['Normal', 'Abnormal'], yticklabels=['Normal', 'Abnormal'])
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix - Test Set')
+
+plt.tight_layout()
 plt.show()

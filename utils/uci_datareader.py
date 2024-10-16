@@ -150,6 +150,10 @@ def get_data_1d_uci_all_data():
     return train_data_normal, train_data_abnormal, test_data_normal, test_data_abnormal
 
 
+# 获取UCI数据集的统计性特征
+def get_uci_stat_features(slide_window_length):
+    print()
+
 if __name__ == '__main__':
     normal, abnormal , t_n, t_a= get_data_1d_uci_all_data()
     print()
