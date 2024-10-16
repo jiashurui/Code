@@ -25,7 +25,48 @@ def get_change_points_excluding_first(file_path):
 
     return change_points.tolist()
 
+def get_uci_data():
+    train_data, train_label = get_type_data('train')
+    test_data, test_label = get_type_data('test')
 
+    return train_data, train_label, test_data, test_label
+
+def get_type_data(data_type):
+    # 加速度
+    file_acc_x = f'../data/UCI/{data_type}/Inertial Signals/total_acc_x_{data_type}.txt'
+    file_acc_y = f'../data/UCI/{data_type}/Inertial Signals/total_acc_y_{data_type}.txt'
+    file_acc_z = f'../data/UCI/{data_type}/Inertial Signals/total_acc_z_{data_type}.txt'
+
+    # 角速度
+    file_gyro_x = f'../data/UCI/{data_type}/Inertial Signals/body_gyro_x_{data_type}.txt'
+    file_gyro_y = f'../data/UCI/{data_type}/Inertial Signals/body_gyro_y_{data_type}.txt'
+    file_gyro_z = f'../data/UCI/{data_type}/Inertial Signals/body_gyro_z_{data_type}.txt'
+    label_file = f'../data/UCI/{data_type}/y_{data_type}.txt'
+
+    # 读取数据
+    data_acc_x = pd.read_csv(file_acc_x, sep='\\s+', header=None)
+    data_acc_y = pd.read_csv(file_acc_y, sep='\\s+', header=None)
+    data_acc_z = pd.read_csv(file_acc_z, sep='\\s+', header=None)
+    data_gyro_x = pd.read_csv(file_gyro_x, sep='\\s+', header=None)
+    data_gyro_y = pd.read_csv(file_gyro_y, sep='\\s+', header=None)
+    data_gyro_z = pd.read_csv(file_gyro_z, sep='\\s+', header=None)
+
+    # 标签
+    data_l = pd.read_csv(label_file, sep='\\s+', header=None)
+    labels = data_l.to_numpy().ravel()
+    data_combined = np.stack((
+        data_acc_x.to_numpy(),
+        data_acc_y.to_numpy(),
+        data_acc_z.to_numpy(),
+        data_gyro_x.to_numpy(),
+        data_gyro_y.to_numpy(),
+        data_gyro_z.to_numpy()
+    ), axis=-1)
+
+    return data_combined, labels
+
+
+# TODO 这个代码有问题,标签取成了人
 def get_data_1d_uci():
     # 创建示例输入数据 TODO
     file_x = '../data/UCI/train/Inertial Signals/total_acc_x_train.txt'
@@ -64,7 +105,6 @@ def get_data_1d_uci():
     test_data = torch.tensor(np.array(final_list), dtype=torch.float32).transpose(1, 2)
     labels = torch.zeros(test_data.shape[0], dtype=torch.long)
     return test_data, labels
-
 
 # 读取的是UCI public的数据
 # 这个读取的是561维度的特征
@@ -149,5 +189,5 @@ def get_data_1d_uci_all_data():
     return train_data_normal, train_data_abnormal, test_data_normal, test_data_abnormal
 
 if __name__ == '__main__':
-    normal, abnormal , t_n, t_a= get_data_1d_uci_all_data()
+    t, tt , ttt, tttt= get_uci_data()
     print()

@@ -110,7 +110,12 @@ class LSTM(nn.Module):
         self.hidden_layer_size = hidden_layer_size
         self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=num_layers, batch_first=True, dropout=0.05)
         self.linear = nn.Linear(hidden_layer_size, output_size)
+
+        # respect to the Geoffrey Hinton received Nobel Prize Physics in 2024
+        # The pioneer of neural network and proposed dropout theory...
         self.dropout = nn.Dropout(0.05)
+        self.layer_norm = nn.LayerNorm(hidden_layer_size)
+
     def forward(self, input_seq):
         batch_size = input_seq.size(0)
         h0 = torch.zeros(self.layer_size, batch_size, self.hidden_layer_size).to(input_seq.device)
@@ -118,8 +123,12 @@ class LSTM(nn.Module):
 
         lstm_out, (h0, c0) = self.lstm(input_seq, (h0, c0))
 
-        predictions = self.linear(lstm_out[:, -1, :])
+        # Layer Norm
+        lstm_out = self.layer_norm(lstm_out)
 
+        # Drop out
+        lstm_out = self.dropout(lstm_out)
+        predictions = self.linear(lstm_out[:, -1, :])
         return predictions
 
     def init_hidden(self, batch_size):

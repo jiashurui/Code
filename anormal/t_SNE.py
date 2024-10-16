@@ -52,3 +52,35 @@ def plot_pca(normal_data, abnormal_data, title):
                 color='lightcoral', alpha=0.5, s=1)  # 淡红色, 半透明, 点大小为1
     plt.title(title)
     plt.show()
+
+# 对于任意数据, 数据标签, 标签表示含义,进行PCA可视化展示
+def plot_data_pca(data , label_list , label_map):
+
+    data = scaler.fit_transform(data)
+    result = pca.fit_transform(data)
+    plt.figure(figsize=(10, 6))
+
+    # Plot the result after dimension reduction
+    plt.scatter(result[:, 0], result[:, 1],
+                color='lightblue', alpha=0.5, s=1)  # 淡蓝色, 半透明, 点大小为1
+
+    # 绘制PCA降维后的数据
+    for label in np.unique(label_list):
+        plt.scatter(result[label_list == label, 0], result[label_list == label, 1], s=3, label=label_map.get(label), alpha=0.5)
+    plt.legend(loc='upper right')
+    plt.show()
+
+def plot_data_tSNE(data , label_list , label_map):
+    data = scaler.fit_transform(data)
+    result = t_sne.fit_transform(data)
+    plt.figure(figsize=(10, 6))
+
+    # Plot the result after dimension reduction
+    plt.scatter(result[:, 0], result[:, 1],
+                color='lightblue', alpha=0.5, s=1)  # 淡蓝色, 半透明, 点大小为1
+
+    # 绘制PCA降维后的数据
+    for label in np.unique(label_list):
+        plt.scatter(result[label_list == label, 0], result[label_list == label, 1], s=3, label=label_map.get(label), alpha=0.5)
+    plt.legend(loc='upper right')
+    plt.show()

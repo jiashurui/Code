@@ -38,6 +38,14 @@ class Constant:
             'SITTING': 4,
             'STANDING': 5,
             'LAYING': 6
+        },
+        action_map_reverse = {
+            1: 'WALKING',
+            2: 'WALKING_UPSTAIRS',
+            3: 'WALKING_DOWNSTAIRS',
+            4: 'SITTING',
+            5: 'STANDING',
+            6: 'LAYING'
         }
     class CHA:
         place_map = {}  # pocket (thigh)
