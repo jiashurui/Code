@@ -113,8 +113,8 @@ def get_data_1d_uci_all_features(slide_window_length):
     train_data_file = '../data/UCI/train/X_train.txt'
     train_label_file = '../data/UCI/train/y_train.txt'
 
-    test_data_file = '../data/UCI/train/X_train.txt'
-    test_label_file = '../data/UCI/train/y_train.txt'
+    test_data_file = '../data/UCI/test/X_test.txt'
+    test_label_file = '../data/UCI/test/y_test.txt'
 
     train_data = pd.read_csv(train_data_file, sep='\\s+', header=None)
     train_label = pd.read_csv(train_label_file, sep='\\s+', header=None)

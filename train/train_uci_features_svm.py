@@ -1,20 +1,11 @@
-from datetime import datetime
-
 import joblib
 import numpy as np
-import torch
-from matplotlib import pyplot as plt
-from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.svm import SVC
-from torch import nn
 
 from anormal.t_SNE import plot_data_pca, plot_data_tSNE
 from prototype.constant import Constant
-from prototype.model import LSTM
-from utils import show, report
-from utils.uci_datareader import get_data_1d_uci_all_features, get_uci_data
-
+from utils.uci_datareader import get_data_1d_uci_all_features
 
 slide_window_length = 128  # 序列长度
 in_channel = 561
