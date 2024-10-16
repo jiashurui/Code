@@ -15,24 +15,10 @@ from prototype.model import LSTM
 from utils import show, report
 from utils.uci_datareader import get_data_1d_uci_all_features, get_uci_data
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slide_window_length = 128  # 序列长度
-learning_rate: float = 0.0001
-batch_size = 64
-epochs = 1
 in_channel = 561
 out_channel = 6
-model_path = '../model/LSTM.pth'
-
-# UCI HAR
-model = LSTM(input_size=in_channel, output_size=out_channel).to(device)
-model_load = LSTM(input_size=in_channel, output_size=out_channel).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
-loss_function = nn.CrossEntropyLoss()
-label_map = Constant.UCI.action_map
-
-
 def train_model():
     train_data, train_labels, test_data, test_labels = get_data_1d_uci_all_features(slide_window_length)
 
@@ -67,39 +53,24 @@ def train_model():
     # 保存模型到文件
     joblib.dump(svm_classifier, '../model/uci_svm_model.pkl')
 
-    # TODO
-    origin_train,origin_test,_,_ = get_uci_data()
-    origin_train = origin_train.reshape(-1, origin_train.shape[2])
-    origin_test = np.tile(origin_test.reshape(-1, 1), 128).ravel()  # 假设你保存了标签到 .npy 文件中
-
-    plot_data_pca(origin_train, origin_test, Constant.UCI.action_map_reverse)
-    plot_data_tSNE(origin_train, origin_test, Constant.UCI.action_map_reverse)
+    # TODO 对原始数据进行降维花的时间太长了
+    # origin_train,origin_test,_,_ = get_uci_data()
+    # origin_train = origin_train.reshape(-1, origin_train.shape[2])
+    # origin_test = np.tile(origin_test.reshape(-1, 1), 128).ravel()  # 假设你保存了标签到 .npy 文件中
+    #
+    # plot_data_pca(origin_train, origin_test, Constant.UCI.action_map_reverse)
+    # plot_data_tSNE(origin_train, origin_test, Constant.UCI.action_map_reverse)
 
 
     # 7. PCA降维并可视化
-
     plot_data_pca(train_data, train_labels, Constant.UCI.action_map_reverse)
     plot_data_tSNE(train_data, train_labels, Constant.UCI.action_map_reverse)
 
 model_load_flag = False
 
-def apply_lstm(test_data):
-    global model_load_flag
-    model_apply = LSTM(input_size=in_channel,output_size=out_channel).to(device)
-
-    if not model_load_flag:
-        model_apply.load_state_dict(torch.load(model_path, map_location=device))
-        model_apply.eval()
-
-    start_time = datetime.now()
-    # 归一化(128, 9)
-    # test_data = standlize(test_data)
-    tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
-    data = tensor_data.unsqueeze(0)[:, :, :in_channel]
-    outputs = model_apply(data)
-    pred = outputs.argmax(dim=1, keepdim=True)
-    print(f"Model predict finished, start: {start_time} , end: {datetime.now()}")
-    return pred
+# TODO apply SVM
+def apply_svm(test_data):
+    print()
 
 if __name__ == '__main__':
     train_model()
