@@ -81,7 +81,7 @@ def stat_mh_all_data():
 
     df_stat, df_pearson = calc_df_features(df)
     df_stat.to_csv(f'{save_base_path}/all/mHealth_all_features.csv')
-
+    df_pearson.to_csv(f'{save_base_path}/all/mHealth_pearson.csv')
 def stat_mh_label_data():
     df = read_data()
     # 使用 group by 根据 'Category' 列分组
@@ -158,4 +158,4 @@ def calc_df_features(df):
     return df_stat, df_pearson
 
 if __name__ == '__main__':
-    stat_mh_indivdual_data()
+    stat_mh_all_data()

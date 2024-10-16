@@ -19,6 +19,8 @@ def slide_window(input_list, window_size, over_lap):
 
     return all_data
 
+# 传入: dataframe
+# 输出: List[ [dataframe1],[dataframe2],[dataframe3], ... ]
 def slide_window2(input_list, window_size, over_lap):
     all_data = []
 
