@@ -12,10 +12,10 @@ if dataset_name == 'uci':
     train_normal, train_abnormal, test_normal, test_abnormal = get_data_1d_uci_all_data()
 
 # tensor data --> numpy
-train_normal = train_normal.numpy().reshape(-1, train_normal.shape[2])
-train_abnormal = train_abnormal.numpy().reshape(-1, train_abnormal.shape[2])
-test_normal = test_normal.numpy().reshape(-1, test_normal.shape[2])
-test_abnormal = test_abnormal.numpy().reshape(-1, test_abnormal.shape[2])
+train_normal = train_normal.cpu().numpy().reshape(-1, train_normal.shape[2])
+train_abnormal = train_abnormal.cpu().numpy().reshape(-1, train_abnormal.shape[2])
+test_normal = test_normal.cpu().numpy().reshape(-1, test_normal.shape[2])
+test_abnormal = test_abnormal.cpu().numpy().reshape(-1, test_abnormal.shape[2])
 
 # 训练 One-Class SVM 模型
 model = svm.OneClassSVM(kernel='rbf', gamma=0.1, nu=0.1)
