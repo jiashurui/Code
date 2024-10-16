@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import joblib
 import numpy as np
 import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -32,6 +33,9 @@ label_map = Constant.UCI.action_map
 def train_model():
     train_data, train_labels, test_data, test_labels = get_data_1d_uci_all_features(slide_window_length)
 
+    train_labels = np.ravel(train_labels)
+    test_labels = np.ravel(test_labels)
+
     # 5. 创建并训练SVM模型
     svm_classifier = SVC(kernel='rbf', C=0.5, gamma='scale', random_state=42)  # 使用RBF核
     svm_classifier.fit(train_data, train_labels)
@@ -40,7 +44,6 @@ def train_model():
     y_pred_train = svm_classifier.predict(train_data)
     train_accuracy = accuracy_score(train_labels, y_pred_train)
     print(f'Train Accuracy: {train_accuracy:.2f}')
-
 
     # 6. 模型评估
     # 在测试集上进行预测
@@ -58,6 +61,8 @@ def train_model():
     print('Confusion Matrix:')
     print(confusion_matrix(test_labels, y_pred))
 
+    # 保存模型到文件
+    joblib.dump(svm_classifier, '../model/uci_svm_model.pkl')
 
 model_load_flag = False
 
