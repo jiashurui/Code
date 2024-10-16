@@ -70,25 +70,24 @@ def get_data_1d_uci():
 # 这个读取的是561维度的特征
 # 并非原始的加速度,角速度数据
 def get_data_1d_uci_all_features(slide_window_length):
-    file = '../data/UCI/train/X_train.txt'
-    label_file = '../data/UCI/train/y_train.txt'
+    train_data_file = '../data/UCI/train/X_train.txt'
+    train_label_file = '../data/UCI/train/y_train.txt'
 
-    data_x = pd.read_csv(file, sep='\\s+', header=None)
-    data_l = pd.read_csv(label_file, sep='\\s+', header=None)
-    data_x['label'] = data_l
+    test_data_file = '../data/UCI/train/X_train.txt'
+    test_label_file = '../data/UCI/train/y_train.txt'
 
-    # test value TODO cross validate
-    train_values = data_x[(data_x['label'] == 1)]
+    train_data = pd.read_csv(train_data_file, sep='\\s+', header=None)
+    train_label = pd.read_csv(train_label_file, sep='\\s+', header=None)
+    test_data = pd.read_csv(test_data_file, sep='\\s+', header=None)
+    test_label = pd.read_csv(test_label_file, sep='\\s+', header=None)
 
-    filtered_values = data_x[(data_x['label'] != 1)]
 
-    normal_data = slide_window2(train_values, slide_window_length, 0.5)
-    abnormal_data = slide_window2(filtered_values, slide_window_length, 0.5)
+    train_data_tensor = np.array(train_data)
+    train_label_tensor = np.array(train_label)
+    test_data_tensor = np.array(test_data)
+    test_label_tensor = np.array(test_label)
 
-    train_data_tensor = torch.tensor(np.array(normal_data), dtype=torch.float32).to(device)
-    test_data_tensor = torch.tensor(np.array(abnormal_data), dtype=torch.float32).to(device)
-
-    return train_data_tensor[:, :, :561], test_data_tensor[:, :, :561]
+    return train_data_tensor, train_label_tensor, test_data_tensor, test_label_tensor
 
 
 # 按照需求,返回训练数据(指定某一种标签)
@@ -148,11 +147,6 @@ def get_data_1d_uci_all_data():
     test_data_normal, test_data_abnormal = get_data_1d_uci_part_data('test')
 
     return train_data_normal, train_data_abnormal, test_data_normal, test_data_abnormal
-
-
-# 获取UCI数据集的统计性特征
-def get_uci_stat_features(slide_window_length):
-    print()
 
 if __name__ == '__main__':
     normal, abnormal , t_n, t_a= get_data_1d_uci_all_data()
