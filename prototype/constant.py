@@ -142,3 +142,11 @@ class Constant:
             'walk': 5,
             'run': 6
         }
+        action_map_en_reverse = {
+            1 : 'stand',
+            2 : 'Wandering',
+            3 : 'squat',
+            4 : 'jump',
+            5 : 'walk',
+            6 : 'run'
+        }
