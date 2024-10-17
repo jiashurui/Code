@@ -317,8 +317,8 @@ def get_mh_data_1d_3ch_for_test(slide_window_length):
     return data, label
 
 # 获取mHealth异常数据,把walk作为正常,walk以外为异常进行检测
-def get_mh_data_for_abnormal_test(slide_window_length):
-    file_list = glob.glob('../../data/mHealth/mHealth_*.log')
+def get_mh_data_for_abnormal_test(slide_window_length, features_num):
+    file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
     appended_data = []
 
@@ -344,7 +344,7 @@ def get_mh_data_for_abnormal_test(slide_window_length):
     big_df = pd.concat(appended_data, ignore_index=True)
 
     # 归一化
-    big_df.iloc[:, :23] = scaler.fit_transform(big_df.iloc[:, :23])
+    # big_df.iloc[:, :23] = scaler.fit_transform(big_df.iloc[:, :23])
 
     record_diff = []
     pre_val = -1
@@ -370,27 +370,19 @@ def get_mh_data_for_abnormal_test(slide_window_length):
 
     # shuffle data
     random.shuffle(final_data)
-
-    # 提取XYZ加速度,合成一个三维向量, 提取标签
-    x = np.array([arr[:, 0].astype(np.float64) for arr in final_data])
-    y = np.array([arr[:, 1].astype(np.float64) for arr in final_data])
-    z = np.array([arr[:, 2].astype(np.float64) for arr in final_data])
-    label = np.array([arr[:, 23].astype(np.float64) for arr in final_data])
-    xyz = np.stack((x, y, z, label), axis=1)
-
-    # 提取数据和标签
-    data = torch.tensor(xyz, dtype=torch.float32).to(device)
+    data = np.array([arr[:, :].astype(np.float64) for arr in final_data])
 
     # 根据标签,分割数据
-    # 1.0 STANDING 4.0 WALK
-    condition = data[:, 3, :] == 4.0
-    condition_abnormal = data[:, 3, :] == 1.0
+    # 1.0 STANDING 4.0 WALK 5.0 upstair
+    condition = data[:, :, 23] != 5.0
+    condition_abnormal = data[:, :, 23] == 5.0
 
     # 使用布尔索引进行分割
-    tensor_walk = data[condition[:, 0]].transpose(1,2)
-    tensor_not_walk = data[condition_abnormal[:, 0]].transpose(1,2)
+    tensor_walk = data[condition[:, 0]]
+    tensor_not_walk = data[condition_abnormal[:, 0]]
 
-    return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
+    return tensor_walk[:, :, :features_num], tensor_not_walk[:, :, :features_num]
 
 if __name__ == '__main__':
-    get_mh_data_1d_9ch(128)
+    t, f = get_mh_data_for_abnormal_test(128, 6)
+    print(t)
