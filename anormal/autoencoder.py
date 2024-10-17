@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
 
-from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE, LSTMAutoencoder, LSTM_VAE
+from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE, LSTMAutoencoder, LSTM_VAE, ConvLSTMAutoencoder
 from anormal.t_SNE import plot_tsne, plot_pca
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
 from datareader.show_child_2024 import show_tensor_data
@@ -18,11 +18,11 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 1000  # Number of training epochs
+epochs = 50  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
-model_name = 'lstm_vae'
+model_name = 'conv_lstm'
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
@@ -55,6 +55,14 @@ elif model_name == 'lstm_vae':
     num_layers = 3  # Number of LSTM layers
     model = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
     model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+elif model_name == 'conv_lstm':
+    train_normal = train_normal.transpose(1,2)
+    train_abnormal = train_abnormal.transpose(1, 2)
+    test_normal = test_normal.transpose(1, 2)
+    test_abnormal = test_abnormal.transpose(1, 2)
+
+    model = ConvLSTMAutoencoder(input_dim).to(device)
+    model_load = ConvLSTMAutoencoder(input_dim).to(device)
 
 # Conv Autoencoder Model
 # Forward Input (batch_size, dim(channel), data_dim(length/height & width))
@@ -69,7 +77,7 @@ elif model_name == 'lstm_vae':
 # model_load = VAE(input_dim, 50).to(device)
 
 loss_function = nn.MSELoss()  # MSE loss for reconstruction
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
 gradient_utils = GradientUtils(model)
 
 # Train
@@ -247,6 +255,9 @@ with torch.no_grad():
 latent_normal_tensor = torch.cat(latent_normal, dim=0)
 latent_abnormal_tensor = torch.cat(latent_abnormal, dim=0)
 
+if model_name == 'conv_lstm':
+    test_normal = test_normal.transpose(1,2)
+    test_abnormal = test_abnormal.transpose(1,2)
 # flatten (batch_size * seq_len, feature)
 simple_num = 5000
 origin_normal_tensor_2d = test_normal.view(-1, input_dim)[torch.randperm(simple_num)]

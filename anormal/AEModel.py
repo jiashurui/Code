@@ -173,15 +173,14 @@ class ConvAutoencoder(nn.Module):
 
 # 1D-CNN --> LSTM --> FC --> {Latent}--> FC -->LSTM --> 1D-CNN --> FC
 class ConvLSTMAutoencoder(nn.Module):
-    def __init__(self, input_dim, hidden_dim, latent_dim, sequence_length, num_layers=3):
+    def __init__(self, input_dim, num_layers=3):
         super(ConvLSTMAutoencoder, self).__init__()
         # Class Parameter
         kernel_size = 3
         stride = 1
         padding = 1
         self.relu = nn.LeakyReLU()
-        self.pool = nn.MaxPool1d(2)
-        self.upool = nn.MaxPool1d(2)
+        self.pool = nn.AvgPool1d(2)
 
         # Encoder
         self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=256, kernel_size=3, stride=stride,
@@ -208,43 +207,94 @@ class ConvLSTMAutoencoder(nn.Module):
 
         self.conv4 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=kernel_size, stride=stride,
                                padding=padding)
+        self.up_conv1 = nn.ConvTranspose1d(128, 128, kernel_size=2, stride=2)
+
         self.conv5 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=kernel_size, stride=stride,
                                padding=padding)
+        self.up_conv2 = nn.ConvTranspose1d(256, 256, kernel_size=2, stride=2)
+
         self.conv6 = nn.Conv1d(in_channels=256, out_channels=input_dim, kernel_size=kernel_size, stride=stride,
                                padding=padding)
+        self.up_conv3 = nn.ConvTranspose1d(input_dim, input_dim, kernel_size=2, stride=2)
 
-        # TODO do we need a liner?
-    def upsample(self, x):
-        # 图像的上采样是双线性插值(mode='bilinear')
-        return F.interpolate(x, scale_factor=2, mode='linear', align_corners=False)
+
+        self.dropout = nn.Dropout(0.05)
+        self.layer_norm1 = nn.LayerNorm(32)
+        self.layer_norm2 = nn.LayerNorm(64)
+
+        self.batch_norm1 = nn.BatchNorm1d(256)
+        self.batch_norm2 = nn.BatchNorm1d(128)
+        self.batch_norm3 = nn.BatchNorm1d(64)
+
+        self.decoder_batch_norm1 = nn.BatchNorm1d(128)
+        self.decoder_batch_norm2 = nn.BatchNorm1d(256)
+
+        self.fc_out = nn.Linear(input_dim, input_dim)
+        self.init_weights()
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.batch_norm1(x)
         x = self.relu(x)
         x = self.pool(x)
         x = self.conv2(x)
+        x = self.batch_norm2(x)
         x = self.relu(x)
         x = self.pool(x)
         x = self.conv3(x)
+        x = self.batch_norm3(x)
         x = self.relu(x)
         x = self.pool(x)
+
+        # CNN 的第二个维度和第三个维度(batch_size, features, seq_len)
+        # LSTM(batch_size, seq_len, features)
+        x = x.transpose(1, 2)
         x, (encoder_h, encoder_c) = self.encoder_lstm(x)
-        x = self.encoder_fc(x)
+        x = self.dropout(x)
+        x = self.layer_norm1(x)
+        latent = self.encoder_fc(x)
 
         # Decoder
-        x = self.decoder_fc(x)
+        x = self.decoder_fc(latent)
         x, (decoder_h, decoder_c) = self.decoder_lstm(x)
-        x = self.conv4(x)
-        x = self.relu(x)
-        x = self.upsample(x)
-        x = self.conv5(x)
-        x = self.relu(x)
-        x = self.upsample(x)
-        x = self.conv6(x)
-        x = self.relu(x)
-        x = self.upsample(x)
-        return x
+        x = self.dropout(x)
+        x = self.layer_norm2(x)
 
+        x = x.transpose(1, 2)
+        x = self.conv4(x)
+        x = self.decoder_batch_norm1(x)
+        x = self.up_conv1(x)
+        x = self.relu(x)
+        x = self.conv5(x)
+        x = self.decoder_batch_norm2(x)
+        x = self.up_conv2(x)
+        x = self.relu(x)
+        x = self.conv6(x)
+        x = self.up_conv3(x)
+        return x, latent
+
+    def init_weights(self):
+        # Xavier 初始化线性层
+        nn.init.xavier_normal_(self.encoder_fc.weight)
+        nn.init.xavier_normal_(self.decoder_fc.weight)
+        nn.init.xavier_normal_(self.fc_out.weight)
+
+        # 对LSTM层的权重进行Xavier初始化
+        for name, param in self.encoder_lstm.named_parameters():
+            if 'weight_ih' in name:
+                nn.init.xavier_normal_(param)
+            elif 'weight_hh' in name:
+                nn.init.orthogonal_(param)
+            elif 'bias' in name:
+                nn.init.zeros_(param)
+
+        for name, param in self.decoder_lstm.named_parameters():
+            if 'weight_ih' in name:
+                nn.init.xavier_normal_(param)
+            elif 'weight_hh' in name:
+                nn.init.orthogonal_(param)
+            elif 'bias' in name:
+                nn.init.zeros_(param)
 # VAE based on MLP
 # https://qiita.com/gensal/items/613d04b5ff50b6413aa0
 class VAE(nn.Module):
