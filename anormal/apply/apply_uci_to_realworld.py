@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from anormal.AEModel import VAE, LSTMFCAutoencoder
+from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder
 from datareader.realworld_datareader import get_realworld_for_abnormal, get_realworld_raw_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -10,7 +10,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 batch_size = 64
 
-model_name = 'vae'
+model_name = 'conv_lstm'
 
 normal_data, abnormal_data = get_realworld_raw_for_abnormal(slide_window_length, 9)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
@@ -28,6 +28,12 @@ if model_name == 'lstm':
 elif model_name == 'vae':
     model_load = VAE(input_dim, 50).to(device)
 
+elif model_name == 'conv_lstm':
+    normal_data = normal_data.transpose(1,2)
+    abnormal_data = abnormal_data.transpose(1, 2)
+
+    model = ConvLSTMAutoencoder(input_dim).to(device)
+    model_load = ConvLSTMAutoencoder(input_dim).to(device)
 
 model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
 model_load.eval()
@@ -50,7 +56,7 @@ with torch.no_grad():
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model_load(input_data)
+            outputs,latent = model_load(input_data)
             loss = loss_function(outputs, input_data)
 
         # 单样本Loss
@@ -69,7 +75,7 @@ with torch.no_grad():
 # 测试异常
 with torch.no_grad():
 
-    loss_sum_test = 0.0  #
+    loss_sum_test = 0.0
     every_simple_loss = []  # 每个样本的loss(batch)
     show_count = 0
 
@@ -84,13 +90,14 @@ with torch.no_grad():
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model_load(input_data)
+            outputs,latent = model_load(input_data)
             loss = loss_function(outputs, input_data)
 
         # 输出
         if show_count < 5:
             show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-abnormal-showcase')
             show_count += 1
+
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())
         every_simple_loss.append(loss.item())
