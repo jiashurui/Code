@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder
+from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder, LSTM_VAE
 from datareader.datareader_stu import get_stu_part_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -28,6 +28,12 @@ if model_name == 'lstm':
 elif model_name == 'vae':
     model_load = VAE(input_dim, 50).to(device)
 
+elif model_name == 'lstm_vae':
+    hidden_dim = 128 * 2  # Hidden state size
+    num_layers = 3  # Number of LSTM layers
+    model = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+    model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+
 elif model_name == 'conv_lstm':
     normal_data = normal_data.transpose(1,2)
     abnormal_data = abnormal_data.transpose(1, 2)
@@ -35,6 +41,8 @@ elif model_name == 'conv_lstm':
     model = ConvLSTMAutoencoder(input_dim).to(device)
     model_load = ConvLSTMAutoencoder(input_dim).to(device)
     loss_function = nn.MSELoss()  # MSE loss for reconstruction
+
+
 
 model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
 model_load.eval()
