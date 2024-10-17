@@ -59,12 +59,11 @@ def show_tensor_data(tensor_before, tensor_after, loss, dataset='child', title='
     seq_data_after = numpy_data_after[0]
 
     if dataset == 'uci':
-        print()# TODO
-        # seq_data= seq_data.T
-        # seq_data_after = seq_data_after.T
+        seq_data= seq_data.T
+        seq_data_after = seq_data_after.T
 
-    df = pd.DataFrame(seq_data[:3, :], columns=['x', 'y', 'z'])
-    df_after = pd.DataFrame(seq_data_after[:3, :], columns=['x_after', 'y_after', 'z_after'])
+    df = pd.DataFrame(seq_data[:, :3], columns=['x', 'y', 'z'])
+    df_after = pd.DataFrame(seq_data_after[:, :3], columns=['x_after', 'y_after', 'z_after'])
 
     plt.figure(figsize=(10, 10))
     plt.plot(df.index, df['x'], label='x', color='red')
