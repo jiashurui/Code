@@ -218,7 +218,7 @@ class ConvLSTMAutoencoder(nn.Module):
         self.up_conv3 = nn.ConvTranspose1d(input_dim, input_dim, kernel_size=2, stride=2)
 
 
-        self.dropout = nn.Dropout(0.05)
+        self.dropout = nn.Dropout(0.1)
         self.layer_norm1 = nn.LayerNorm(32)
         self.layer_norm2 = nn.LayerNorm(64)
 

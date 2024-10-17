@@ -8,7 +8,7 @@ from utils import show
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slide_window_length = 128  # 序列长度
-batch_size = 64
+batch_size = 1
 
 model_name = 'conv_lstm'
 
