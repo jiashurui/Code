@@ -18,7 +18,7 @@ scaler = MinMaxScaler(feature_range=(-1, 1))
 
 def get_realworld_for_abnormal(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../../data/realworld/*/acc_*_waist.csv')
+    file_list = glob.glob('../data/realworld/*/acc_*_waist.csv')
     final_data = []
 
     # make label by fileName (walking)
@@ -43,7 +43,7 @@ def get_realworld_for_abnormal(slide_window_length):
         data = data.iloc[:, 2:]
 
         # 归一化
-        data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
+        # data.iloc[:, :3] = scaler.fit_transform(data.iloc[:, :3])
 
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
@@ -62,7 +62,7 @@ def get_realworld_for_abnormal(slide_window_length):
     data_tensor = torch.tensor(input_features, dtype=torch.float32).to(device)  # 添加通道维度
 
     # 根据标签,分割数据
-    condition = data_tensor[:, :, 3] == 7.0  # walking
+    condition = data_tensor[:, :, 3] != 6.0  # standing
     stand_condition = data_tensor[:, :, 3] == 6.0  # standing
 
     # 使用布尔索引进行分割
@@ -118,7 +118,47 @@ def get_realworld_for_recon(slide_window_length, features_num):
     return train_data,train_labels,test_data,test_labels
 
 
+# 读取realworld数据(不做任何处理变换)
+def get_realworld_raw_for_abnormal(slide_window_length, features_num):
+    # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
+    file_list = glob.glob('../../data/realworld/*/waist_merged.csv')
+    final_data = []
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+
+        # 去除头部
+        data = data[stop_simple: len(data)]
+
+        # 分割后的数据 100个 X组
+        data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
+
+        # 对于每一个dataframe , 滑动窗口分割数据
+        final_data.extend(data_sliced_list)
+        print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
+
+    # shuffle data
+    random.shuffle(final_data)
+
+    # 提取输入和标签
+    input_features = np.array([arr[:, :features_num] for arr in final_data])
+    labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
+
+    # 将NumPy数组转换为Tensor
+    data_tensor = torch.tensor(input_features, dtype=torch.float32).to(device)
+    data_label = torch.tensor(labels, dtype=torch.long).to(device)
+
+    # 根据标签,分割数据
+    condition = data_tensor[:, :, 3] != 6.0  # standing
+    stand_condition = data_tensor[:, :, 3] == 6.0  # standing
+
+    # 使用布尔索引进行分割
+    tensor_not_standing = data_tensor[condition[:, 0]]
+    tensor_standing = data_tensor[stand_condition[:, 0]]
+
+
+    return tensor_not_standing, tensor_standing
+
 
 if __name__ == '__main__':
-    train_data, test_data,train_labels,test_labels = get_realworld_for_recon(128)
+    normal,abnormal = get_realworld_raw_for_abnormal(128,9)
     print()

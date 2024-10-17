@@ -354,6 +354,13 @@ class VAE(nn.Module):
         loss = recon_loss + 0.1 * kl_loss
         return loss
 
+# 混合高斯分布(TODO 确认数据符合哪种分布)
+#  Variational Deep Embedding:
+#  An Unsupervised and Generative Approach to Clustering（ICLR 2016）
+class GMM_VAE(nn.Module):
+    def __init__(self, input_dim, z_dim):
+        super().__init__()
+
 class DeepVAE(VAE):
     def __init__(self, input_dim, z_dim):
         super().__init__()
