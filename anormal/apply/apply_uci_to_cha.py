@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from anormal.AEModel import VAE, LSTMFCAutoencoder, LSTM_VAE
+from anormal.AEModel import VAE, LSTMFCAutoencoder, LSTM_VAE, ConvLSTM_VAE
 from datareader.cha_datareader import get_cha_data_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -15,6 +15,7 @@ input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
 dataset_name = 'cha'
 model_name = 'vae'
+trans_flag = False
 
 if model_name == 'lstm':
     hidden_dim = 1024  # Hidden state size
@@ -29,6 +30,13 @@ elif model_name == 'lstm_vae':
     num_layers = 3  # Number of LSTM layers
     model = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
     model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+
+elif model_name == 'conv_lstm_vae':
+    train_normal = normal_data.transpose(1,2)
+    train_abnormal = normal_data.transpose(1, 2)
+    trans_flag = True
+    model = ConvLSTM_VAE(input_dim).to(device)
+    model_load = ConvLSTM_VAE(input_dim).to(device)
 
 elif model_name == 'vae':
     model_load = VAE(input_dim, 50).to(device)
@@ -61,7 +69,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-normal-showcase')
+            show_tensor_data(input_data, outputs, loss, trans_flag, title=f'{dataset_name}-normal-showcase')
             show_count += 1
 
 
@@ -94,7 +102,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-abnormal-showcase')
+            show_tensor_data(input_data, outputs, loss, trans_flag, title=f'{dataset_name}-abnormal-showcase')
             show_count += 1
 
         every_simple_loss.append(loss.item())

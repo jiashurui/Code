@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder, LSTM_VAE
+from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder, LSTM_VAE, ConvLSTM_VAE
 from datareader.mh_datareader import get_mh_data_for_abnormal_test
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -14,6 +14,7 @@ input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
 dataset_name = 'mHealth'
 model_name = 'vae'
+transflag = False
 
 if model_name == 'lstm':
     hidden_dim = 1024  # Hidden state size
@@ -26,6 +27,13 @@ if model_name == 'lstm':
 elif model_name == 'vae':
     model_load = VAE(input_dim, 50).to(device)
 
+elif model_name == 'conv_lstm_vae':
+    train_normal = normal_data.transpose(1,2)
+    train_abnormal = normal_data.transpose(1, 2)
+    transflag = True
+    model = ConvLSTM_VAE(input_dim).to(device)
+    model_load = ConvLSTM_VAE(input_dim).to(device)
+
 elif model_name == 'lstm_vae':
     hidden_dim = 128 * 2  # Hidden state size
     num_layers = 3  # Number of LSTM layers
@@ -35,6 +43,7 @@ elif model_name == 'lstm_vae':
 elif model_name == 'conv_lstm':
     test_normal = normal_data.transpose(1, 2)
     test_abnormal = abnormal_data.transpose(1, 2)
+    transflag = True
     model = ConvLSTMAutoencoder(input_dim).to(device)
     model_load = ConvLSTMAutoencoder(input_dim).to(device)
 
@@ -68,7 +77,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-normal-showcase')
+            show_tensor_data(input_data, outputs, loss, transflag, title=f'{dataset_name}-normal-showcase')
             show_count += 1
 
     print(f'测试集(mHealth)平均单样本(正例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
@@ -98,7 +107,7 @@ with torch.no_grad():
 
         # 输出
         if show_count < 5:
-            show_tensor_data(input_data, outputs, loss, dataset_name, title=f'{dataset_name}-abnormal-showcase')
+            show_tensor_data(input_data, outputs, loss, transflag, title=f'{dataset_name}-abnormal-showcase')
             show_count += 1
         # 单样本Loss
         loss_sum_test = (loss_sum_test + loss.item())

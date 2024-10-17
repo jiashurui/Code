@@ -444,8 +444,10 @@ class LSTM_VAE(nn.Module):
 class ConvLSTM_VAE(ConvLSTMAutoencoder):
     def __init__(self, input_dim, num_layers=6):
         super().__init__(input_dim, num_layers)
-        self.lr_ave = nn.Linear(64, 32)  # average
-        self.lr_dev = nn.Linear(64, 32)  # log(sigma^2)
+        self.lr_ave = nn.Linear(16, 8)  # average
+        self.lr_dev = nn.Linear(16, 8)  # log(sigma^2)
+        self.decoder_fc1 = nn.Linear(8, 16)
+        self.decoder_fc2 = nn.Linear(16, 32)
 
     def forward(self, x):
 
@@ -478,7 +480,9 @@ class ConvLSTM_VAE(ConvLSTMAutoencoder):
 
 
         # Decoder
-        x = self.decoder_fc(z)
+        x = self.decoder_fc1(z)
+        x = self.decoder_fc2(x)
+
         x, (decoder_h, decoder_c) = self.decoder_lstm(x)
         x = self.dropout(x)
         x = self.layer_norm2(x)
