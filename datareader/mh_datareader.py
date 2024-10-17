@@ -381,7 +381,11 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
     tensor_walk = data[condition[:, 0]]
     tensor_not_walk = data[condition_abnormal[:, 0]]
 
-    return tensor_walk[:, :, :features_num], tensor_not_walk[:, :, :features_num]
+    tensor_walk_tensor = torch.tensor(tensor_walk, dtype=torch.float32).to(device)
+
+    tensor_not_walk_tensor = torch.tensor(tensor_not_walk, dtype=torch.float32).to(device)
+
+    return tensor_walk_tensor[:, :, :features_num], tensor_not_walk_tensor[:, :, :features_num]
 
 if __name__ == '__main__':
     t, f = get_mh_data_for_abnormal_test(128, 6)
