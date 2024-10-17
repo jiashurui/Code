@@ -12,7 +12,7 @@ batch_size = 1
 
 model_name = 'conv_lstm_vae'
 
-normal_data, abnormal_data = get_stu_part_features(128,6,1)
+normal_data, abnormal_data = get_stu_part_features(slide_window_length,6,1)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 transflag = False
 dataset_name = 'student'
