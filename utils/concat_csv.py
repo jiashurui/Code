@@ -2,9 +2,9 @@ import pandas as pd
 
 # 假设有三个CSV文件 'file1.csv', 'file2.csv', 'file3.csv'
 
-csv1 = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/accelerometers_label.csv'
-csv2 = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/angular_rate.csv'
-csv3 = '/Users/jiashurui/Desktop/Dataset_student/0726_lab/magnetic_field.csv'
+csv1 = '../data/student/0726_lab/accelerometers_label.csv'
+csv2 = '../data/student/0726_lab/angular_rate.csv'
+csv3 = '../data/student/0726_lab/magnetic_field.csv'
 
 csv_files = [csv1, csv2, csv3]
 
@@ -26,4 +26,4 @@ label = merged_df.pop('label')
 merged_df['label'] = label
 
 # 将拼接后的DataFrame导出为新的CSV文件
-merged_df.to_csv('/Users/jiashurui/Desktop/Dataset_student/0726_lab/merge_labeled.csv', index=False)
+merged_df.to_csv('../data/student/0726_lab/merge_labeled.csv', index=False)
