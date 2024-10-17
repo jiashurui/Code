@@ -183,6 +183,17 @@ def get_data_1d_uci_all_data():
 
     return train_data_normal, train_data_abnormal, test_data_normal, test_data_abnormal
 
+# 返回UCI数据集所有数据(不分train set和 test set)
+# 只返回
+def get_uci_all_data():
+    train_data_normal, train_data_abnormal = get_data_1d_uci_part_data('train')
+    test_data_normal, test_data_abnormal = get_data_1d_uci_part_data('test')
+
+
+    normal = torch.cat((train_data_normal, test_data_normal), dim=0)
+    abnormal = torch.cat((train_data_abnormal, test_data_abnormal), dim=0)
+    return normal , abnormal
+
 if __name__ == '__main__':
-    t, tt , ttt, tttt= get_uci_data()
+    t, tt = get_uci_all_data()
     print()

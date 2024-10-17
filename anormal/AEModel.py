@@ -510,6 +510,6 @@ class ConvLSTM_VAE(ConvLSTMAutoencoder):
         kl_loss = -0.5 * torch.sum(1 + log_sigma2 - ave ** 2 - log_sigma2.exp())
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
-        # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
-        loss = recon_loss + 0.02 * kl_loss
+        print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
+        loss = recon_loss +  kl_loss
         return loss
