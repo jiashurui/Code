@@ -440,3 +440,72 @@ class LSTM_VAE(nn.Module):
         # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
         loss = recon_loss + 0.02 * kl_loss
         return loss
+
+class ConvLSTM_VAE(ConvLSTMAutoencoder):
+    def __init__(self, input_dim, num_layers=6):
+        super().__init__(input_dim, num_layers)
+        self.lr_ave = nn.Linear(64, 32)  # average
+        self.lr_dev = nn.Linear(64, 32)  # log(sigma^2)
+
+    def forward(self, x):
+
+        x = self.conv1(x)
+        x = self.batch_norm1(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.conv2(x)
+        x = self.batch_norm2(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = self.conv3(x)
+        x = self.batch_norm3(x)
+        x = self.relu(x)
+        x = self.pool(x)
+
+        # CNN 的第二个维度和第三个维度(batch_size, features, seq_len)
+        # LSTM(batch_size, seq_len, features)
+        x = x.transpose(1, 2)
+        x, (encoder_h, encoder_c) = self.encoder_lstm(x)
+        x = self.dropout(x)
+        x = self.layer_norm1(x)
+        x = self.encoder_fc(x)
+
+        # 变分
+        u = self.lr_ave(x)  # average μ
+        log_sigma2 = self.lr_dev(x)  # log(sigma^2)
+        ep = torch.randn_like(u)  # 平均0分散1の正規分布に従い生成されるz_dim次元の乱数
+        z = u + torch.exp(log_sigma2 / 2) * ep  # 再パラメータ化トリック
+
+
+        # Decoder
+        x = self.decoder_fc(z)
+        x, (decoder_h, decoder_c) = self.decoder_lstm(x)
+        x = self.dropout(x)
+        x = self.layer_norm2(x)
+
+        x = x.transpose(1, 2)
+        x = self.conv4(x)
+        x = self.decoder_batch_norm1(x)
+        x = self.up_conv1(x)
+        x = self.relu(x)
+        x = self.conv5(x)
+        x = self.decoder_batch_norm2(x)
+        x = self.up_conv2(x)
+        x = self.relu(x)
+        x = self.conv6(x)
+        x = self.up_conv3(x)
+        return x, z, u, log_sigma2
+
+    def loss_function(self, recon, origin, ave, log_sigma2):
+        # 重建Loss (reconstruction Loss)
+        # TODO 记住,这里要用差值总和,不能用平均值,人类数据偏向非线性,用平均值会导致VAE重建糟糕,重建图像的时候会很模糊
+        recon_loss = nn.MSELoss(reduction='sum')(recon, origin)
+        # recon_loss = nn.BCELoss(reduction='sum')(recon, origin)
+
+        # KL散度 (KL)
+        kl_loss = -0.5 * torch.sum(1 + log_sigma2 - ave ** 2 - log_sigma2.exp())
+
+        #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
+        # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
+        loss = recon_loss + 0.02 * kl_loss
+        return loss
