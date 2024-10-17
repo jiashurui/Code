@@ -12,7 +12,7 @@ batch_size = 64
 
 model_name = 'conv_lstm'
 
-normal_data, abnormal_data = get_realworld_raw_for_abnormal(slide_window_length, 9)
+normal_data, abnormal_data = get_realworld_raw_for_abnormal(slide_window_length, 6)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 
 dataset_name = 'realworld'
@@ -34,6 +34,7 @@ elif model_name == 'conv_lstm':
 
     model = ConvLSTMAutoencoder(input_dim).to(device)
     model_load = ConvLSTMAutoencoder(input_dim).to(device)
+    loss_function = nn.MSELoss()  # MSE loss for reconstruction
 
 model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
 model_load.eval()
