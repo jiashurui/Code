@@ -151,16 +151,11 @@ def get_data_1d_uci_part_data(data_type):
     data_gyro_x = pd.read_csv(file_gyro_x, sep='\\s+', header=None)
     data_gyro_y = pd.read_csv(file_gyro_y, sep='\\s+', header=None)
     data_gyro_z = pd.read_csv(file_gyro_z, sep='\\s+', header=None)
-    # big_df.iloc[:, 1:21] = scaler.fit_transform(big_df.iloc[:, 1:21])
-
     labels = data_l.to_numpy().ravel()
     data_combined = np.stack((
         data_acc_x.to_numpy(),
         data_acc_y.to_numpy(),
         data_acc_z.to_numpy(),
-
-        # TODO 当前只用加速度数据,因为其他论文数据无法对齐,用不了角速度数据
-        # TODO #2 ?? 上面那个TODO 干啥的?
         data_gyro_x.to_numpy(),
         data_gyro_y.to_numpy(),
         data_gyro_z.to_numpy()
@@ -170,7 +165,7 @@ def get_data_1d_uci_part_data(data_type):
     selected_data = data_combined[(labels != 5)]
     not_selected_data = data_combined[(labels == 5)]
 
-    # 归一化处理，将值缩放到 [-1, 1] 范围
+    # 归一化处理，将值缩放到 [-1, 1] 范围 TODO 用在autoencoder上面发现重建成了一个直线
     # selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
     # not_selected_data = 2 * (not_selected_data - not_selected_data.min()) / (not_selected_data.max() - not_selected_data.min()) - 1
 
