@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
 
+from prototype import constant
 from prototype.global_tramsform import transform_sensor_data_to_df
 from utils.slidewindow import slide_window2
 
@@ -185,15 +186,7 @@ def get_mh_data_1d_9ch(slide_window_length, features_num):
         print(file_name)
         data = pd.read_csv(file_name,sep='\t',header=None)
 
-        data.columns = ['chest_x', 'chest_y', 'chest_z',
-                        'electrocardiogram_1', 'electrocardiogram_2',
-                        'ankle_x', 'ankle_y', 'ankle_z',
-                        'gyro_x', 'gyro_y', 'gyro_z',
-                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
-                        'arm_x', 'arm_y', 'arm_z',
-                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
-                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
-                        'label']
+        data.columns = constant.Constant.mHealth.data_columns
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
