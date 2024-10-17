@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from anormal.AEModel import VAE, LSTMFCAutoencoder
+from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder
 from datareader.mh_datareader import get_mh_data_for_abnormal_test
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -25,7 +25,11 @@ if model_name == 'lstm':
 
 elif model_name == 'vae':
     model_load = VAE(input_dim, 50).to(device)
-
+elif model_name == 'conv_lstm':
+    test_normal = normal_data.transpose(1, 2)
+    test_abnormal = abnormal_data.transpose(1, 2)
+    model = ConvLSTMAutoencoder(input_dim).to(device)
+    model_load = ConvLSTMAutoencoder(input_dim).to(device)
 
 model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
 model_load.eval()
@@ -48,7 +52,7 @@ with torch.no_grad():
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model_load(input_data)
+            outputs, latent_normal = model_load(input_data)
             loss = loss_function(outputs, input_data)
 
         # 单样本Loss
@@ -82,7 +86,7 @@ with torch.no_grad():
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
-            outputs = model_load(input_data)
+            outputs,latent_abnormal = model_load(input_data)
             loss = loss_function(outputs, input_data)
 
         # 输出
@@ -96,3 +100,5 @@ with torch.no_grad():
     print(f'测试集(mHealth)平均单样本(反例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
 
     show.show_me_data0(every_simple_loss)
+
+
