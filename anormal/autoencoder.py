@@ -18,7 +18,7 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 50  # Number of training epochs
+epochs = 1000  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
@@ -77,7 +77,7 @@ elif model_name == 'conv_lstm':
 # model_load = VAE(input_dim, 50).to(device)
 
 loss_function = nn.MSELoss()  # MSE loss for reconstruction
-optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
 gradient_utils = GradientUtils(model)
 
 # Train

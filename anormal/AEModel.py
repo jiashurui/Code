@@ -173,7 +173,7 @@ class ConvAutoencoder(nn.Module):
 
 # 1D-CNN --> LSTM --> FC --> {Latent}--> FC -->LSTM --> 1D-CNN --> FC
 class ConvLSTMAutoencoder(nn.Module):
-    def __init__(self, input_dim, num_layers=1):
+    def __init__(self, input_dim, num_layers=6):
         super(ConvLSTMAutoencoder, self).__init__()
         # Class Parameter
         kernel_size = 3
