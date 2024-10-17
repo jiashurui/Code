@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from anormal.AEModel import VAE, LSTMFCAutoencoder
+from anormal.AEModel import VAE, LSTMFCAutoencoder, LSTM_VAE
 from datareader.cha_datareader import get_cha_data_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
@@ -24,6 +24,12 @@ if model_name == 'lstm':
     model_load = LSTMFCAutoencoder(input_dim, hidden_dim, latent_dim, slide_window_length, num_layers).to(device)
     loss_function = nn.MSELoss()  # MSE loss for reconstruction
 
+elif model_name == 'lstm_vae':
+    hidden_dim = 128 * 2  # Hidden state size
+    num_layers = 3  # Number of LSTM layers
+    model = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+    model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
+
 elif model_name == 'vae':
     model_load = VAE(input_dim, 50).to(device)
 
@@ -42,7 +48,7 @@ with torch.no_grad():
         if input_data.size(0) != batch_size:
             continue
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae' or model_name == 'lstm_vae':
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
@@ -76,7 +82,7 @@ with torch.no_grad():
             continue
 
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae' or model_name == 'lstm_vae':
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
