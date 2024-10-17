@@ -61,7 +61,7 @@ with torch.no_grad():
             continue
 
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae' or model_name == 'lstm_vae':
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
@@ -95,7 +95,7 @@ with torch.no_grad():
             continue
 
         # VAE
-        if model_name == 'vae':
+        if model_name == 'vae' or model_name == 'lstm_vae':
             outputs, _, u, sigma = model_load(input_data)
             loss = model_load.loss_function(outputs, input_data, u, sigma)
         else:
