@@ -109,7 +109,7 @@ def show_origin():
     labels = big_df['label'].values
 
     plot_data_pca(data, labels, Constant.mHealth.action_map_reverse)
-    plot_data_tSNE(data, labels, Constant.ChildWalk.action_map_reverse)
+    plot_data_tSNE(data, labels, Constant.mHealth.action_map_reverse)
 
 def show_pca():
     file = glob.glob('../data/mHealth/features/merged_data_features.csv')
