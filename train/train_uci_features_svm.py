@@ -17,7 +17,7 @@ def train_model():
     test_labels = np.ravel(test_labels)
 
     # 5. 创建并训练SVM模型
-    svm_classifier = SVC(kernel='rbf', C=0.5, gamma='scale', random_state=42)  # 使用RBF核
+    svm_classifier = SVC(kernel='rbf', C=0.1, gamma='scale', random_state=3407)  # 使用RBF核
     svm_classifier.fit(train_data, train_labels)
 
     # 测试集评估
