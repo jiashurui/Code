@@ -140,7 +140,7 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
     random.shuffle(final_data)
 
     # 提取输入和标签
-    input_features = np.array([arr[:, :features_num] for arr in final_data])
+    input_features = np.array([arr[:, :] for arr in final_data])
     labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor
@@ -148,15 +148,15 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
     data_label = torch.tensor(labels, dtype=torch.long).to(device)
 
     # 根据标签,分割数据
-    condition = data_tensor[:, :, 3] != 6.0  # standing
-    stand_condition = data_tensor[:, :, 3] == 6.0  # standing
+    condition = data_tensor[:, :, 9] != 6.0  # standing
+    stand_condition = data_tensor[:, :, 9] == 6.0  # standing
 
     # 使用布尔索引进行分割
     tensor_not_standing = data_tensor[condition[:, 0]]
     tensor_standing = data_tensor[stand_condition[:, 0]]
 
 
-    return tensor_not_standing, tensor_standing
+    return tensor_not_standing[:,:,:features_num], tensor_standing[:,:,:features_num]
 
 
 if __name__ == '__main__':
