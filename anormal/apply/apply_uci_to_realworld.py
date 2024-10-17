@@ -10,7 +10,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 batch_size = 1
 
-model_name = 'conv_lstm'
+model_name = 'conv_lstm_vae'
 
 normal_data, abnormal_data = get_realworld_raw_for_abnormal(slide_window_length, 6)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
@@ -35,8 +35,8 @@ elif model_name == 'lstm_vae':
     model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
 
 elif model_name == 'conv_lstm_vae':
-    train_normal = normal_data.transpose(1,2)
-    train_abnormal = normal_data.transpose(1, 2)
+    normal_data = normal_data.transpose(1,2)
+    abnormal_data = abnormal_data.transpose(1, 2)
     transflag = True
     model = ConvLSTM_VAE(input_dim).to(device)
     model_load = ConvLSTM_VAE(input_dim).to(device)
