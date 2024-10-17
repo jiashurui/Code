@@ -84,9 +84,6 @@ gradient_utils = GradientUtils(model)
 model.train()
 lost_arr = []
 lost_avg_arr = []
-# 梯度裁剪
-torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-
 for epoch in range(epochs):
     permutation = torch.randperm(train_normal.size()[0])
 
@@ -118,6 +115,10 @@ for epoch in range(epochs):
 
         # BP
         loss.backward()
+
+        # 梯度剪裁
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
         # 记录梯度数据
         gradient_utils.record_gradient_norm()
 
