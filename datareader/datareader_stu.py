@@ -97,7 +97,7 @@ def get_stu_data(slide_window_length):
 
 
 def get_stu_all_features(slide_window_length):
-    base_path = '../../data/student/0726_lab/merge_labeled.csv'
+    base_path = '../data/student/0726_lab/merge_labeled.csv'
 
     acc_file = glob.glob(base_path)
     final_data = []
