@@ -23,7 +23,7 @@ learning_rate = 0.0001  # Learning rate
 epochs = 50  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
-dataset_name = 'uci'
+dataset_name = 'realworld'
 model_name = 'conv_lstm_vae'
 trans_flag = False
 # https://arxiv.org/abs/2109.08203
