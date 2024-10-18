@@ -56,7 +56,10 @@ def show_origin():
 
     big_df = pd.concat(appended_data, ignore_index=True)
 
+    big_df = big_df[big_df['label'] != -1]
+
     data = big_df.iloc[:, 1:10].values
+
     labels = big_df['label'].values
 
     plot_data_pca(data, labels, Constant.uStudent.action_map_en_reverse)
