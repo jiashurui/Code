@@ -148,8 +148,8 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
     data_label = torch.tensor(labels, dtype=torch.long).to(device)
 
     # 根据标签,分割数据
-    condition = data_tensor[:, :, 9] != 6.0  # standing
-    stand_condition = data_tensor[:, :, 9] == 6.0  # standing
+    condition = data_tensor[:, :, 9] != 1.0  # standing
+    stand_condition = data_tensor[:, :, 9] == 1.0  # standing
 
     # 使用布尔索引进行分割
     tensor_not_standing = data_tensor[condition[:, 0]]

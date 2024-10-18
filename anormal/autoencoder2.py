@@ -21,10 +21,10 @@ latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
 epochs = 50  # Number of training epochs
-slide_window_length = 250  # 序列长度
+slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
-model_name = 'lstm_vae'
+model_name = 'conv_lstm_vae'
 trans_flag = False
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)

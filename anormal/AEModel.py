@@ -438,11 +438,11 @@ class LSTM_VAE(nn.Module):
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
         # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
-        loss = recon_loss + 0.02 * kl_loss
+        loss = recon_loss + 1 * kl_loss
         return loss
 
 class ConvLSTM_VAE(ConvLSTMAutoencoder):
-    def __init__(self, input_dim, num_layers=6):
+    def __init__(self, input_dim, num_layers=1):
         super().__init__(input_dim, num_layers)
         self.lr_ave = nn.Linear(16, 8)  # average
         self.lr_dev = nn.Linear(16, 8)  # log(sigma^2)
@@ -510,6 +510,6 @@ class ConvLSTM_VAE(ConvLSTMAutoencoder):
         kl_loss = -0.5 * torch.sum(1 + log_sigma2 - ave ** 2 - log_sigma2.exp())
 
         #  如果KL散度和重构损失不在一个尺度,则会有问题,要确保统一量纲
-        print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
+        # print(f'recon_loss: {recon_loss:.4f}, kl_loss:{kl_loss:.4f}')
         loss = recon_loss +  kl_loss
         return loss

@@ -2,11 +2,9 @@ import torch
 from torch import nn
 
 from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder, LSTM_VAE, ConvLSTM_VAE
-from datareader.datareader_stu import get_stu_part_features
+from datareader.realworld_datareader import get_realworld_for_abnormal, get_realworld_raw_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
-from utils.uci_datareader import get_uci_all_data
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slide_window_length = 128  # 序列长度
@@ -14,10 +12,10 @@ batch_size = 1
 
 model_name = 'conv_lstm_vae'
 
-normal_data, abnormal_data = get_uci_all_data()
+normal_data, abnormal_data = get_realworld_raw_for_abnormal(slide_window_length, 6)
 input_dim = normal_data.size(2)  # Dimensionality of input sequence
 transflag = False
-dataset_name = 'student'
+dataset_name = 'realworld'
 
 if model_name == 'lstm':
     hidden_dim = 1024  # Hidden state size
@@ -51,9 +49,7 @@ elif model_name == 'conv_lstm':
     model_load = ConvLSTMAutoencoder(input_dim).to(device)
     loss_function = nn.MSELoss()  # MSE loss for reconstruction
 
-
-
-model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
+model_load.load_state_dict(torch.load('../model/autoencoder.pth'))
 model_load.eval()
 
 # 测试正常

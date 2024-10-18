@@ -51,7 +51,7 @@ elif model_name == 'conv_lstm':
 
 
 
-model_load.load_state_dict(torch.load('../../model/autoencoder.pth'))
+model_load.load_state_dict(torch.load('../model/autoencoder.pth'))
 model_load.eval()
 
 # 测试正常

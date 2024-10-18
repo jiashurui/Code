@@ -19,11 +19,11 @@ hidden_dim = 1024  # Hidden state size
 latent_dim = 512  # Latent space size
 num_layers = 3  # Number of LSTM layers
 learning_rate = 0.0001  # Learning rate
-epochs = 1  # Number of training epochs
+epochs = 50  # Number of training epochs
 slide_window_length = 128  # 序列长度
 batch_size = 64
 dataset_name = 'uci'
-model_name = 'lstm_vae'
+model_name = 'conv_lstm_vae'
 trans_flag = False
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
@@ -89,7 +89,7 @@ elif model_name == 'conv_lstm':
 # model_load = VAE(input_dim, 50).to(device)
 
 loss_function = nn.MSELoss()  # MSE loss for reconstruction
-optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
 gradient_utils = GradientUtils(model)
 
 # Train

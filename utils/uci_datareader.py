@@ -162,8 +162,8 @@ def get_data_1d_uci_part_data(data_type):
     ), axis=-1)
 
     # 1 WALKING 5 STANDING
-    selected_data = data_combined[(labels != 5)]
-    not_selected_data = data_combined[(labels == 5)]
+    selected_data = data_combined[(labels != 2)]
+    not_selected_data = data_combined[(labels == 2)]
 
     # 归一化处理，将值缩放到 [-1, 1] 范围 TODO 用在autoencoder上面发现重建成了一个直线
     # selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
