@@ -122,4 +122,4 @@ def show_pca():
     plot_data_tSNE(data, labels, Constant.mHealth.action_map_reverse)
 
 if __name__ == '__main__':
-    show_origin()
+    show_pca()
