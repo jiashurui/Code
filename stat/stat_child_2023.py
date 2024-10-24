@@ -9,7 +9,8 @@ from scipy.spatial.transform import Rotation as R
 
 from prototype.constant import Constant
 from prototype.global_tramsform import transform_sensor_data_to_df, transform_sensor_data_to_np
-from stat_common import calc_fft_spectral_energy, spectral_entropy, calc_hanmming_window, calc_df_features,calc_df_fft
+from stat_common import calc_fft_spectral_energy, spectral_entropy, calc_hanmming_window, calc_df_features, calc_df_fft, \
+    save_fft_result
 
 from utils.slidewindow import slide_window2
 
@@ -163,81 +164,6 @@ def read_data(file_name='../data/child/2023_03/merged_data/*.csv'):
     big_df = pd.concat(appended_data, ignore_index=True)
     return big_df
 
-# 对一个dataframe分段计算FFT,然后合并平均FFT的结果
-def calc_df_avg_fft(df):
-    list_windows = slide_window2(df, 32, 0.5)
-    fft_x_list = []
-    fft_y_list = []
-    fft_z_list = []
-    freq = 0.0
-
-    features_list = []
-    for data_window in list_windows:
-        fft_x, fft_y, fft_z, freq_x, max_freq_x, max_freq_y, max_freq_z = calc_df_fft(data_window)
-        x_spec_energy, y_spec_energy, z_spec_energy, spec_total = calc_fft_spectral_energy(data_window)
-        x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total = spectral_entropy(data_window)
-
-        fft_x_list.append(fft_x)
-        fft_y_list.append(fft_y)
-        fft_z_list.append(fft_z)
-
-        # 所有FFT结果一样
-        freq = freq_x
-        # 特征值(能量与能量熵)
-        features_list.append((x_spec_energy, y_spec_energy, z_spec_energy, spec_total,
-                              x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total,
-                              max_freq_x, max_freq_y, max_freq_z))
-
-    feature_arr = np.array(features_list)
-
-    # 所有数据,每个频段上的平均(1hz, 2hz, 3hz)
-    fft_x_avg_series = np.array(fft_x_list).mean(axis=0)
-    fft_y_avg_series = np.array(fft_y_list).mean(axis=0)
-    fft_z_avg_series = np.array(fft_z_list).mean(axis=0)
-
-    # 所有数据,全频段上的能量和,的平均energy(1hz+2hz+3hz)/avg
-    energy_x_avg_series = np.mean(feature_arr[:, 0])
-    energy_y_avg_series = np.mean(feature_arr[:, 1])
-    energy_z_avg_series = np.mean(feature_arr[:, 2])
-    energy_t_avg_series = np.mean(feature_arr[:, 3])
-
-    # 所有数据,全频段上的能量熵,的平均entropy(1hz+2hz+3hz)/avg
-    entropy_x_avg_series = np.mean(feature_arr[:, 4])
-    entropy_y_avg_series = np.mean(feature_arr[:, 5])
-    entropy_z_avg_series = np.mean(feature_arr[:, 6])
-    entropy_t_avg_series = np.mean(feature_arr[:, 7])
-
-    # 频域最大值(hz)
-    freq_max_x = np.mean(feature_arr[:, 8])
-    freq_max_y = np.mean(feature_arr[:, 9])
-    freq_max_z = np.mean(feature_arr[:, 10])
-
-    # 保存特征分析结果
-    df_stat = pd.DataFrame([energy_x_avg_series, energy_y_avg_series, energy_z_avg_series, energy_t_avg_series, \
-                            entropy_x_avg_series, entropy_y_avg_series, entropy_z_avg_series, entropy_t_avg_series,
-                            freq_max_x, freq_max_y, freq_max_z])
-    df_stat.index = ['energy_x', 'energy_y', 'energy_z', 'energy_total',
-                     'entropy_x', 'entropy_y', 'entropy_z', 'entropy_total',
-                     'freq_max_x', 'freq_max_y', 'freq_max_z']
-    df_stat.columns = ['value']
-
-    return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_stat
-
-
-# 保存FFT变换的结果
-def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, file_name):
-    # 绘制傅里叶变换结果
-    fig, axs = plt.subplots(3, 1, figsize=[10, 5])
-    axs[0].plot(freq, fft_x_avg_series, c='r')
-    axs[1].plot(freq, fft_y_avg_series, c='g')
-    axs[2].plot(freq, fft_z_avg_series, c='b')
-    axs[0].set_title('FFT AccX')
-    axs[1].set_title('FFT AccY')
-    axs[2].set_title('FFT AccZ')
-    fig.tight_layout()
-    plt.savefig(f'{file_name}', dpi=300)
-
-
 # 展示儿童进行全局变换后的结果(使用我自己的算法)
 def show_child_after_transformed():
     df = read_data('../data/child/2023_03/merged_data/A-1_DSCF0001.csv')
@@ -342,6 +268,65 @@ def show_child_after_transformed():
     # plt.legend()
     # plt.show()
 
+# 对一个dataframe分段计算FFT,然后合并平均FFT的结果
+def calc_df_avg_fft(df):
+    list_windows = slide_window2(df, 32, 0.5)
+    fft_x_list = []
+    fft_y_list = []
+    fft_z_list = []
+    freq = 0.0
+
+    features_list = []
+    for data_window in list_windows:
+        fft_x, fft_y, fft_z, freq_x, max_freq_x, max_freq_y, max_freq_z = calc_df_fft(data_window)
+        x_spec_energy, y_spec_energy, z_spec_energy, spec_total = calc_fft_spectral_energy(data_window)
+        x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total = spectral_entropy(data_window)
+
+        fft_x_list.append(fft_x)
+        fft_y_list.append(fft_y)
+        fft_z_list.append(fft_z)
+
+        # 所有FFT结果一样
+        freq = freq_x
+        # 特征值(能量与能量熵)
+        features_list.append((x_spec_energy, y_spec_energy, z_spec_energy, spec_total,
+                              x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total,
+                              max_freq_x, max_freq_y, max_freq_z))
+
+    feature_arr = np.array(features_list)
+
+    # 所有数据,每个频段上的平均(1hz, 2hz, 3hz)
+    fft_x_avg_series = np.array(fft_x_list).mean(axis=0)
+    fft_y_avg_series = np.array(fft_y_list).mean(axis=0)
+    fft_z_avg_series = np.array(fft_z_list).mean(axis=0)
+
+    # 所有数据,全频段上的能量和,的平均energy(1hz+2hz+3hz)/avg
+    energy_x_avg_series = np.mean(feature_arr[:, 0])
+    energy_y_avg_series = np.mean(feature_arr[:, 1])
+    energy_z_avg_series = np.mean(feature_arr[:, 2])
+    energy_t_avg_series = np.mean(feature_arr[:, 3])
+
+    # 所有数据,全频段上的能量熵,的平均entropy(1hz+2hz+3hz)/avg
+    entropy_x_avg_series = np.mean(feature_arr[:, 4])
+    entropy_y_avg_series = np.mean(feature_arr[:, 5])
+    entropy_z_avg_series = np.mean(feature_arr[:, 6])
+    entropy_t_avg_series = np.mean(feature_arr[:, 7])
+
+    # 频域最大值(hz)
+    freq_max_x = np.mean(feature_arr[:, 8])
+    freq_max_y = np.mean(feature_arr[:, 9])
+    freq_max_z = np.mean(feature_arr[:, 10])
+
+    # 保存特征分析结果
+    df_stat = pd.DataFrame([energy_x_avg_series, energy_y_avg_series, energy_z_avg_series, energy_t_avg_series, \
+                            entropy_x_avg_series, entropy_y_avg_series, entropy_z_avg_series, entropy_t_avg_series,
+                            freq_max_x, freq_max_y, freq_max_z])
+    df_stat.index = ['energy_x', 'energy_y', 'energy_z', 'energy_total',
+                     'entropy_x', 'entropy_y', 'entropy_z', 'entropy_total',
+                     'freq_max_x', 'freq_max_y', 'freq_max_z']
+    df_stat.columns = ['value']
+
+    return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_stat
 
 if __name__ == '__main__':
     show_child_hist_stat4()

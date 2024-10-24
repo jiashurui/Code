@@ -1,17 +1,60 @@
 # 计算一个时间步上, 频谱能量和
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
+from scipy.fft import fft, fftfreq
 from scipy.signal import welch
 from scipy.signal.windows import hamming
-from scipy.signal import welch
 from scipy.stats import kurtosis, skew
-from scipy.fft import fft, fftfreq
 
-def calc_fft_spectral_energy(df):
-    T = 0.1  # 采样周期为 0.1 秒（10Hz)
-    df_acc_x = df['accx'].values
-    df_acc_y = df['accy'].values
-    df_acc_z = df['accz'].values
+
+# 对单个dataframe整体进行FFT变换
+def calc_df_fft(df,acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz',T = 0.1):
+    df_acc_x = df[acc_x_name].values
+    df_acc_y = df[acc_y_name].values
+    df_acc_z = df[acc_z_name].values
+
+    N = len(df_acc_x)
+
+    # 前处理: 去除直流成分
+    df_acc_x = df_acc_x - np.mean(df_acc_x)
+    df_acc_y = df_acc_y - np.mean(df_acc_y)
+    df_acc_z = df_acc_z - np.mean(df_acc_z)
+
+    # 计算傅里叶变换 (对原始数据进行 汉明窗变换)
+    df_acc_x = calc_hanmming_window(df_acc_x, N)
+    df_acc_y = calc_hanmming_window(df_acc_y, N)
+    df_acc_z = calc_hanmming_window(df_acc_z, N)
+
+    # FFT
+    fft_acc_x = fft(df_acc_x)
+    fft_acc_y = fft(df_acc_y)
+    fft_acc_z = fft(df_acc_z)
+
+    # 计算频率
+    freq_acc_x = fftfreq(N, T)[:N // 2]
+
+    positive_fft_x = np.abs(fft_acc_x[:N // 2])
+    positive_fft_y = np.abs(fft_acc_y[:N // 2])
+    positive_fft_z = np.abs(fft_acc_z[:N // 2])
+
+    fft_x_result_scaling = 2.0 / N * positive_fft_x
+    fft_y_result_scaling = 2.0 / N * positive_fft_y
+    fft_z_result_scaling = 2.0 / N * positive_fft_z
+
+    # 获取最大频率的值
+    max_freq_x = freq_acc_x[np.argmax(positive_fft_x)]
+    max_freq_y = freq_acc_x[np.argmax(positive_fft_y)]
+    max_freq_z = freq_acc_x[np.argmax(positive_fft_z)]
+
+    return fft_x_result_scaling, fft_y_result_scaling, fft_z_result_scaling, freq_acc_x, \
+        max_freq_x, max_freq_y, max_freq_z
+
+# 计算一个时间步上, 频谱能量
+def calc_fft_spectral_energy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz'):
+    df_acc_x = df[acc_x_name].values
+    df_acc_y = df[acc_y_name].values
+    df_acc_z = df[acc_z_name].values
 
     N = len(df_acc_x)
 
@@ -47,10 +90,10 @@ def calc_fft_spectral_energy(df):
 
 
 # 计算一个时间步上, 频谱熵
-def spectral_entropy(df):
-    df_acc_x = df['accx'].values
-    df_acc_y = df['accy'].values
-    df_acc_z = df['accz'].values
+def spectral_entropy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz'):
+    df_acc_x = df[acc_x_name].values
+    df_acc_y = df[acc_y_name].values
+    df_acc_z = df[acc_z_name].values
 
     # 使用Welch方法计算功率谱密度 (PSD)
     _, psd_x = welch(df_acc_x, fs=10, nperseg=len(df))  # 10hz
@@ -105,45 +148,15 @@ def calc_df_features(df):
 
     return df_stat, df_pearson
 
-# 对单个dataframe整体进行FFT变换
-def calc_df_fft(df):
-    T = 0.1  # 采样周期为 0.1 秒（10Hz)
-    df_acc_x = df['accx'].values
-    df_acc_y = df['accy'].values
-    df_acc_z = df['accz'].values
-
-    N = len(df_acc_x)
-
-    # 前处理: 去除直流成分
-    df_acc_x = df_acc_x - np.mean(df_acc_x)
-    df_acc_y = df_acc_y - np.mean(df_acc_y)
-    df_acc_z = df_acc_z - np.mean(df_acc_z)
-
-    # 计算傅里叶变换 (对原始数据进行 汉明窗变换)
-    df_acc_x = calc_hanmming_window(df_acc_x, N)
-    df_acc_y = calc_hanmming_window(df_acc_y, N)
-    df_acc_z = calc_hanmming_window(df_acc_z, N)
-
-    # FFT
-    fft_acc_x = fft(df_acc_x)
-    fft_acc_y = fft(df_acc_y)
-    fft_acc_z = fft(df_acc_z)
-
-    # 计算频率
-    freq_acc_x = fftfreq(N, T)[:N // 2]
-
-    positive_fft_x = np.abs(fft_acc_x[:N // 2])
-    positive_fft_y = np.abs(fft_acc_y[:N // 2])
-    positive_fft_z = np.abs(fft_acc_z[:N // 2])
-
-    fft_x_result_scaling = 2.0 / N * positive_fft_x
-    fft_y_result_scaling = 2.0 / N * positive_fft_y
-    fft_z_result_scaling = 2.0 / N * positive_fft_z
-
-    # 获取最大频率的值
-    max_freq_x = freq_acc_x[np.argmax(positive_fft_x)]
-    max_freq_y = freq_acc_x[np.argmax(positive_fft_y)]
-    max_freq_z = freq_acc_x[np.argmax(positive_fft_z)]
-
-    return fft_x_result_scaling, fft_y_result_scaling, fft_z_result_scaling, freq_acc_x, \
-        max_freq_x, max_freq_y, max_freq_z
+# 保存FFT变换的结果
+def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq , file_name):
+    # 绘制傅里叶变换结果
+    fig, axs = plt.subplots(3, 1, figsize=[10, 5])
+    axs[0].plot(freq, fft_x_avg_series, c='r')
+    axs[1].plot(freq, fft_y_avg_series, c='g')
+    axs[2].plot(freq, fft_z_avg_series, c='b')
+    axs[0].set_title('FFT AccX')
+    axs[1].set_title('FFT AccY')
+    axs[2].set_title('FFT AccZ')
+    fig.tight_layout()
+    plt.savefig(f'{file_name}', dpi=300)
