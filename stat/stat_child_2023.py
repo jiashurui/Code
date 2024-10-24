@@ -5,6 +5,7 @@ import pandas as pd
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.fft import fft, fftfreq
+from scipy.signal import welch
 from scipy.signal.windows import hamming
 from scipy.stats import kurtosis, skew
 from scipy.spatial.transform import Rotation as R
@@ -15,7 +16,6 @@ from utils.slidewindow import slide_window2
 
 all_save_base_path = './child/202303/all/'
 individual = './child/202303/individual/'
-
 # 统计所有儿童整体行走数据
 def show_child_hist_stat():
     big_df = read_data()
@@ -89,9 +89,12 @@ def show_child_hist_stat2():
     df_stat, df_pearson = calc_df_features(big_df)
 
     # 计算平均fft
-    fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq = calc_df_avg_fft(big_df)
+    fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat= calc_df_avg_fft(big_df)\
+
     save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, f'{all_save_base_path}fft_all_avg_result.png')
     df_stat.to_csv(f'{all_save_base_path}Child_all_data_features.csv')
+    df_freq_stat.to_csv(f'{all_save_base_path}Child_all_data_freq_features.csv')
+
     df_pearson.to_csv(f'{all_save_base_path}Child_all_data_pearson.csv')
 
 # 展示2023年所有的儿童的步行特征量(按照标签进行分组展示)
@@ -223,29 +226,123 @@ def calc_df_fft(df):
     # plt.show()
     return fft_x_result_scaling, fft_y_result_scaling, fft_z_result_scaling, freq_acc_x
 
+# 计算一个时间步上, 频谱能量和
+def calc_fft_spectral_energy(df):
+    T = 0.1  # 采样周期为 0.1 秒（10Hz)
+    df_acc_x = df['accx'].values
+    df_acc_y = df['accy'].values
+    df_acc_z = df['accz'].values
+
+    N = len(df_acc_x)
+
+    # 前处理: 去除直流成分
+    df_acc_x = df_acc_x - np.mean(df_acc_x)
+    df_acc_y = df_acc_y - np.mean(df_acc_y)
+    df_acc_z = df_acc_z - np.mean(df_acc_z)
+
+    # 计算傅里叶变换 (对原始数据进行 汉明窗变换)
+    df_acc_x = calc_hanmming_window(df_acc_x, N)
+    df_acc_y = calc_hanmming_window(df_acc_y, N)
+    df_acc_z = calc_hanmming_window(df_acc_z, N)
+
+    # FFT
+    fft_acc_x = fft(df_acc_x)
+    fft_acc_y = fft(df_acc_y)
+    fft_acc_z = fft(df_acc_z)
+
+    # 只保留正频率部分（傅里叶变换的前一半结果）
+    fft_acc_x = fft_acc_x[:N // 2]
+    fft_acc_y = fft_acc_y[:N // 2]
+    fft_acc_z = fft_acc_z[:N // 2]
+
+    # spectral_energy 计算频谱能量
+    spectral_energy_x = np.sum(np.abs(fft_acc_x) ** 2)
+    spectral_energy_y = np.sum(np.abs(fft_acc_y) ** 2)
+    spectral_energy_z = np.sum(np.abs(fft_acc_z) ** 2)
+
+    # 使用L1 范式,计算频谱能量
+    total_spectral_energy = spectral_energy_x + spectral_energy_y + spectral_energy_z
+
+    return spectral_energy_x, spectral_energy_y,spectral_energy_z, total_spectral_energy
+
+# 计算一个时间步上, 频谱熵
+def spectral_entropy(df):
+
+    df_acc_x = df['accx'].values
+    df_acc_y = df['accy'].values
+    df_acc_z = df['accz'].values
+
+    # 使用Welch方法计算功率谱密度 (PSD)
+    _, psd_x = welch(df_acc_x, fs=10)  # 10hz
+    _, psd_y = welch(df_acc_y, fs=10)  # 10hz
+    _, psd_z = welch(df_acc_z, fs=10)  # 10hz
+
+    # 归一化 PSD 以形成概率分布
+    psd_norm_x = psd_x / np.sum(psd_x)
+    psd_norm_y = psd_y / np.sum(psd_y)
+    psd_norm_z = psd_z / np.sum(psd_z)
+
+    # 计算 Shannon Entropy
+    entropy_x = -np.sum(psd_norm_x * np.log2(psd_norm_x + np.finfo(float).eps))
+    entropy_y = -np.sum(psd_norm_y * np.log2(psd_norm_y + np.finfo(float).eps))
+    entropy_z = -np.sum(psd_norm_z * np.log2(psd_norm_z + np.finfo(float).eps))
+
+    # 使用L1 范式,进行特征合并
+    entropy_total = entropy_x + entropy_y + entropy_z
+
+    return entropy_x, entropy_y, entropy_z, entropy_total
+
 # 对一个dataframe分段计算FFT,然后合并平均FFT的结果
 def calc_df_avg_fft(df):
-    list_windows = slide_window2(df, 100, 0.5)
+    list_windows = slide_window2(df, 32, 0.5)
     fft_x_list = []
     fft_y_list = []
     fft_z_list = []
     freq = 0.0
+
+    features_list = []
     for data_window in list_windows:
         fft_x, fft_y, fft_z, freq_x = calc_df_fft(data_window)
+        x_spec_energy, y_spec_energy, z_spec_energy, spec_total = calc_fft_spectral_energy(data_window)
+        x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total = spectral_entropy(data_window)
+
         fft_x_list.append(fft_x)
         fft_y_list.append(fft_y)
         fft_z_list.append(fft_z)
 
         # 所有FFT结果一样
         freq = freq_x
+        # 特征值(能量与能量熵)
+        features_list.append((x_spec_energy, y_spec_energy, z_spec_energy, spec_total,
+                              x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total))
 
-    # fft_x_avg_seria
+    feature_arr = np.array(features_list)
+
+    # 所有数据,每个频段上的平均(1hz, 2hz, 3hz)
     fft_x_avg_series = np.array(fft_x_list).mean(axis=0)
     fft_y_avg_series = np.array(fft_y_list).mean(axis=0)
     fft_z_avg_series = np.array(fft_z_list).mean(axis=0)
 
-    return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq
+    # 所有数据,全频段上的能量和,的平均energy(1hz+2hz+3hz)/avg
+    energy_x_avg_series = np.mean(feature_arr[:, 0])
+    energy_y_avg_series = np.mean(feature_arr[:, 1])
+    energy_z_avg_series = np.mean(feature_arr[:, 2])
+    energy_t_avg_series = np.mean(feature_arr[:, 3])
 
+    # 所有数据,全频段上的能量熵,的平均entropy(1hz+2hz+3hz)/avg
+    entropy_x_avg_series = np.mean(feature_arr[:, 4])
+    entropy_y_avg_series = np.mean(feature_arr[:, 5])
+    entropy_z_avg_series = np.mean(feature_arr[:, 6])
+    entropy_t_avg_series = np.mean(feature_arr[:, 7])
+
+    # 保存特征分析结果
+    df_stat = pd.DataFrame([energy_x_avg_series, energy_y_avg_series, energy_z_avg_series, energy_t_avg_series,\
+                         entropy_x_avg_series, entropy_y_avg_series, entropy_z_avg_series, entropy_t_avg_series])
+    df_stat.index = ['energy_x', 'energy_y', 'energy_z', 'energy_total', 'entropy_x', 'entropy_y', 'entropy_z', 'entropy_total']
+    df_stat.columns =['value']
+
+
+    return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_stat
 # 保存FFT变换的结果
 def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq , file_name):
     # 绘制傅里叶变换结果
@@ -369,4 +466,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_child_hist_stat4()
+    show_child_hist_stat2()
