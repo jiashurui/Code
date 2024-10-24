@@ -16,6 +16,8 @@ from utils.slidewindow import slide_window2
 
 all_save_base_path = './child/202303/all/'
 individual = './child/202303/individual/'
+
+
 # 统计所有儿童整体行走数据
 def show_child_hist_stat():
     big_df = read_data()
@@ -78,6 +80,7 @@ def show_child_hist_stat():
         # 保存当前子图的文件，使用 fig_label.suptitle 的标题作为文件名
         fig_label.savefig(f'{all_save_base_path}{label}_transformed_hist.png', dpi=300)
 
+
 # 特徴量：平均值,最小值,最大值,中央值,
 # 标准差, 变异系数(CV),偏度(Skewness),"Kurtosis"（峰度）
 # 信号power, 二乘平方根, peak强度, 皮尔逊相关系数
@@ -89,13 +92,14 @@ def show_child_hist_stat2():
     df_stat, df_pearson = calc_df_features(big_df)
 
     # 计算平均fft
-    fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat= calc_df_avg_fft(big_df)\
-
-    save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, f'{all_save_base_path}fft_all_avg_result.png')
+    fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat = calc_df_avg_fft(big_df)
+    save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq,
+                    f'{all_save_base_path}fft_all_avg_result.png')
     df_stat.to_csv(f'{all_save_base_path}Child_all_data_features.csv')
     df_freq_stat.to_csv(f'{all_save_base_path}Child_all_data_freq_features.csv')
 
     df_pearson.to_csv(f'{all_save_base_path}Child_all_data_pearson.csv')
+
 
 # 展示2023年所有的儿童的步行特征量(按照标签进行分组展示)
 def show_child_hist_stat3():
@@ -109,7 +113,7 @@ def show_child_hist_stat3():
         data = data.iloc[:, 1:10]
 
         # 计算平均fft
-        fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq = calc_df_avg_fft(data)
+        fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat = calc_df_avg_fft(data)
         save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq,
                         f'{all_save_base_path}fft_{label}_avg_result.png')
 
@@ -117,6 +121,7 @@ def show_child_hist_stat3():
         df_stat, df_pearson = calc_df_features(data)
         df_stat.to_csv(f'{all_save_base_path}Child_{label}_features.csv')
         df_pearson.to_csv(f'{all_save_base_path}Child_{label}_pearson.csv')
+
 
 # 每个个体之间的差异
 def show_child_hist_stat4():
@@ -140,11 +145,12 @@ def show_child_hist_stat4():
         all_individual.append(df_stat)
     all_individual_stat_data = np.array(all_individual)
     std_values = np.std(all_individual_stat_data, axis=0)
-    std_df = pd.DataFrame(std_values, index=all_individual[0].index , columns=all_individual[0].columns)
+    std_df = pd.DataFrame(std_values, index=all_individual[0].index, columns=all_individual[0].columns)
     std_df.to_csv(f'{individual}Child_individual_features.csv')
 
+
 # 读取数据
-def read_data(file_name = '../data/child/2023_03/merged_data/*.csv'):
+def read_data(file_name='../data/child/2023_03/merged_data/*.csv'):
     file_list = glob.glob(file_name)
     appended_data = []
 
@@ -154,6 +160,7 @@ def read_data(file_name = '../data/child/2023_03/merged_data/*.csv'):
 
     big_df = pd.concat(appended_data, ignore_index=True)
     return big_df
+
 
 # 计算数据的各维度特征量
 def calc_df_features(df):
@@ -182,6 +189,7 @@ def calc_df_features(df):
 
     return df_stat, df_pearson
 
+
 # 对单个dataframe整体进行FFT变换
 def calc_df_fft(df):
     T = 0.1  # 采样周期为 0.1 秒（10Hz)
@@ -209,22 +217,22 @@ def calc_df_fft(df):
     # 计算频率
     freq_acc_x = fftfreq(N, T)[:N // 2]
 
-    fft_x_result_scaling = 2.0 / N * np.abs(fft_acc_x[:N // 2])
-    fft_y_result_scaling = 2.0 / N * np.abs(fft_acc_y[:N // 2])
-    fft_z_result_scaling = 2.0 / N * np.abs(fft_acc_z[:N // 2])
+    positive_fft_x = np.abs(fft_acc_x[:N // 2])
+    positive_fft_y = np.abs(fft_acc_y[:N // 2])
+    positive_fft_z = np.abs(fft_acc_z[:N // 2])
 
-    # 绘制傅里叶变换结果
-    # fig, axs = plt.subplots(3, 1, figsize=[10, 5])
-    #
-    # axs[0].plot(freq_acc_x, fft_x_result_scaling, c='r')
-    # axs[1].plot(freq_acc_x, fft_y_result_scaling, c='g')
-    # axs[2].plot(freq_acc_x, fft_z_result_scaling, c='b')
-    # axs[0].set_title('FFT AccX')
-    # axs[1].set_title('FFT AccY')
-    # axs[2].set_title('FFT AccZ')
-    # fig.tight_layout()
-    # plt.show()
-    return fft_x_result_scaling, fft_y_result_scaling, fft_z_result_scaling, freq_acc_x
+    fft_x_result_scaling = 2.0 / N * positive_fft_x
+    fft_y_result_scaling = 2.0 / N * positive_fft_y
+    fft_z_result_scaling = 2.0 / N * positive_fft_z
+
+    # 获取最大频率的值
+    max_freq_x = freq_acc_x[np.argmax(positive_fft_x)]
+    max_freq_y = freq_acc_x[np.argmax(positive_fft_y)]
+    max_freq_z = freq_acc_x[np.argmax(positive_fft_z)]
+
+    return fft_x_result_scaling, fft_y_result_scaling, fft_z_result_scaling, freq_acc_x, \
+        max_freq_x, max_freq_y, max_freq_z
+
 
 # 计算一个时间步上, 频谱能量和
 def calc_fft_spectral_energy(df):
@@ -263,11 +271,11 @@ def calc_fft_spectral_energy(df):
     # 使用L1 范式,计算频谱能量
     total_spectral_energy = spectral_energy_x + spectral_energy_y + spectral_energy_z
 
-    return spectral_energy_x, spectral_energy_y,spectral_energy_z, total_spectral_energy
+    return spectral_energy_x, spectral_energy_y, spectral_energy_z, total_spectral_energy
+
 
 # 计算一个时间步上, 频谱熵
 def spectral_entropy(df):
-
     df_acc_x = df['accx'].values
     df_acc_y = df['accy'].values
     df_acc_z = df['accz'].values
@@ -292,6 +300,7 @@ def spectral_entropy(df):
 
     return entropy_x, entropy_y, entropy_z, entropy_total
 
+
 # 对一个dataframe分段计算FFT,然后合并平均FFT的结果
 def calc_df_avg_fft(df):
     list_windows = slide_window2(df, 32, 0.5)
@@ -302,7 +311,7 @@ def calc_df_avg_fft(df):
 
     features_list = []
     for data_window in list_windows:
-        fft_x, fft_y, fft_z, freq_x = calc_df_fft(data_window)
+        fft_x, fft_y, fft_z, freq_x, max_freq_x, max_freq_y, max_freq_z = calc_df_fft(data_window)
         x_spec_energy, y_spec_energy, z_spec_energy, spec_total = calc_fft_spectral_energy(data_window)
         x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total = spectral_entropy(data_window)
 
@@ -314,7 +323,8 @@ def calc_df_avg_fft(df):
         freq = freq_x
         # 特征值(能量与能量熵)
         features_list.append((x_spec_energy, y_spec_energy, z_spec_energy, spec_total,
-                              x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total))
+                              x_spec_entropy, y_spec_entropy, z_spec_entropy, entropy_total,
+                              max_freq_x, max_freq_y, max_freq_z))
 
     feature_arr = np.array(features_list)
 
@@ -335,16 +345,25 @@ def calc_df_avg_fft(df):
     entropy_z_avg_series = np.mean(feature_arr[:, 6])
     entropy_t_avg_series = np.mean(feature_arr[:, 7])
 
-    # 保存特征分析结果
-    df_stat = pd.DataFrame([energy_x_avg_series, energy_y_avg_series, energy_z_avg_series, energy_t_avg_series,\
-                         entropy_x_avg_series, entropy_y_avg_series, entropy_z_avg_series, entropy_t_avg_series])
-    df_stat.index = ['energy_x', 'energy_y', 'energy_z', 'energy_total', 'entropy_x', 'entropy_y', 'entropy_z', 'entropy_total']
-    df_stat.columns =['value']
+    # 频域最大值(hz)
+    freq_max_x = np.mean(feature_arr[:, 8])
+    freq_max_y = np.mean(feature_arr[:, 9])
+    freq_max_z = np.mean(feature_arr[:, 10])
 
+    # 保存特征分析结果
+    df_stat = pd.DataFrame([energy_x_avg_series, energy_y_avg_series, energy_z_avg_series, energy_t_avg_series, \
+                            entropy_x_avg_series, entropy_y_avg_series, entropy_z_avg_series, entropy_t_avg_series,
+                            freq_max_x, freq_max_y, freq_max_z])
+    df_stat.index = ['energy_x', 'energy_y', 'energy_z', 'energy_total',
+                     'entropy_x', 'entropy_y', 'entropy_z', 'entropy_total',
+                     'freq_max_x', 'freq_max_y', 'freq_max_z']
+    df_stat.columns = ['value']
 
     return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_stat
+
+
 # 保存FFT变换的结果
-def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq , file_name):
+def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, file_name):
     # 绘制傅里叶变换结果
     fig, axs = plt.subplots(3, 1, figsize=[10, 5])
     axs[0].plot(freq, fft_x_avg_series, c='r')
@@ -356,23 +375,25 @@ def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq ,
     fig.tight_layout()
     plt.savefig(f'{file_name}', dpi=300)
 
+
 # 对数据进行汉明窗变换
 def calc_hanmming_window(data, N):
     hamming_window = hamming(N)
     return hamming_window * data
 
+
 # 展示儿童进行全局变换后的结果(使用我自己的算法)
 def show_child_after_transformed():
     df = read_data('../data/child/2023_03/merged_data/A-1_DSCF0001.csv')
     df = df.iloc[:, 1:]
-    data_transformed,rpy = transform_sensor_data_to_np(df.values)
+    data_transformed, rpy = transform_sensor_data_to_np(df.values)
 
     degrees_array = np.degrees(rpy.astype(float))
 
-    df_rpy = pd.DataFrame(degrees_array, columns=['my_roll','my_pitch','my_yaw'])
+    df_rpy = pd.DataFrame(degrees_array, columns=['my_roll', 'my_pitch', 'my_yaw'])
     df_transformed = pd.DataFrame(data_transformed, columns=df.columns)
 
-    data = pd.concat([df_transformed,df_rpy], axis=1)
+    data = pd.concat([df_transformed, df_rpy], axis=1)
 
     # 设置长方体的初始顶点坐标
     def get_cube_vertices():
@@ -464,6 +485,7 @@ def show_child_after_transformed():
     #
     # plt.legend()
     # plt.show()
+
 
 if __name__ == '__main__':
     show_child_hist_stat2()
