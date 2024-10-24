@@ -120,6 +120,8 @@ def show_child_hist_stat3():
         # 计算特征量
         df_stat, df_pearson = calc_df_features(data)
         df_stat.to_csv(f'{all_save_base_path}Child_{label}_features.csv')
+        df_freq_stat.to_csv(f'{all_save_base_path}Child_{label}_freq_features.csv')
+
         df_pearson.to_csv(f'{all_save_base_path}Child_{label}_pearson.csv')
 
 
@@ -281,9 +283,9 @@ def spectral_entropy(df):
     df_acc_z = df['accz'].values
 
     # 使用Welch方法计算功率谱密度 (PSD)
-    _, psd_x = welch(df_acc_x, fs=10)  # 10hz
-    _, psd_y = welch(df_acc_y, fs=10)  # 10hz
-    _, psd_z = welch(df_acc_z, fs=10)  # 10hz
+    _, psd_x = welch(df_acc_x, fs=10, nperseg=len(df))  # 10hz
+    _, psd_y = welch(df_acc_y, fs=10, nperseg=len(df))  # 10hz
+    _, psd_z = welch(df_acc_z, fs=10, nperseg=len(df))  # 10hz
 
     # 归一化 PSD 以形成概率分布
     psd_norm_x = psd_x / np.sum(psd_x)
@@ -488,4 +490,4 @@ def show_child_after_transformed():
 
 
 if __name__ == '__main__':
-    show_child_hist_stat2()
+    show_child_hist_stat3()
