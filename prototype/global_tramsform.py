@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-HZ = 10
+HZ = 50
 def f(x, u):
     quat = x.flatten()
     omega = u.flatten()
