@@ -51,7 +51,7 @@ def calc_df_fft(df,acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz',T = 0.
         max_freq_x, max_freq_y, max_freq_z
 
 # 计算一个时间步上, 频谱能量
-def calc_fft_spectral_energy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz'):
+def calc_fft_spectral_energy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz' ,T = 10):
     df_acc_x = df[acc_x_name].values
     df_acc_y = df[acc_y_name].values
     df_acc_z = df[acc_z_name].values
@@ -79,9 +79,9 @@ def calc_fft_spectral_energy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name
     fft_acc_z = fft_acc_z[:N // 2]
 
     # spectral_energy 计算频谱能量
-    spectral_energy_x = np.sum(np.abs(fft_acc_x) ** 2)
-    spectral_energy_y = np.sum(np.abs(fft_acc_y) ** 2)
-    spectral_energy_z = np.sum(np.abs(fft_acc_z) ** 2)
+    spectral_energy_x = np.sum(np.abs(fft_acc_x) ** 2) / (N * T)
+    spectral_energy_y = np.sum(np.abs(fft_acc_y) ** 2) / (N * T)
+    spectral_energy_z = np.sum(np.abs(fft_acc_z) ** 2) / (N * T)
 
     # 使用L1 范式,计算频谱能量
     total_spectral_energy = spectral_energy_x + spectral_energy_y + spectral_energy_z
@@ -90,15 +90,15 @@ def calc_fft_spectral_energy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name
 
 
 # 计算一个时间步上, 频谱熵
-def spectral_entropy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz'):
+def spectral_entropy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name='accz', T = 10):
     df_acc_x = df[acc_x_name].values
     df_acc_y = df[acc_y_name].values
     df_acc_z = df[acc_z_name].values
 
     # 使用Welch方法计算功率谱密度 (PSD)
-    _, psd_x = welch(df_acc_x, fs=10, nperseg=len(df))  # 10hz
-    _, psd_y = welch(df_acc_y, fs=10, nperseg=len(df))  # 10hz
-    _, psd_z = welch(df_acc_z, fs=10, nperseg=len(df))  # 10hz
+    _, psd_x = welch(df_acc_x, fs=T, nperseg=len(df))  # 10hz
+    _, psd_y = welch(df_acc_y, fs=T, nperseg=len(df))  # 10hz
+    _, psd_z = welch(df_acc_z, fs=T, nperseg=len(df))  # 10hz
 
     # 归一化 PSD 以形成概率分布
     psd_norm_x = psd_x / np.sum(psd_x)

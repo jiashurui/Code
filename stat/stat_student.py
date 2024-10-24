@@ -42,6 +42,45 @@ def show_stu_hist_stat():
     # 保存整个图形
     fig.savefig(f'{all_save_base_path}University_Student_all_data_histogram.png', dpi=300)
 
+    # 使用 groupby 根据 'Category' 列分组
+    groups = list(big_df.groupby('label'))
+
+    for group in groups:
+        label = Constant.uStudent.action_map_en_reverse.get(group[0])
+        data = group[1]
+        fig_label, axes_label = plt.subplots(1, 3, figsize=(12, 6))
+        fig_label.suptitle(f'{label}_hist', fontsize=20)
+
+        for i, ax in enumerate(axes_label):
+            ax.hist(data[col_name[i]], bins=30, color='blue', edgecolor='black', alpha=0.7)
+            title = f'{titles[i % 3]}, label: {label}'
+            ax.set_title(title)
+            ax.set_xlabel('Value(m/s2)')
+            ax.set_ylabel('Number')
+
+        # 保存当前子图的文件，使用 fig_label.suptitle 的标题作为文件名
+        fig_label.savefig(f'{all_save_base_path}{label}_hist.png', dpi=300)
+
+    # Global Transformed
+    data_transformed = transform_sensor_data_to_df(big_df)
+    groups = list(data_transformed.groupby('label'))
+
+    for group in groups:
+        label = Constant.uStudent.action_map_en_reverse.get(group[0])
+        data = group[1]
+        fig_label, axes_label = plt.subplots(1, 3, figsize=(12, 6))
+        fig_label.suptitle(f'{label}_transformed_hist', fontsize=20)
+
+        for i, ax in enumerate(axes_label):
+            ax.hist(data[col_name[i]], bins=30, color='blue', edgecolor='black', alpha=0.7)
+            title = f'{titles[i % 3]}, label: {label}'
+            ax.set_title(title)
+            ax.set_xlabel('Value(m/s2)')
+            ax.set_ylabel('Number')
+
+        # 保存当前子图的文件，使用 fig_label.suptitle 的标题作为文件名
+        fig_label.savefig(f'{all_save_base_path}{label}_transformed_hist.png', dpi=300)
+
 
 # 特徴量：平均值,最小值,最大值,中央值,
 # 标准差, 变异系数(CV),偏度(Skewness),"Kurtosis"（峰度）
@@ -291,4 +330,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_stu_hist_stat3()
+    show_stu_hist_stat2()

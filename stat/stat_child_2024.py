@@ -236,4 +236,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_child_hist_stat3()
+    show_child_hist_stat()
