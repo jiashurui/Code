@@ -59,13 +59,13 @@ def show_stu_hist_stat2():
     df_pearson.to_csv(f'{all_save_base_path}Student_all_data_pearson.csv')
 
 # 展示2023年所有的儿童的步行特征量(按照标签进行分组展示)
-def show_child_hist_stat3():
+def show_stu_hist_stat3():
     big_df = read_data()
     # 使用 group by 根据 'Category' 列分组
-    groups = list(big_df.groupby('X'))
+    groups = list(big_df.groupby('label'))
 
     for group in groups:
-        label = Constant.ChildWalk.action_map_en.get(group[0])
+        label = Constant.uStudent.action_map_en_reverse.get(group[0])
         data = group[1]
         data = data.iloc[:, 1:10]
 
@@ -76,11 +76,11 @@ def show_child_hist_stat3():
 
         # 计算特征量
         df_stat, df_pearson = calc_df_features(data)
-        df_stat.to_csv(f'{all_save_base_path}Child_{label}_features.csv')
-        df_pearson.to_csv(f'{all_save_base_path}Child_{label}_pearson.csv')
+        df_stat.to_csv(f'{all_save_base_path}Student_{label}_features.csv')
+        df_pearson.to_csv(f'{all_save_base_path}Student_{label}_pearson.csv')
 
 # 每个个体之间的差异
-def show_child_hist_stat4():
+def show_stu_hist_stat4():
     df = read_data()
 
     # 使用 group by 根据 'Category' 列分组
@@ -114,6 +114,10 @@ def read_data(file_name = '../data/student/0726_lab/merge_labeled.csv'):
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
+
+    # 过滤掉 -1 标签(未参与实验的数据)
+
+    big_df = big_df[big_df['label'] != -1]
     return big_df
 
 # 计算数据的各维度特征量
@@ -146,9 +150,9 @@ def calc_df_features(df):
 # 对单个dataframe整体进行FFT变换
 def calc_df_fft(df):
     T = 0.1  # 采样周期为 0.1 秒（10Hz)
-    df_acc_x = df['acc_x'].values
-    df_acc_y = df['acc_y'].values
-    df_acc_z = df['acc_z'].values
+    df_acc_x = df['x(m/s2)'].values
+    df_acc_y = df['y(m/s2)'].values
+    df_acc_z = df['z(m/s2)'].values
 
     N = len(df_acc_x)
 
@@ -333,4 +337,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_stu_hist_stat()
+    show_stu_hist_stat3()

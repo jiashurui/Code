@@ -129,6 +129,9 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
         # 去除头部
         data = data[stop_simple: len(data)]
 
+        # 归一化
+        data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
+
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
 

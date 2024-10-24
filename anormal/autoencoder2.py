@@ -33,8 +33,7 @@ torch.manual_seed(3407)
 # train_data = get_child_all_features(slide_window_length)
 # train_data, test_data = get_child_part_action(slide_window_length)
 # train_data, test_data = get_child_2024_all_features(slide_window_length)
-if dataset_name == 'uci':
-    train_normal,  test_abnormal = get_realworld_raw_for_abnormal(slide_window_length, 6)
+train_normal,  test_abnormal = get_realworld_raw_for_abnormal(slide_window_length, 6)
 
 input_dim = train_normal.size(2)  # Dimensionality of input sequence
 
