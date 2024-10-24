@@ -166,8 +166,8 @@ def get_data_1d_uci_part_data(data_type):
     not_selected_data = data_combined[(labels == 2)]
 
     # 归一化处理，将值缩放到 [-1, 1] 范围 TODO 用在autoencoder上面发现重建成了一个直线
-    # selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
-    # not_selected_data = 2 * (not_selected_data - not_selected_data.min()) / (not_selected_data.max() - not_selected_data.min()) - 1
+    selected_data = 2 * (selected_data - selected_data.min()) / (selected_data.max() - selected_data.min()) - 1
+    not_selected_data = 2 * (not_selected_data - not_selected_data.min()) / (not_selected_data.max() - not_selected_data.min()) - 1
 
 
     train_data_tensor = torch.tensor(np.array(selected_data), dtype=torch.float32).to(device)
