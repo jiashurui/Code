@@ -14,7 +14,12 @@ from prototype.global_tramsform import transform_sensor_data_to_df, transform_se
 from stat_common import calc_df_fft, calc_fft_spectral_energy, spectral_entropy, save_fft_result, calc_df_features
 from utils.slidewindow import slide_window2
 
-all_save_base_path = './child/202404/all/'
+is_transform = True
+if is_transform:
+    all_save_base_path = './child/202404/all_trans/'
+else:
+    all_save_base_path = './child/202404/all/'
+
 individual = './child/202404/individual/'
 
 # 统计所有儿童整体行走数据
@@ -47,6 +52,8 @@ def show_child_hist_stat():
 def show_child_hist_stat2():
     big_df = read_data()
     big_df = big_df.iloc[:, 1:22]
+    if is_transform:
+        big_df = transform_sensor_data_to_df(big_df)
 
     # 计算特征量
     df_stat, df_pearson = calc_df_features(big_df)
@@ -236,4 +243,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_child_hist_stat()
+    show_child_hist_stat2()

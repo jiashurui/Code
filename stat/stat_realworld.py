@@ -14,7 +14,12 @@ from stat_common import calc_fft_spectral_energy, spectral_entropy, calc_hanmmin
 
 from utils.slidewindow import slide_window2
 
-all_save_base_path = './realworld/all/'
+is_transform = True
+if is_transform:
+    all_save_base_path = './realworld/all_trans/'
+else:
+    all_save_base_path = './realworld/all/'
+
 individual = './realworld/individual/'
 
 
@@ -87,6 +92,9 @@ def show_realworld_hist_stat():
 def show_realworld_hist_stat2():
     big_df = read_data()
 
+    if is_transform:
+        big_df = transform_sensor_data_to_df(big_df)
+
     # 计算特征量
     df_stat, df_pearson = calc_df_features(big_df)
 
@@ -109,6 +117,9 @@ def show_realworld_hist_stat3():
     for group in groups:
         label = Constant.RealWorld.action_map_reverse.get(group[0])
         data = group[1]
+
+        if is_transform:
+            data = transform_sensor_data_to_df(data)
 
         # 计算平均fft
         fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat = calc_df_avg_fft(data)

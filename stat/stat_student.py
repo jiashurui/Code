@@ -14,10 +14,16 @@ from prototype.global_tramsform import transform_sensor_data_to_df, transform_se
 from stat_common import calc_hanmming_window, save_fft_result, calc_df_fft, calc_fft_spectral_energy, spectral_entropy
 from utils.slidewindow import slide_window2
 
-all_save_base_path = './student/20240721/all/'
+is_transform = True
+if is_transform:
+    all_save_base_path = './student/20240721/all_trans/'
+else:
+    all_save_base_path = './student/20240721/all/'
+
+
 individual = './student/20240721/individual/'
 
-# 统计所有儿童整体行走数据
+# 统计所有大学生整体行走数据
 def show_stu_hist_stat():
     big_df = read_data()
 
@@ -88,6 +94,8 @@ def show_stu_hist_stat():
 def show_stu_hist_stat2():
     big_df = read_data()
     big_df = big_df.iloc[:, 1:10]
+    if is_transform:
+        big_df = transform_sensor_data_to_df(big_df)
 
     # 计算特征量
     df_stat, df_pearson = calc_df_features(big_df)
@@ -109,6 +117,9 @@ def show_stu_hist_stat3():
         label = Constant.uStudent.action_map_en_reverse.get(group[0])
         data = group[1]
         data = data.iloc[:, 1:10]
+
+        if is_transform:
+            data = transform_sensor_data_to_df(data)
 
         # 计算平均fft
         fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat = calc_df_avg_fft(data)
@@ -330,4 +341,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_stu_hist_stat()
+    show_stu_hist_stat3()

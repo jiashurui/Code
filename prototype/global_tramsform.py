@@ -2,11 +2,11 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-
+HZ = 10
 def f(x, u):
     quat = x.flatten()
     omega = u.flatten()
-    dt = 1 / 50  # 假设时间步长为 50Hz
+    dt = 1 / HZ
 
     # 计算四元数的变化
     r_delta = Rotation.from_rotvec(omega * dt)
@@ -71,7 +71,7 @@ x = np.array([[0], [0], [0], [1]])  # 初始四元数，表示无旋转
 P = np.eye(4)
 
 # 时间步长
-dt = 1 / 50  # 50 Hz
+dt = 1 / HZ
 
 # 转换前和转换后的加速度存储
 def transform_sensor_data(data):
@@ -84,7 +84,7 @@ def transform_sensor_data(data):
     P = np.eye(4)
 
     # 时间步长
-    dt = 1 / 50  # 50 Hz
+    dt = 1 / HZ
     data = np.array(data)
     arr_acc = data[:, 0:3]
     arr_gyo = data[:, 3:6]

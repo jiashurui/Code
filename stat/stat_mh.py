@@ -95,7 +95,6 @@ def stat_mh_label_data():
         df_stat.to_csv(f'{save_base_path}all_group_by_label/stat/mHealth_{label}_features.csv')
         df_pearson.to_csv(f'{save_base_path}all_group_by_label/stat/mHealth_{label}_pearson.csv')
 
-
 # 统计mHealth 个人向数据
 def stat_mh_indivdual_data():
     df = read_data()

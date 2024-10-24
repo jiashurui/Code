@@ -13,10 +13,14 @@ from stat_common import calc_fft_spectral_energy, spectral_entropy, calc_hanmmin
     save_fft_result
 
 from utils.slidewindow import slide_window2
+is_transform = True
 
-all_save_base_path = './child/202303/all/'
+if is_transform:
+    all_save_base_path = './child/202303/all_trans/'
+else:
+    all_save_base_path = './child/202303/all/'
+
 individual = './child/202303/individual/'
-
 
 # 统计所有儿童整体行走数据
 def show_child_hist_stat():
@@ -87,6 +91,8 @@ def show_child_hist_stat():
 def show_child_hist_stat2():
     big_df = read_data()
     big_df = big_df.iloc[:, 1:10]
+    if is_transform:
+        big_df = transform_sensor_data_to_df(big_df)
 
     # 计算特征量
     df_stat, df_pearson = calc_df_features(big_df)
@@ -111,6 +117,8 @@ def show_child_hist_stat3():
         label = Constant.ChildWalk.action_map_en.get(group[0])
         data = group[1]
         data = data.iloc[:, 1:10]
+        if is_transform:
+            data = transform_sensor_data_to_df(data)
 
         # 计算平均fft
         fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_freq_stat = calc_df_avg_fft(data)
