@@ -330,4 +330,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_stu_hist_stat2()
+    show_stu_hist_stat()

@@ -56,37 +56,28 @@ def calc_fft_spectral_energy(df, acc_x_name='accx',acc_y_name= 'accy',acc_z_name
     df_acc_y = df[acc_y_name].values
     df_acc_z = df[acc_z_name].values
 
-    N = len(df_acc_x)
+    # 使用 Welch 方法计算功率谱密度（PSD）
+    freqs_x, psd_x = welch(df_acc_x, fs=T, nperseg=len(df))
+    freqs_y, psd_y = welch(df_acc_y, fs=T, nperseg=len(df))
+    freqs_z, psd_z = welch(df_acc_z, fs=T, nperseg=len(df))
 
-    # 前处理: 去除直流成分
-    df_acc_x = df_acc_x - np.mean(df_acc_x)
-    df_acc_y = df_acc_y - np.mean(df_acc_y)
-    df_acc_z = df_acc_z - np.mean(df_acc_z)
+    # 找到指定频率范围 [0, 5Hz] 的索引
+    freq_indices = np.where((freqs_x >= 0) & (freqs_x <= 5))[0]
 
-    # 计算傅里叶变换 (对原始数据进行 汉明窗变换)
-    df_acc_x = calc_hanmming_window(df_acc_x, N)
-    df_acc_y = calc_hanmming_window(df_acc_y, N)
-    df_acc_z = calc_hanmming_window(df_acc_z, N)
+    # 计算频带 [0, 5Hz] 的能量
+    spectral_energy_x = np.sum(psd_x[freq_indices])
+    spectral_energy_y = np.sum(psd_y[freq_indices])
+    spectral_energy_z = np.sum(psd_z[freq_indices])
 
-    # FFT
-    fft_acc_x = fft(df_acc_x)
-    fft_acc_y = fft(df_acc_y)
-    fft_acc_z = fft(df_acc_z)
+    # 归一化：除以频率区间内的频率数量 (x + y + 1)
+    normalized_energy_x = spectral_energy_x / (5 + 1)
+    normalized_energy_y = spectral_energy_y / (5 + 1)
+    normalized_energy_z = spectral_energy_z / (5 + 1)
 
-    # 只保留正频率部分（傅里叶变换的前一半结果）
-    fft_acc_x = fft_acc_x[:N // 2]
-    fft_acc_y = fft_acc_y[:N // 2]
-    fft_acc_z = fft_acc_z[:N // 2]
+    # 总的频谱能量
+    total_spectral_energy = normalized_energy_x + normalized_energy_y + normalized_energy_z
 
-    # spectral_energy 计算频谱能量
-    spectral_energy_x = np.sum(np.abs(fft_acc_x) ** 2) / (N * T)
-    spectral_energy_y = np.sum(np.abs(fft_acc_y) ** 2) / (N * T)
-    spectral_energy_z = np.sum(np.abs(fft_acc_z) ** 2) / (N * T)
-
-    # 使用L1 范式,计算频谱能量
-    total_spectral_energy = spectral_energy_x + spectral_energy_y + spectral_energy_z
-
-    return spectral_energy_x, spectral_energy_y, spectral_energy_z, total_spectral_energy
+    return normalized_energy_x, normalized_energy_y, normalized_energy_z, total_spectral_energy
 
 
 # 计算一个时间步上, 频谱熵
@@ -158,5 +149,10 @@ def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq ,
     axs[0].set_title('FFT AccX')
     axs[1].set_title('FFT AccY')
     axs[2].set_title('FFT AccZ')
+    # 限制 x 轴最多显示到 5
+    axs[0].set_xlim(0, 5)
+    axs[1].set_xlim(0, 5)
+    axs[2].set_xlim(0, 5)
+
     fig.tight_layout()
     plt.savefig(f'{file_name}', dpi=300)

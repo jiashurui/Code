@@ -329,4 +329,4 @@ def calc_df_avg_fft(df):
     return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_stat
 
 if __name__ == '__main__':
-    show_child_hist_stat2()
+    show_child_hist_stat3()
