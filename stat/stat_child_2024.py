@@ -58,52 +58,6 @@ def show_child_hist_stat2():
     df_freq_stat.to_csv(f'{all_save_base_path}Child_freq_features.csv')
     df_pearson.to_csv(f'{all_save_base_path}Child_all_data_pearson.csv')
 
-# 展示2023年所有的儿童的步行特征量(按照标签进行分组展示)
-def show_child_hist_stat3():
-    big_df = read_data()
-    # 使用 group by 根据 'Category' 列分组
-    groups = list(big_df.groupby('X'))
-
-    for group in groups:
-        label = Constant.ChildWalk.action_map_en.get(group[0])
-        data = group[1]
-        data = data.iloc[:, 1:10]
-
-        # 计算平均fft
-        fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq = calc_df_avg_fft(data)
-        save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq,
-                        f'{all_save_base_path}fft_{label}_avg_result.png')
-
-        # 计算特征量
-        df_stat, df_pearson = calc_df_features(data)
-        df_stat.to_csv(f'{all_save_base_path}Child_{label}_features.csv')
-        df_pearson.to_csv(f'{all_save_base_path}Child_{label}_pearson.csv')
-
-# 每个个体之间的差异
-def show_child_hist_stat4():
-    df = read_data()
-
-    # 使用 group by 根据 'Category' 列分组
-    groups = list(df.groupby('object'))
-
-    all_individual = []
-    for group in groups:
-        label = group[0]
-        data = group[1]
-        data = data.iloc[:, 1:10]
-
-        # 计算平均fft
-        fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq = calc_df_avg_fft(data)
-        save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq,
-                        f'{individual}fft_{label}_avg_result.png')
-
-        df_stat, _ = calc_df_features(data)
-        all_individual.append(df_stat)
-    all_individual_stat_data = np.array(all_individual)
-    std_values = np.std(all_individual_stat_data, axis=0)
-    std_df = pd.DataFrame(std_values, index=all_individual[0].index , columns=all_individual[0].columns)
-    std_df.to_csv(f'{individual}Child_individual_features.csv')
-
 # 读取数据
 def read_data(file_name = '../data/child/2024_04/toyota_202404_crossing/*/*/*.csv'):
     file_list = glob.glob(file_name)
@@ -282,4 +236,4 @@ def show_child_after_transformed():
     # plt.show()
 
 if __name__ == '__main__':
-    show_child_hist_stat2()
+    show_child_hist_stat3()
