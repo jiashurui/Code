@@ -31,7 +31,7 @@ trans_flag = False
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
-train_normal,test_normal, test_abnormal = get_realworld_transformed_for_abnormal(slide_window_length, 6)
+train_normal, test_normal, test_abnormal = get_realworld_transformed_for_abnormal(slide_window_length, 6)
 
 input_dim = train_normal.size(2)  # Dimensionality of input sequence
 
@@ -54,16 +54,17 @@ elif model_name == 'lstm_vae':
     model_load = LSTM_VAE(input_dim, hidden_dim, num_layers).to(device)
 
 elif model_name == 'conv_lstm_vae':
-    train_normal = train_normal.transpose(1,2)
+    train_normal = train_normal.transpose(1, 2)
     test_abnormal = test_abnormal.transpose(1, 2)
+    test_normal = test_normal.transpose(1, 2)
     trans_flag = True
     model = ConvLSTM_VAE(input_dim).to(device)
     model_load = ConvLSTM_VAE(input_dim).to(device)
 
 elif model_name == 'conv_lstm':
-    train_normal = train_normal.transpose(1,2)
-
+    train_normal = train_normal.transpose(1, 2)
     test_abnormal = test_abnormal.transpose(1, 2)
+    test_normal = test_normal.transpose(1, 2)
     trans_flag = True
     model = ConvLSTMAutoencoder(input_dim).to(device)
     model_load = ConvLSTMAutoencoder(input_dim).to(device)
