@@ -8,13 +8,40 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
-from prototype.global_tramsform import transform_sensor_data, transform_sensor_data_to_df
+from prototype.global_tramsform import transform_sensor_data, transform_sensor_data_to_df, transform_sensor_data_to_df0
+from convert_common import convert_df_columns_name
+from utils.show import show_acc_data_before_transformed
 from utils.slidewindow import slide_window2
 
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 初始化 MinMaxScaler(Normalization [-1,1])
 scaler = MinMaxScaler(feature_range=(-1, 1))
+
+def read_data():
+    file_name = '../data/realworld/*/shin_merged.csv'
+    file_list = glob.glob(file_name)
+    appended_data = []
+
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+        appended_data.append(data)
+
+    df = pd.concat(appended_data, ignore_index=True)
+
+    # 进行数据筛选, 仅仅选择步行数据
+    df = df[df['label'] == 7]
+
+    # 进行列名转换
+    df = convert_df_columns_name(df)
+
+    # Global Transform
+    df , df_transformed = transform_sensor_data_to_df0(df)
+
+    # 数据展示
+    show_acc_data_before_transformed(df , df_transformed,300,400)
+
+    return df
 
 def get_realworld_for_abnormal(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
@@ -163,5 +190,5 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
 
 
 if __name__ == '__main__':
-    normal,abnormal = get_realworld_raw_for_abnormal(128,9)
+    normal,abnormal = read_data()
     print()

@@ -53,7 +53,6 @@ def convert_data():
 
     return big_df
 
-
 # 返回: XYZ(轴) * 3种信号数据(加速度,角速度,磁力) * 10维度特征
 # Series(90)
 def calc_df_features(df):
