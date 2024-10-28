@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 10
+epochs = 50
 in_channel = 6
 out_channel = 8
 # realworld
