@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-HZ = 10
+HZ = 50
 def f(x, u):
     quat = x.flatten()
     omega = u.flatten()
@@ -115,18 +115,12 @@ def transform_sensor_data(data):
     return acc_global
 
 
-def transform_sensor_data_to_df0(data):
-    origin_data = data.copy()
-    np_acc = transform_sensor_data(data)
-    data.iloc[:, :3] = np_acc[:, :3]
-    return origin_data, data
-
-def transform_sensor_data_to_df(data):
+def transform_sensor_data_to_df2(data):
     np_acc = transform_sensor_data(data)
     data.iloc[:, :3] = np_acc[:, :3]
     return data
 
-def transform_sensor_data_to_np(data):
+def transform_sensor_data_to_np2(data):
     np_acc = transform_sensor_data(data)
     data[:, :3] = np_acc[:, :3]
 

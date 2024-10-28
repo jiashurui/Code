@@ -28,6 +28,33 @@ def show_me_acc(np_arr):
     plt.grid(True)
     plt.show()
 
+# Param:{df: 全局变换之前的dataframe}
+# Param:{df_transformed: 全局变换之后的dataframe}
+# Param:{start_index : 开始的索引}
+# Param:{end_index: 结束的索引}
+# Result:{展示图片}
+def show_acc_data_before_transformed(df, df_transformed, start_index = 0, end_index = 1000):
+
+    # 对展示数据进行截断
+    data = df.iloc[start_index:end_index, :]
+    data_transformed = df_transformed.iloc[start_index:end_index, :]
+
+    # 绘图
+    plt.figure(figsize=(16, 8))
+
+    # 以索引为横坐标,纵坐标为加速度数据(这里默认加速度数据处于前三个位置)
+    plt.plot(data.index, data['accx'], color='r', linestyle='-', label='accx')
+    plt.plot(data.index, data['accy'], color='g', linestyle='-', label='accy')
+    plt.plot(data.index, data['accz'], color='b', linestyle='-', label='accz')
+
+    # 进行了全局变换之后的图
+    plt.plot(data_transformed.index, data_transformed['accx'], color='#8B0000', linestyle='--', label='accx_transformed')
+    plt.plot(data_transformed.index, data_transformed['accy'], color='#006400', linestyle='--', label='accy_transformed')
+    plt.plot(data_transformed.index, data_transformed['accz'], color='#00008B', linestyle='--', label='accz_transformed')
+
+    plt.legend()
+    # 展示图片
+    plt.show()
 
 def show_me_data1(df, col_name):
     fig, ax = plt.subplots()
@@ -221,7 +248,7 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
         real_time_show_phone_data.line2_3.set_ydata(y3_data_2)
 
         # 重新调整 x 和 y 轴的范围
-        show_range_percent = 1.1  # 110%
+        show_range_percent = 1.1  # 150%
         real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0] * show_range_percent)
         real_time_show_phone_data.ax.set_ylim(np.min(float_matrix[:, :3]) * show_range_percent, np.max(float_matrix[:, :3]) * show_range_percent)
         real_time_show_phone_data.ax.set_title(f'acc_data, '
@@ -232,7 +259,6 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
 
     plt.draw()  # 重绘当前图表
     plt.pause(0.01)  # 短暂停以确保图表刷新
-
 
 if __name__ == '__main__':
 

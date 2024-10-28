@@ -18,7 +18,7 @@ real_normal = real_normal.cpu().numpy()
 real_abnormal = real_abnormal.cpu().numpy()
 # 定义 HMM 模型
 n_components = 6  # 假设有6个隐状态
-model = hmm.GaussianHMM(n_components=n_components, covariance_type='diag', n_iter=100)
+model = hmm.GaussianHMM(n_components=n_components, covariance_type='diag', n_iter=1000)
 
 
 # 展平数据并训练 HMM
