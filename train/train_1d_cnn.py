@@ -113,7 +113,7 @@ def apply_1d_cnn(test_data):
     model_apply = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
 
     if not model_load_flag:
-        model_apply.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+        model_apply.load_state_dict(torch.load('../model/1D-CNN-3CH.pth', map_location=device))
         model_apply.eval()
 
     start_time = datetime.now()

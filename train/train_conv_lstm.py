@@ -108,12 +108,12 @@ def train_model():
 
 model_load_flag = False
 
-def apply_Conv_LSTM(test_data):
+def apply_conv_lstm(test_data):
     global model_load_flag
-    model_apply = ConvLSTM(in_channels=in_channel, out_channel=out_channel).to(device)
+    model_apply = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 
     if not model_load_flag:
-        model_apply.load_state_dict(torch.load('../model/Conv-LSTM.pth'))
+        model_apply.load_state_dict(torch.load('../model/Conv-LSTM.pth', map_location=device))
         model_apply.eval()
 
     start_time = datetime.now()
