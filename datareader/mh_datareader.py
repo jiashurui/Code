@@ -323,10 +323,8 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
                         'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
                         'label']
 
-        # filter 1:standing 4:walking 11:running
-        # filtered_df = data[data['label'].isin([1, 4, 11])]
-        # filtered_df.loc[:, 'label'] = filtered_df['label'].replace({1: 2, 4: 1, 11: 3})
-
+        # Global Transform
+        data = transform_sensor_data_to_df(data)
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
@@ -362,8 +360,8 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
 
     # 根据标签,分割数据
     # 1.0 STANDING 4.0 WALK 5.0 upstair
-    condition = data[:, :, 23] != 5.0
-    condition_abnormal = data[:, :, 23] == 5.0
+    condition = data[:, :, 23] == 4.0
+    condition_abnormal = data[:, :, 23] != 4.0
 
     # 使用布尔索引进行分割
     tensor_walk = data[condition[:, 0]]

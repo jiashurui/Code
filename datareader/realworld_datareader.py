@@ -180,20 +180,27 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_tra
     data_label = torch.tensor(labels, dtype=torch.long).to(device)
 
     # 根据标签,分割数据
-    condition = data_tensor[:, :, 9] != 1.0  # standing
-    stand_condition = data_tensor[:, :, 9] == 1.0  # standing
+    condition = data_tensor[:, :, 9] == 7.0  # walking
+    stand_condition = data_tensor[:, :, 9] != 7.0  # not walking
 
     # 使用布尔索引进行分割
-    tensor_not_standing = data_tensor[condition[:, 0]]
-    tensor_standing = data_tensor[stand_condition[:, 0]]
+    tensor_walking = data_tensor[condition[:, 0]]
+    tensor_not_walking = data_tensor[stand_condition[:, 0]]
 
+    # 计算分割点 7:3
+    split_point = int(0.7 * len(tensor_walking))
 
-    return tensor_not_standing[:,:,:features_num], tensor_standing[:,:,:features_num]
+    # train data/label   test data/label
+    train_normal_data = tensor_walking[:split_point].to(device)
+    test_abnormal_data = tensor_walking[split_point:].to(device)
+
+    return train_normal_data[:, :, :features_num], test_abnormal_data[:, :, :features_num], tensor_not_walking[:, :, :features_num]
+
 
 # 读取realworld数据用于异常检测
 def get_realworld_transformed_for_abnormal(slide_window_length, features_num):
     return get_realworld_raw_for_abnormal(slide_window_length, features_num, global_transform=True)
 
 if __name__ == '__main__':
-    normal,abnormal = read_data()
+    normal,abnormal,test_abnormal = get_realworld_transformed_for_abnormal(128, 6)
     print()

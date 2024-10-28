@@ -31,16 +31,9 @@ trans_flag = False
 # https://arxiv.org/abs/2109.08203
 torch.manual_seed(3407)
 
-# (simple_size, window_length, features_num)
-# train_data = get_child_all_features(slide_window_length)
-# train_data, test_data = get_child_part_action(slide_window_length)
-# train_data, test_data = get_child_2024_all_features(slide_window_length)
-train_normal,  test_abnormal = get_realworld_transformed_for_abnormal(slide_window_length, 6)
+train_normal,test_normal, test_abnormal = get_realworld_transformed_for_abnormal(slide_window_length, 6)
 
 input_dim = train_normal.size(2)  # Dimensionality of input sequence
-
-# LSTM Autoencoder Model
-# Forward Input (batch_size, seq_length, dim)
 
 if model_name == 'lstm':
     hidden_dim = 128  # Hidden state size
@@ -149,11 +142,49 @@ loss_avg_plot = show.show_me_data0(lost_avg_arr[1:len(lost_avg_arr)-1])
 # 展示梯度数据
 gradient_utils.show()
 
+
 # Test
 ##############################################################################################################
 # 实例化模型(加载模型参数)
 model_load.load_state_dict(torch.load('../model/autoencoder.pth'))
 model_load.eval()
+
+
+
+# 测试正常
+with torch.no_grad():
+
+    loss_sum_test = 0.0  #
+    every_simple_loss = []  # 每个样本的loss(batch)
+    show_count = 0
+
+    for i in range(0, test_normal.size()[0], batch_size):
+        input_data = test_normal[i: i + batch_size]
+
+        if input_data.size(0) != batch_size:
+            continue
+
+        # VAE
+        if model_name == 'vae' or model_name == 'lstm_vae' or model_name == 'conv_lstm_vae':
+            outputs, _, u, sigma = model_load(input_data)
+            loss = model_load.loss_function(outputs, input_data, u, sigma)
+        else:
+            outputs, latent_normal = model_load(input_data)
+            loss = loss_function(outputs, input_data)
+
+        # 单样本Loss
+        loss_sum_test = (loss_sum_test + loss.item())
+        every_simple_loss.append(loss.item())
+
+        # 输出
+        if show_count < 5:
+            show_tensor_data(input_data, outputs, loss, trans_flag, title=f'{dataset_name}-normal-showcase')
+            show_count += 1
+
+    print(f'测试集(mHealth)平均单样本(正例) loss: {loss_sum_test / (i+1)}')  # 平均单样本 loss
+
+    show.show_me_data0(every_simple_loss)
+
 
 # 测试反例
 with torch.no_grad():
