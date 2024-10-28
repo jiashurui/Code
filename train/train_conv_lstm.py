@@ -5,6 +5,7 @@ import torch
 from torch import nn
 
 from cnn.cnn import DeepOneDimCNN
+from cnn.conv_lstm import ConvLSTM
 from datareader.realworld_datareader import get_realworld_for_recon
 from prototype.constant import Constant
 from utils import show, report
@@ -18,8 +19,8 @@ epochs = 10
 in_channel = 6
 out_channel = 8
 # realworld
-model = DeepOneDimCNN(in_channels=in_channel,out_channel=out_channel).to(device)
-model_load = DeepOneDimCNN(in_channels=in_channel,out_channel=out_channel).to(device)
+model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
+model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 loss_function = nn.CrossEntropyLoss()
 label_map = Constant.RealWorld.action_map
@@ -72,11 +73,10 @@ def train_model():
     report.save_plot(loss_plot, 'learn-loss')
 
     # save my model
-    torch.save(model.state_dict(), '../model/1D-CNN-3CH.pth')
+    torch.save(model.state_dict(), '../model/Conv-LSTM.pth')
 
-
-
-    model_load.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+    # Load Model
+    model_load.load_state_dict(torch.load('../model/Conv-LSTM.pth'))
 
     model_load.eval()
     num_sum = 0
@@ -108,12 +108,12 @@ def train_model():
 
 model_load_flag = False
 
-def apply_1d_cnn(test_data):
+def apply_Conv_LSTM(test_data):
     global model_load_flag
-    model_apply = DeepOneDimCNN(in_channels=in_channel, out_channel=out_channel).to(device)
+    model_apply = ConvLSTM(in_channels=in_channel, out_channel=out_channel).to(device)
 
     if not model_load_flag:
-        model_apply.load_state_dict(torch.load('../model/1D-CNN-3CH.pth'))
+        model_apply.load_state_dict(torch.load('../model/Conv-LSTM.pth'))
         model_apply.eval()
 
     start_time = datetime.now()
