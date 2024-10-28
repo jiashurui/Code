@@ -260,6 +260,119 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
     plt.draw()  # 重绘当前图表
     plt.pause(0.01)  # 短暂停以确保图表刷新
 
+
+# 实时展示异常检测结果
+def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, rpy):
+    plt.ion()  # 开启交互模式
+    # 获取当前数据前三列
+    x_data = np.arange(origin_data.shape[0])
+    y1_data = origin_data[:, 0]  # 第一列
+    y2_data = origin_data[:, 1]  # 第二列
+    y3_data = origin_data[:, 2]  # 第三列
+
+    y1_data_2 = transformed_data[:, 0]  # 变换后第1列
+    y2_data_2 = transformed_data[:, 1]  # 变换后第2列
+    y3_data_2 = transformed_data[:, 2]  # 变换后第3列
+
+    y1_data_3 = model_recon[:, 0]  # 重建后第1列
+    y2_data_3 = model_recon[:, 1]  # 重建后第2列
+    y3_data_3 = model_recon[:, 2]  # 重建后第3列
+
+
+    # 如果是第一次调用，初始化图表
+    if not hasattr(real_time_show_phone_data, 'initialized'):
+        real_time_show_phone_data.fig, real_time_show_phone_data.ax = plt.subplots(3, 1)
+        plt.title('acc_data')
+
+        # 第1行: 原始数据
+        real_time_show_phone_data.line1, = real_time_show_phone_data.ax[0].plot(x_data, y1_data, label='acc_x',color='red')
+        real_time_show_phone_data.line2, = real_time_show_phone_data.ax[0].plot(x_data, y2_data, label='acc_y',color='green')
+        real_time_show_phone_data.line3, = real_time_show_phone_data.ax[0].plot(x_data, y3_data, label='acc_z',color='blue')
+
+        real_time_show_phone_data.ax[0].legend()
+        real_time_show_phone_data.ax[0].set_title('Origin Data')
+
+
+        # 第2行: 全局变换后
+        real_time_show_phone_data.line2_1, = real_time_show_phone_data.ax[1].plot(x_data, y1_data_2,
+                                                                                     label='acc_x_t',
+                                                                                     color='#8B0000'
+                                                                               , linestyle='--'
+                                                                               )
+        real_time_show_phone_data.line2_2, = real_time_show_phone_data.ax[1].plot(x_data, y2_data_2,
+                                                                                     label='acc_y_t',
+                                                                                     color='#006400'
+                                                                               , linestyle='--'
+                                                                               )
+        real_time_show_phone_data.line2_3, = real_time_show_phone_data.ax[1].plot(x_data, y3_data_2,
+                                                                                     label='acc_z_t',
+                                                                                     color='#00008B'
+                                                                               , linestyle='--')
+        real_time_show_phone_data.ax[1].legend()
+        real_time_show_phone_data.ax[1].set_title('Transformed Data')
+
+
+        # 第2行: 全局变换后
+        real_time_show_phone_data.line3_1, = real_time_show_phone_data.ax[2].plot(x_data, y1_data_3,
+                                                                                     label='acc_x_t',
+                                                                                     color='#8B0000'
+                                                                               , linestyle='--'
+                                                                               )
+        real_time_show_phone_data.line3_2, = real_time_show_phone_data.ax[2].plot(x_data, y2_data_3,
+                                                                                     label='acc_y_t',
+                                                                                     color='#006400'
+                                                                               , linestyle='--'
+                                                                               )
+        real_time_show_phone_data.line3_3, = real_time_show_phone_data.ax[2].plot(x_data, y3_data_3,
+                                                                                     label='acc_z_t',
+                                                                                     color='#00008B'
+                                                                               , linestyle='--')
+        real_time_show_phone_data.ax[2].legend()
+        real_time_show_phone_data.ax[2].set_title('Transformed Data')
+
+        # 设置 x 和 y 轴的限制
+        for ax in real_time_show_phone_data.ax:
+            ax.set_xlim(0, origin_data.shape[0])
+            ax.set_ylim(np.min(origin_data[:, :3]), np.max(origin_data[:, :3]))
+
+        real_time_show_phone_data.initialized = True
+    else:
+        # 更新数据而不是重新绘制图表
+        real_time_show_phone_data.line1.set_xdata(x_data)
+        real_time_show_phone_data.line1.set_ydata(y1_data)
+        real_time_show_phone_data.line2.set_xdata(x_data)
+        real_time_show_phone_data.line2.set_ydata(y2_data)
+        real_time_show_phone_data.line3.set_xdata(x_data)
+        real_time_show_phone_data.line3.set_ydata(y3_data)
+
+        # 更新第二组数据的线条
+        real_time_show_phone_data.line2_1.set_xdata(x_data)
+        real_time_show_phone_data.line2_1.set_ydata(y1_data_2)
+        real_time_show_phone_data.line2_2.set_xdata(x_data)
+        real_time_show_phone_data.line2_2.set_ydata(y2_data_2)
+        real_time_show_phone_data.line2_3.set_xdata(x_data)
+        real_time_show_phone_data.line2_3.set_ydata(y3_data_2)
+
+
+        # 更新第三组数据的线条
+        real_time_show_phone_data.line3_1.set_xdata(x_data)
+        real_time_show_phone_data.line3_1.set_ydata(y1_data_2)
+        real_time_show_phone_data.line3_2.set_xdata(x_data)
+        real_time_show_phone_data.line3_2.set_ydata(y2_data_2)
+        real_time_show_phone_data.line3_3.set_xdata(x_data)
+        real_time_show_phone_data.line3_3.set_ydata(y3_data_2)
+
+        # 重新调整 x 和 y 轴的范围
+        show_range_percent = 1.1  # 150%
+        for ax in real_time_show_phone_data.ax[:2]:
+            ax.set_xlim(0, origin_data.shape[0] * show_range_percent)
+            ax.set_ylim(np.min(origin_data[:, :3]) * show_range_percent,
+                        np.max(origin_data[:, :3]) * show_range_percent)
+
+    plt.tight_layout()  # 调整子图布局以避免重叠
+    plt.draw()  # 重绘当前图表
+    plt.pause(0.01)  # 短暂停以确保图表刷新
+
 if __name__ == '__main__':
 
     print(Constant.mHealth.action_map)

@@ -59,18 +59,6 @@ def get_mh_data(slide_window_length):
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
 
-        # data_processed = []
-        # # 对于每个样本组,100条数据,都进行特征合并操作
-        # for data_simple in data_sliced_list:
-        #     x_axis = data_simple[:, 0]
-        #     y_axis = data_simple[:, 1]
-        #     z_axis = data_simple[:, 2]
-        #     xyz_axis = np.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2).reshape(-1, 1)
-        #     # xyz_axis = merge_data_to_1D(x=x_axis, y=y_axis, z=z_axis, method='fft').reshape(-1, 1)
-        #
-        #     result = np.hstack((data_simple, xyz_axis))
-        #     data_processed.append(result)
-
         # 对于每一个dataframe , 滑动窗口分割数据
         final_data.extend(data_sliced_list)
         print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
@@ -388,5 +376,5 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
     return tensor_walk_tensor[:, :, :features_num], tensor_not_walk_tensor[:, :, :features_num]
 
 if __name__ == '__main__':
-    t, f = get_mh_data_for_abnormal_test(128, 6)
+    t, f = get_mh_data(128)
     print(t)

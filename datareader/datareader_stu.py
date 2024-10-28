@@ -159,5 +159,5 @@ def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_t
 
 
 if __name__ == '__main__':
-    normal,abnormal =get_stu_part_features(25,6,1)
+    normal,abnormal =get_stu_data(128)
     print()

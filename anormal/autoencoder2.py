@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -8,7 +10,7 @@ from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE, LSTMAutoenc
     ConvLSTM_VAE
 from anormal.t_SNE import plot_tsne, plot_pca
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
-from datareader.realworld_datareader import get_realworld_raw_for_abnormal
+from datareader.realworld_datareader import get_realworld_raw_for_abnormal, get_realworld_transformed_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 from utils.show import GradientUtils
@@ -33,7 +35,7 @@ torch.manual_seed(3407)
 # train_data = get_child_all_features(slide_window_length)
 # train_data, test_data = get_child_part_action(slide_window_length)
 # train_data, test_data = get_child_2024_all_features(slide_window_length)
-train_normal,  test_abnormal = get_realworld_raw_for_abnormal(slide_window_length, 6)
+train_normal,  test_abnormal = get_realworld_transformed_for_abnormal(slide_window_length, 6)
 
 input_dim = train_normal.size(2)  # Dimensionality of input sequence
 
@@ -188,7 +190,23 @@ with torch.no_grad():
 
     show.show_me_data0(every_simple_loss)
 
-latent_abnormal_tensor = torch.cat(latent_abnormal, dim=0)
+model_load_flag = False
 
-if model_name == 'conv_lstm' or model_name == 'conv_lstm_vae':
-    test_abnormal = test_abnormal.transpose(1,2)
+def apply_conv_lstm_vae(test_data):
+    global model_load_flag
+    model_apply = ConvLSTM_VAE(input_dim=input_dim).to(device)
+
+    if not model_load_flag:
+        model_apply.load_state_dict(torch.load('../model/autoencoder.pth', map_location=device))
+        model_apply.eval()
+
+    start_time = datetime.now()
+    # 归一化(128, 9)
+    tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
+    data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :input_dim, :]
+    reconstruction, _, _, _ = model_apply(data)
+
+    loss = loss_function(reconstruction, data)
+
+    print(f"Model reconstruction finished, start: {start_time} , end: {datetime.now()}, loss: {loss.item()}")
+    return loss.item()

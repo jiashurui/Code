@@ -146,7 +146,7 @@ def get_realworld_for_recon(slide_window_length, features_num):
 
 
 # 读取realworld数据(不做任何处理变换)
-def get_realworld_raw_for_abnormal(slide_window_length, features_num):
+def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_transform=False):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
     file_list = glob.glob('../data/realworld/*/waist_merged.csv')
     final_data = []
@@ -156,6 +156,8 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
         # 去除头部
         data = data[stop_simple: len(data)]
 
+        if global_transform:
+            data = transform_sensor_data_to_df(data)
         # 归一化 TODO 2024/10/25 归一化会影响重建
         # data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
 
@@ -188,6 +190,9 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num):
 
     return tensor_not_standing[:,:,:features_num], tensor_standing[:,:,:features_num]
 
+# 读取realworld数据用于异常检测
+def get_realworld_transformed_for_abnormal(slide_window_length, features_num):
+    return get_realworld_raw_for_abnormal(slide_window_length, features_num, global_transform=True)
 
 if __name__ == '__main__':
     normal,abnormal = read_data()

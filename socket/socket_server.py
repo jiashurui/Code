@@ -6,6 +6,7 @@ from datetime import datetime
 import numpy as np
 import sys
 
+from anormal.autoencoder2 import apply_conv_lstm_vae
 from train import train_1d_cnn, train_mh_1d_cnn, train_lstm, train_conv_lstm
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data
@@ -17,8 +18,8 @@ PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
 apply_model = 'realworld'
 # apply_model = 'mHealth'
-model = 'conv-lstm'  # cnn, lstm ,conv-lstm
-
+model = 'conv-lstm'  # cnn, lstm ,conv-lstm, conv-lstm-vae
+task = 'pred' # pred ,abnormal
 # 接收完整数据的函数
 def receive_data(conn, data_size):
     data = b''
@@ -93,8 +94,15 @@ def start_server():
                                 pred = train_lstm.apply_lstm(transformed)
                             elif model == 'conv-lstm':
                                 pred = train_conv_lstm.apply_conv_lstm(transformed)
+                            elif model == 'conv-lstm-vae':
+                                output = apply_conv_lstm_vae(transformed)
 
-                            pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
+
+                            if task == 'pred':
+                                pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
+                            elif task == 'abnormal':
+                                print()  # TODO
+
 
                         elif apply_model == 'mHealth':
                             pred = train_mh_1d_cnn.apply_1d_cnn(transformed)
