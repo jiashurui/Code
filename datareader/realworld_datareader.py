@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
 from prototype.global_tramsform import transform_sensor_data, transform_sensor_data_to_df, transform_sensor_data_to_df0
-from convert_common import convert_df_columns_name
+from .convert_common import convert_df_columns_name
 from utils.show import show_acc_data_before_transformed
 from utils.slidewindow import slide_window2
 

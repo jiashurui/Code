@@ -8,6 +8,7 @@ from anormal.AEModel import LSTMFCAutoencoder, ConvAutoencoder, VAE, LSTMAutoenc
     ConvLSTM_VAE
 from anormal.t_SNE import plot_tsne, plot_pca
 from datareader.child_datareader import get_child_all_features, get_child_part_action, get_child_2024_all_features
+from datareader.realworld_datareader import get_realworld_raw_for_abnormal
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 from utils.show import GradientUtils

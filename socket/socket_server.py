@@ -6,7 +6,6 @@ from datetime import datetime
 import numpy as np
 import sys
 
-import train.train_1d_cnn
 from train import train_1d_cnn, train_mh_1d_cnn, train_lstm
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data
