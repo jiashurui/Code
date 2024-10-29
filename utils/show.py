@@ -1,7 +1,13 @@
+import glob
+from time import sleep
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
+from prototype import global_tramsform, constant
 from prototype.constant import Constant
+from train import train_conv_lstm
 
 
 def show_me_data0(np_arr):
@@ -185,10 +191,40 @@ class GradientUtils:
                 grad_norm = param.grad.norm().item()  # 计算梯度范数
                 self.gradient_norms[name].append(grad_norm)
 
+# 读取文件数据,不断更新图表
+def real_time_show_file_data(file_name = '../data/realworld/*/forearm_merged.csv'):
+    file_list = glob.glob(file_name)
+    appended_data = []
+
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+        appended_data.append(data)
+
+    big_df = pd.concat(appended_data, ignore_index=True)
+
+    all_data = np.zeros((128, 3), np.float32)
+    all_transformed_data = np.zeros((128, 3), np.float32)
+
+    # 遍历 dataframe，每次读取 128 行
+    chunk_size = 128
+    show_length = 512
+    for start_row in range(0, len(big_df), chunk_size):
+        data = big_df.iloc[start_row:start_row + chunk_size].values
+        all_data = np.vstack([all_data, data[:, :3]])[-show_length:, :]
+        transformed, rpy = global_tramsform.transform_sensor_data_to_np(data)
+
+        pred = train_conv_lstm.apply_conv_lstm(transformed)
+        pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
+        ground_truth = constant.Constant.RealWorld.action_map_reverse.get(data[1, 9])
+        all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[-show_length:, :]
+        real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy, ground_truth= ground_truth)
+
+        sleep(0.5)
+
+
 
 # 实时展示数据的函数，接收一个二维数组 float_matrix，并展示前三列
-
-def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
+def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy, ground_truth = None):
     plt.ion()  # 开启交互模式
     # 获取当前数据的前三列
     x_data = np.arange(float_matrix.shape[0])
@@ -250,12 +286,19 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
         # 重新调整 x 和 y 轴的范围
         show_range_percent = 1.1  # 150%
         real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0] * show_range_percent)
-        real_time_show_phone_data.ax.set_ylim(np.min(float_matrix[:, :3]) * show_range_percent, np.max(float_matrix[:, :3]) * show_range_percent)
+        real_time_show_phone_data.ax.set_ylim(
+            min(np.min(float_matrix[:, :3]), np.min(transformed_data[:, :3])) * show_range_percent
+            ,max(np.max(float_matrix[:, :3]), np.max(transformed_data[:, :3])) * show_range_percent)
+
+        ground_truth_str = f"{ground_truth}" if ground_truth is not None else ""
+
         real_time_show_phone_data.ax.set_title(f'acc_data, '
                                                f'model_pred: {model_pred},\n'
                                                f'roll:{np.degrees(rpy[-1,0]):.2f},'
                                                f'pitch:{np.degrees(rpy[-1,1]):.2f},'
-                                               f'yaw:{np.degrees(rpy[-1,2]):.2f}.')
+                                               f'yaw:{np.degrees(rpy[-1,2]):.2f}.'
+                                               f'ground_truth:{ground_truth_str}'
+                                               )
 
     plt.draw()  # 重绘当前图表
     plt.pause(0.01)  # 短暂停以确保图表刷新
@@ -380,5 +423,4 @@ def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, loss
     plt.pause(0.01)  # 短暂停以确保图表刷新
 
 if __name__ == '__main__':
-
-    print(Constant.mHealth.action_map)
+    real_time_show_file_data()
