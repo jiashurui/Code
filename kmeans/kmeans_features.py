@@ -3,6 +3,8 @@ import stat
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 from datareader.child_datareader import get_child_all_features
 from datareader.datareader_stu import get_stu_all_features, simple_get_stu_all_features
@@ -23,17 +25,23 @@ slice_length = 20
 
 # 全局变换之后的大学生数据(全局变换按照frame进行)
 origin_data = simple_get_stu_all_features(slice_length, type= 'df')
+origin_data_np = np.array(origin_data)
 
 features_list = []
 for d in origin_data:
-    df_features = calc_df_features(d)
-    features_list.append(df_features)
+    df_features, _ = calc_df_features(d.iloc[:, :9])
+    features_list.append(df_features.values.flatten())
 
 train_data = np.array(features_list)
+pca = PCA(n_components=10, random_state=3407)
+scaler = StandardScaler()
+# n_components specifies how many principal components to keep
+normal_latent = scaler.fit_transform(train_data)
+normal_result = pca.fit_transform(normal_latent)
 
 # 使用 KMeans 进行聚类
 kmeans = KMeans(n_clusters=K, random_state=123)
-kmeans.fit(train_data)
+kmeans.fit(normal_result)
 
 
 # 获取聚类结果
@@ -50,7 +58,7 @@ for i in range(K):
     print(f'Cluster {i}: {len(indices)}')
 
     for j in range(len(indices)):
-        true_label = int(origin_data[indices[j], 1, 9].item())
+        true_label = int(origin_data_np[indices[j], 1, 9].item())
         all_gt[true_label - 1] += 1
 
     true_label_in_cluster.append(all_gt)
@@ -68,9 +76,9 @@ for i in range(K):
     # len(index) == 5
     for j in range(len(index)):
 
-        num = origin_data[index[j]].numpy()
+        num = origin_data_np[index[j]]
         # (data_num , seq_data_index , feature(第9个是标签))
-        ground_truth = int(origin_data[index[j], 1, 9].item())
+        ground_truth = int(origin_data_np[index[j], 1, 9].item())
 
         ground_truth_name = find_key_by_value(Constant.uStudent.action_map_en,ground_truth)
 
