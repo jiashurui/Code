@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 
 from datareader.datareader_stu import get_stu_all_features
 
-train_data = get_stu_all_features(20)[:, :, 1: 10]
+train_data = get_stu_all_features(20)[:, :, : 9]
 # 9 features
 train_data = train_data.reshape(-1, 9 * 20)
 # 计算不同簇数的 SSE

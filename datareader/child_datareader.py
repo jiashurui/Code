@@ -210,7 +210,8 @@ def get_child_part_action(slide_window_length, train_action=None):
     # TODO all features
     # return tensor_walk[:, :, :20], tensor_not_walk[:, :, :20]
 
-
+# 按照老师给的标签,进行diff分割后
+# 然后返回数据(可能不准确)
 def get_child_2024_all_features(slide_window_length):
     # 读取数据
     labeled_path = get_value_from_config('child_new_data')
@@ -242,7 +243,6 @@ def get_child_2024_all_features(slide_window_length):
         start = record_diff[i - 1]
         end = record_diff[i]
         sliced_df = big_df.iloc[start:end]
-        # if sliced_df['Label_X'].array[0] != 'なし':
         sliced_list.append(sliced_df)
 
     for df in sliced_list:
@@ -268,7 +268,27 @@ def get_child_2024_all_features(slide_window_length):
     # TODO long lat
     return tensor_walk[:, :, :9], tensor_not_walk[:, :, :9]
 
+# 返回2024年井上小学生活动数据(9维无标签)
+def simple_get_child_2024_all_features(slide_window_length):
+    file_list = glob.glob('../data/child/2024_04/toyota_202404_crossing/*/*/*.csv')
+    appended_data = []
+
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+        appended_data.append(data)
+
+    df = pd.concat(appended_data, ignore_index=True)
+
+    df = df.iloc[:, 1:10]
+
+    df_list = slide_window2(df, slide_window_length, 0.5)
+
+    np_arr = np.array(df_list)
+
+    tensor_data = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    return tensor_data
 
 
 if __name__ == '__main__':
-    print(get_child_2024_all_features(slide_window_length=20))
+    print(simple_get_child_2024_all_features(slide_window_length=20))

@@ -96,6 +96,7 @@ def get_stu_data(slide_window_length):
     return train_data, train_labels, test_data, test_labels
 
 
+# 获取长冈科技大学,学生所有特征
 def get_stu_all_features(slide_window_length):
     base_path = '../data/student/0726_lab/merge_labeled.csv'
 

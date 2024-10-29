@@ -2,11 +2,14 @@
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 
-from datareader.datareader_stu import get_stu_all_features
+from datareader.child_datareader import simple_get_child_2024_all_features
 
-train_data = get_stu_all_features(20)[:, :, 1: 10]
-# 9 features
-train_data = train_data.reshape(-1, 9 * 20)
+window_size = 20
+feature_nums = 9
+
+
+train_data = simple_get_child_2024_all_features(window_size)
+train_data = train_data.reshape(-1, feature_nums * window_size)
 # 计算不同簇数的 SSE
 sse = []
 k_values = range(1, 10)

@@ -9,7 +9,7 @@ from prototype import global_tramsform, constant
 from train import train_conv_lstm
 from utils.show import real_time_show_phone_data
 
-
+# 实时展示长冈科技大学, 大学生的行为数据图表
 def real_time_show_file_data(file_name = '../data/student/0726_lab/merge_labeled.csv'):
     file_list = glob.glob(file_name)
     appended_data = []
