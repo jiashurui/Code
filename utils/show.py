@@ -262,7 +262,7 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy):
 
 
 # 实时展示异常检测结果
-def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, rpy):
+def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, loss):
     plt.ion()  # 开启交互模式
     # 获取当前数据前三列
     x_data = np.arange(origin_data.shape[0])
@@ -312,23 +312,23 @@ def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, rpy)
         real_time_show_phone_data.ax[1].set_title('Transformed Data')
 
 
-        # 第2行: 全局变换后
+        # 第3行: 重建后
         real_time_show_phone_data.line3_1, = real_time_show_phone_data.ax[2].plot(x_data, y1_data_3,
-                                                                                     label='acc_x_t',
+                                                                                     label='acc_x_r',
                                                                                      color='#8B0000'
                                                                                , linestyle='--'
                                                                                )
         real_time_show_phone_data.line3_2, = real_time_show_phone_data.ax[2].plot(x_data, y2_data_3,
-                                                                                     label='acc_y_t',
+                                                                                     label='acc_y_r',
                                                                                      color='#006400'
                                                                                , linestyle='--'
                                                                                )
         real_time_show_phone_data.line3_3, = real_time_show_phone_data.ax[2].plot(x_data, y3_data_3,
-                                                                                     label='acc_z_t',
+                                                                                     label='acc_z_r',
                                                                                      color='#00008B'
                                                                                , linestyle='--')
         real_time_show_phone_data.ax[2].legend()
-        real_time_show_phone_data.ax[2].set_title('Transformed Data')
+        real_time_show_phone_data.ax[2].set_title('Reconstruction Data')
 
         # 设置 x 和 y 轴的限制
         for ax in real_time_show_phone_data.ax:
@@ -356,18 +356,24 @@ def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, rpy)
 
         # 更新第三组数据的线条
         real_time_show_phone_data.line3_1.set_xdata(x_data)
-        real_time_show_phone_data.line3_1.set_ydata(y1_data_2)
+        real_time_show_phone_data.line3_1.set_ydata(y1_data_3)
         real_time_show_phone_data.line3_2.set_xdata(x_data)
-        real_time_show_phone_data.line3_2.set_ydata(y2_data_2)
+        real_time_show_phone_data.line3_2.set_ydata(y2_data_3)
         real_time_show_phone_data.line3_3.set_xdata(x_data)
-        real_time_show_phone_data.line3_3.set_ydata(y3_data_2)
+        real_time_show_phone_data.line3_3.set_ydata(y3_data_3)
 
         # 重新调整 x 和 y 轴的范围
-        show_range_percent = 1.1  # 150%
-        for ax in real_time_show_phone_data.ax[:2]:
-            ax.set_xlim(0, origin_data.shape[0] * show_range_percent)
-            ax.set_ylim(np.min(origin_data[:, :3]) * show_range_percent,
-                        np.max(origin_data[:, :3]) * show_range_percent)
+        show_range_percent = 1.2  # 120%
+
+        real_time_show_phone_data.ax[0].set_xlim(0, origin_data.shape[0] * show_range_percent)
+        real_time_show_phone_data.ax[0].set_ylim(np.min(origin_data[:, :3]) * show_range_percent,np.max(origin_data[:, :3]) * show_range_percent)
+        real_time_show_phone_data.ax[1].set_xlim(0, transformed_data.shape[0] * show_range_percent)
+        real_time_show_phone_data.ax[1].set_ylim(np.min(transformed_data[:, :3]) * show_range_percent,np.max(transformed_data[:, :3]) * show_range_percent)
+        real_time_show_phone_data.ax[2].set_xlim(0, model_recon.shape[0] * show_range_percent)
+        real_time_show_phone_data.ax[2].set_ylim(np.min(model_recon[:, :3]) * show_range_percent,np.max(model_recon[:, :3]) * show_range_percent)
+
+    real_time_show_phone_data.ax[2].set_title(f'loss:{loss}')
+
 
     plt.tight_layout()  # 调整子图布局以避免重叠
     plt.draw()  # 重绘当前图表
