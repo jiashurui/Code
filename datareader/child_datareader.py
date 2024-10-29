@@ -273,17 +273,19 @@ def get_child_2024_all_features(slide_window_length):
     return tensor_walk[:, :, :9], tensor_not_walk[:, :, :9]
 
 # 返回2024年井上小学生活动数据(9维无标签)
-def simple_get_child_2024_all_features(slide_window_length):
-    file_list = glob.glob('../data/child/2024_04/toyota_202404_crossing/*/*/*.csv')
+def simple_get_child_2023_all_features(slide_window_length, type = 'tensor'):
+    file_list = glob.glob('../data/child/2023_03/merged_data/*.csv')
     appended_data = []
 
     for file_name in file_list:
         data = pd.read_csv(file_name)
+
+        data = data[data['X'] != 'なし']
+        data = data.iloc[:, 1:10]
+        data = transform_sensor_data_to_df(data)
         appended_data.append(data)
 
     df = pd.concat(appended_data, ignore_index=True)
-
-    df = df.iloc[:, 1:10]
 
     df_list = slide_window2(df, slide_window_length, 0.5)
 
@@ -291,6 +293,37 @@ def simple_get_child_2024_all_features(slide_window_length):
 
     tensor_data = torch.tensor(np_arr, dtype=torch.float32).to(device)
 
+    if type == 'df':
+        return df_list
+    elif type == 'np':
+        return np_arr
+    return tensor_data
+
+
+# 返回2024年井上小学生活动数据(9维无标签)
+def simple_get_child_2024_all_features(slide_window_length, type = 'tensor'):
+    file_list = glob.glob('../data/child/2024_04/toyota_202404_crossing/*/*/*.csv')
+    appended_data = []
+
+    for file_name in file_list:
+        data = pd.read_csv(file_name)
+
+        data = data.iloc[:, 1:10]
+        data = transform_sensor_data_to_df(data)
+        appended_data.append(data)
+
+    df = pd.concat(appended_data, ignore_index=True)
+
+    df_list = slide_window2(df, slide_window_length, 0.5)
+
+    np_arr = np.array(df_list)
+
+    tensor_data = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    if type == 'df':
+        return df_list
+    elif type == 'np':
+        return np_arr
     return tensor_data
 
 
