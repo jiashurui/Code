@@ -3,22 +3,23 @@ from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 
 from datareader.child_datareader import get_child_all_features
+from datareader.datareader_stu import get_stu_all_features, simple_get_stu_all_features
 from prototype.constant import Constant
-from prototype.student.datareader_stu import get_stu_all_features
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
 K = 6
 features_number = 9
-slice_length = 40
-# 子供
-train_data = get_child_all_features(20)
+slice_length = 20
 # 大学生 - 9 features
 # train_data = get_stu_all_features(slice_length)
 
 # 大学生 - 3 features(加速度のみ)
 
-origin_data = get_stu_all_features(slice_length)
+# origin_data = get_stu_all_features(slice_length)
+
+# 全局变换之后的大学生数据(全局变换按照frame进行)
+origin_data = simple_get_stu_all_features(slice_length)
 
 slice_data = origin_data[:, :, 0: features_number]
 

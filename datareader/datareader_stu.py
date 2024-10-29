@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
 
+from prototype.global_tramsform import transform_sensor_data_to_df
 from utils.config_utils import get_value_from_config
 from utils.slidewindow import slide_window2
 
@@ -107,6 +108,7 @@ def get_stu_all_features(slide_window_length):
     # 对 DataFrame 的每一列进行归一化
     # df.iloc[:, 1:10] = scaler.fit_transform(df.iloc[:, 1:10])
 
+
     record_diff = []
     pre_val = -2
     # 按照label,分成各个label单位的小组
@@ -126,6 +128,10 @@ def get_stu_all_features(slide_window_length):
 
     for df in sliced_list:
         # 分割后的数据 100个 X组
+        # 全局变换
+        df = transform_sensor_data_to_df(df)
+
+        # 滑动窗口分割
         data_sliced_list = slide_window2(df.to_numpy(), slide_window_length, 0.5)
 
         # 对于每一个dataframe , 滑动窗口分割数据
@@ -143,6 +149,24 @@ def get_stu_all_features(slide_window_length):
 
     return data_tensor
 
+def simple_get_stu_all_features(slide_window_length):
+    file = glob.glob('../data/student/0726_lab/merge_labeled.csv')
+    df = pd.read_csv(file[0])
+    df = df[df['label'] != -1]
+    df = df.iloc[:, 1:11]
+    # 全局变换
+    df = transform_sensor_data_to_df(df)
+    df_list = slide_window2(df, slide_window_length, 0.5)
+
+    transformed_list = []
+    for d in df_list:
+        transformed_frame = transform_sensor_data_to_df(d)
+        transformed_list.append(transformed_frame)
+
+    np_arr = np.array(transformed_list)
+    data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    return data_tensor
 
 # 传递出所有特征(不带标签)
 def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_test):
@@ -160,5 +184,5 @@ def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_t
 
 
 if __name__ == '__main__':
-    normal,abnormal =get_stu_data(128)
+    normal =simple_get_stu_all_features(20)
     print()

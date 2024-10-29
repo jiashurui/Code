@@ -7,6 +7,7 @@ import torch
 from sklearn.preprocessing import MinMaxScaler
 
 from prototype.constant import Constant
+from prototype.global_tramsform import transform_sensor_data_to_df
 from utils.config_utils import get_value_from_config
 from utils.slidewindow import slide_window2
 
@@ -106,6 +107,9 @@ def get_child_all_features(slide_window_length):
 
     for file_name in file_list:
         data = pd.read_csv(file_name)
+
+        # Global Transform
+        # data = transform_sensor_data_to_df(data)
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
