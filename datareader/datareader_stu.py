@@ -149,7 +149,7 @@ def get_stu_all_features(slide_window_length):
 
     return data_tensor
 
-def simple_get_stu_all_features(slide_window_length):
+def simple_get_stu_all_features(slide_window_length, type = 'tensor'):
     file = glob.glob('../data/student/0726_lab/merge_labeled.csv')
     df = pd.read_csv(file[0])
     df = df[df['label'] != -1]
@@ -162,9 +162,13 @@ def simple_get_stu_all_features(slide_window_length):
     for d in df_list:
         transformed_frame = transform_sensor_data_to_df(d)
         transformed_list.append(transformed_frame)
-
     np_arr = np.array(transformed_list)
     data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    if type == 'df':
+        return transformed_list
+    elif type == 'np':
+        return np_arr
 
     return data_tensor
 
@@ -184,5 +188,5 @@ def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_t
 
 
 if __name__ == '__main__':
-    normal =simple_get_stu_all_features(20)
+    normal =simple_get_stu_all_features(20, type='df')
     print()
