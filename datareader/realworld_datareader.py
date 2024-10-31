@@ -15,7 +15,7 @@ from .convert_common import convert_df_columns_name
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 初始化 MinMaxScaler(Normalization [-1,1])
-scaler = StandardScaler()
+# scaler = StandardScaler()
 
 def read_data():
     file_name = '../data/realworld/*/shin_merged.csv'
