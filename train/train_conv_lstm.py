@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 1
+epochs = 50
 
 # 表明是否要将该数据集迁移到别的数据集上
 filtered = True
