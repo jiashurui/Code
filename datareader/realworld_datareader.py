@@ -43,6 +43,7 @@ def read_data():
 
     return df
 
+
 def get_realworld_for_abnormal(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
     file_list = glob.glob('../data/realworld/*/acc_*_waist.csv')
@@ -98,9 +99,10 @@ def get_realworld_for_abnormal(slide_window_length):
 
     return tensor_walk[:, :, :3], tensor_not_walk[:, :, :3]
 
-#
-def get_realworld_for_recon(slide_window_length, features_num):
-    # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
+
+# 读取Realworld数据用于训练模型
+def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[], mapping_label={}):
+    # 创建示例输入数据
     file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
     final_data = []
     for file_name in file_list:
@@ -114,6 +116,11 @@ def get_realworld_for_recon(slide_window_length, features_num):
 
         # 归一化
         # data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
+
+        # 过滤指定标签数据
+        if filtered_label:
+            data = data[data['label'].isin(filtered_label)]
+            data['label'] = data['label'].map(mapping_label)
 
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)

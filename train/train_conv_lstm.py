@@ -23,11 +23,21 @@ model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 loss_function = nn.CrossEntropyLoss()
-label_map = Constant.RealWorld.action_map
 
+# 表明是否要将该数据集迁移到别的数据集上
+filtered = True
+if filtered:
+    filtered_label = [0,1,3,5]
+    label_map = Constant.realworld_x_uStudent.action_map_en_reverse
+    mapping_label = Constant.realworld_x_uStudent.mapping_realworld
+
+else:
+    filtered_label = []
+    label_map = Constant.RealWorld.action_map
 
 def train_model():
-    train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length,in_channel)
+    #
+    train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length,in_channel, filtered_label=[0,1,3,5], mapping_label=mapping_label)
     print(train_labels.min(), train_labels.max())
 
     train_data = train_data.transpose(1, 2)
