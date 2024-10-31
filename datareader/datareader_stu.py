@@ -98,7 +98,7 @@ def get_stu_data(slide_window_length):
 
 
 # 获取长冈科技大学,学生所有特征
-def get_stu_all_features(slide_window_length):
+def get_stu_all_features(slide_window_length, option='with_label'):
     base_path = '../data/student/0726_lab/merge_labeled.csv'
 
     acc_file = glob.glob(base_path)
@@ -140,15 +140,26 @@ def get_stu_all_features(slide_window_length):
     # shuffle data
     random.shuffle(final_data)
 
-    ########    ########    ########    ########    ########    ########    ########
-    # 提取输入和标签
-    data = np.array([arr[:, 1:11].astype(np.float64) for arr in final_data])
 
-    # 将NumPy数组转换为Tensor
-    data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
+    if option == 'with_label':
+        # 提取输入和标签
+        data = np.array([arr[:, 1:11].astype(np.float64) for arr in final_data])
 
-    return data_tensor
+        # 将NumPy数组转换为Tensor
+        data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
+        return data_tensor
+    elif option == 'without_label':
+        # 提取输入和标签
+        data = np.array([arr[:, 1:10] for arr in final_data])
+        label = np.array([arr[:, 10] for arr in final_data])[:, 0]
 
+        # 将NumPy数组转换为Tensor
+        data_tensor = torch.tensor(data, dtype=torch.float32).to(device)
+        label_tensor = torch.tensor(label, dtype=torch.long).to(device)
+
+        return data_tensor, label_tensor
+
+# 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
 def simple_get_stu_all_features(slide_window_length, type = 'tensor'):
     file = glob.glob('../data/student/0726_lab/merge_labeled.csv')
     df = pd.read_csv(file[0])
@@ -188,5 +199,5 @@ def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_t
 
 
 if __name__ == '__main__':
-    normal =simple_get_stu_all_features(20, type='df')
+    normal = get_stu_all_features(20)
     print()
