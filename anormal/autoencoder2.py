@@ -245,3 +245,6 @@ def apply_conv_lstm_vae(test_data):
 
     print(f"Model reconstruction finished, start: {start_time} , end: {datetime.now()}, loss: {loss.item()}")
     return reconstruction,loss
+
+if __name__ == '__main__':
+    train_model()

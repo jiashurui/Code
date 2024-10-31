@@ -1,6 +1,6 @@
 class Constant:
     class RealWorld:
-        label_map = {
+        placement_map = {
             'waist': 0,
             'chest': 1,
             'forearm': 2,
