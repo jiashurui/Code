@@ -27,7 +27,7 @@ from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 初始化 MinMaxScaler
-scaler = MinMaxScaler()
+scaler = MinMaxScaler(feature_range=(-1, 1))
 
 
 def get_stu_data(slide_window_length):
@@ -174,6 +174,10 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     df = df.iloc[:, 1:11]
     # 全局变换
     df = transform_sensor_data_to_df(df)
+
+    # 归一化
+    # df.iloc[:, :9] = scaler.fit_transform(df.iloc[:, :9])
+
     df_list = slide_window2(df, slide_window_length, 0.5)
 
     transformed_list = []
