@@ -161,7 +161,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
 # 读取realworld数据(不做任何处理变换)
 def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_transform=False):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
-    file_list = glob.glob('../data/realworld/*/waist_merged.csv')
+    file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
     final_data = []
     for file_name in file_list:
         data = pd.read_csv(file_name)
