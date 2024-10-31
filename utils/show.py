@@ -322,16 +322,15 @@ def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, loss
         real_time_show_phone_data.ax[1].legend()
         real_time_show_phone_data.ax[1].set_title('Transformed Data')
 
-
         # 第3行: 重建后
         real_time_show_phone_data.line3_1, = real_time_show_phone_data.ax[2].plot(x_data, y1_data_3,
                                                                                      label='acc_x_r',
-                                                                                     color='#8B0000'
+                                                                                     color= '#8B0000'
                                                                                , linestyle='--'
                                                                                )
         real_time_show_phone_data.line3_2, = real_time_show_phone_data.ax[2].plot(x_data, y2_data_3,
                                                                                      label='acc_y_r',
-                                                                                     color='#006400'
+                                                                                     color= '#006400'
                                                                                , linestyle='--'
                                                                                )
         real_time_show_phone_data.line3_3, = real_time_show_phone_data.ax[2].plot(x_data, y3_data_3,
@@ -372,6 +371,18 @@ def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, loss
         real_time_show_phone_data.line3_2.set_ydata(y2_data_3)
         real_time_show_phone_data.line3_3.set_xdata(x_data)
         real_time_show_phone_data.line3_3.set_ydata(y3_data_3)
+
+        # 判断 model_recon 是否超过阈值
+        if np.max(model_recon) > 5000:
+            # 修改最新 128 个数据点的颜色
+            real_time_show_abnormal_data.line3_1.set_color('red')
+            real_time_show_abnormal_data.line3_2.set_color('red')
+            real_time_show_abnormal_data.line3_3.set_color('red')
+        else:
+            # 恢复正常颜色
+            real_time_show_abnormal_data.line3_1.set_color('#8B0000')
+            real_time_show_abnormal_data.line3_2.set_color('#006400')
+            real_time_show_abnormal_data.line3_3.set_color('#00008B')
 
         # 重新调整 x 和 y 轴的范围
         show_range_percent = 1.2  # 120%
