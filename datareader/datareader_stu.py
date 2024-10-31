@@ -160,10 +160,15 @@ def get_stu_all_features(slide_window_length, option='with_label'):
         return data_tensor, label_tensor
 
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
-def simple_get_stu_all_features(slide_window_length, type = 'tensor'):
+def simple_get_stu_all_features(slide_window_length, type = 'tensor', filtered_label=[], mapping_label={}):
     file = glob.glob('../data/student/0726_lab/merge_labeled.csv')
     df = pd.read_csv(file[0])
     df = df[df['label'] != -1]
+
+    if filtered_label:
+        df = df[~df['label'].isin(filtered_label)]
+        df['label'] = df['label'].map(mapping_label)
+
     df = df.iloc[:, 1:11]
     # 全局变换
     df = transform_sensor_data_to_df(df)

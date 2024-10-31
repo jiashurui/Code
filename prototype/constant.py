@@ -159,18 +159,28 @@ class Constant:
     # Realworld 数据集与长冈科技大学学生交叉
     class realworld_x_uStudent:
         action_map_en_reverse = {
-            1: 'stand',
-            2: 'jump',
-            3: 'walk',
-            4: 'run'
+            0: 'stand',
+            1: 'jump',
+            2: 'walk',
+            3: 'run'
         }
+        # 将realworld的标签转换
         mapping_realworld = {
             # 'climbingdown': 0,
             # 'climbingup': 1,
-            2: 2,  # 'jumping': 2,
+            2: 1,  # 'jumping': 2,
             # 'lying': 3,
-            4: 4,  # 'running': 4,
+            4: 3,  # 'running': 4,
             # 'sitting': 5,
-            6: 1,  # 'standing': 6,
-            7: 3  # 'walking': 7,
+            6: 0,  # 'standing': 6,
+            7: 2  # 'walking': 7,
+        }
+        # 将大学生的标签转换
+        mapping_stu = {
+            1: 0,  # 1: 'stand',
+            # 2: 'Wandering',
+            # 3: 'squat',
+            4: 1 , # 4: 'jump',
+            5: 2 , # 5: 'walk',
+            6: 3 # 6: 'run'
         }

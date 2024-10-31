@@ -12,9 +12,21 @@ out_channel = 6
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 
+# Option
+
+# 使用realworld进行训练
+filtered = True
+if filtered:
+    filtered_label = [2,3]
+    label_map = Constant.realworld_x_uStudent.action_map_en_reverse
+    mapping_label = Constant.realworld_x_uStudent.mapping_stu
+
+else:
+    filtered_label = []
+    label_map = Constant.uStudent.action_map_en
 
 # Data
-origin_data = simple_get_stu_all_features(25)
+origin_data = simple_get_stu_all_features(25, filtered_label, mapping_label)
 test_data = origin_data[:, :, :in_channel]
 test_labels = origin_data[:, :, 9][:, 0].to(torch.long)
 
@@ -22,7 +34,6 @@ test_data = test_data.transpose(1, 2)
 label_map = Constant.RealWorld.action_map
 
 model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
-
 
 model_load.eval()
 num_sum = 0
