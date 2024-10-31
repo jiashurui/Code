@@ -4,14 +4,13 @@ import random
 import numpy as np
 import pandas as pd
 import torch
-from matplotlib import pyplot as plt
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from prototype.constant import Constant
-from prototype.global_tramsform import transform_sensor_data, transform_sensor_data_to_df, transform_sensor_data_to_df0
-from .convert_common import convert_df_columns_name
+from prototype.global_tramsform2 import transform_sensor_data_to_df2
 from utils.show import show_acc_data_before_transformed
 from utils.slidewindow import slide_window2
+from .convert_common import convert_df_columns_name
 
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -36,7 +35,7 @@ def read_data():
     df = convert_df_columns_name(df)
 
     # Global Transform
-    df , df_transformed = transform_sensor_data_to_df0(df)
+    df , df_transformed = transform_sensor_data_to_df2(df)
 
     # 数据展示
     show_acc_data_before_transformed(df , df_transformed,300,400)
@@ -126,7 +125,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
         transformed_list = []
         for d in data_sliced_list:
             # 全局转换
-            transformed_frame = transform_sensor_data_to_df(d)
+            transformed_frame = transform_sensor_data_to_df2(d)
             # 归一化
             transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
@@ -171,7 +170,7 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_tra
         data = data[stop_simple: len(data)]
 
         if global_transform:
-            data = transform_sensor_data_to_df(data)
+            data = transform_sensor_data_to_df2(data)
         # 归一化 TODO 2024/10/25 归一化会影响重建
         # data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
 

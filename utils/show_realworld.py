@@ -5,7 +5,7 @@ from time import sleep
 import numpy as np
 import pandas as pd
 
-from prototype import global_tramsform, constant
+from prototype import constant, global_tramsform2
 from train import train_conv_lstm
 from utils.show import real_time_show_phone_data
 
@@ -29,7 +29,7 @@ def real_time_show_file_data(file_name='../data/realworld/*/forearm_merged.csv')
     for start_row in range(0, len(big_df), chunk_size):
         data = big_df.iloc[start_row:start_row + chunk_size].values
         all_data = np.vstack([all_data, data[:, :3]])[-show_length:, :]
-        transformed, rpy = global_tramsform.transform_sensor_data_to_np(data)
+        transformed, rpy = global_tramsform2.transform_sensor_data_to_np2(data)
 
         pred = train_conv_lstm.apply_conv_lstm(transformed)
         pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
