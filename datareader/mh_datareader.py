@@ -4,7 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from prototype import constant
 from prototype.global_tramsform2 import transform_sensor_data_to_df2
@@ -12,7 +12,8 @@ from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 flag_if_show_image = False
-scaler = MinMaxScaler(feature_range=(-1, 1))
+# scaler = MinMaxScaler(feature_range=(-1, 1))
+scaler = StandardScaler()
 
 def get_mh_data(slide_window_length):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
@@ -260,7 +261,7 @@ def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_l
     transformed_list = []
     for d in df_list:
         transformed_frame = transform_sensor_data_to_df2(d)
-        transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+        # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
         transformed_list.append(transformed_frame)
 

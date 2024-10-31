@@ -4,7 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from prototype.global_tramsform import transform_sensor_data_to_df
 from utils.config_utils import get_value_from_config
@@ -182,7 +182,7 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     transformed_list = []
     for d in df_list:
         transformed_frame = transform_sensor_data_to_df(d)
-        transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+        # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
         transformed_list.append(transformed_frame)
 
