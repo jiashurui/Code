@@ -1,19 +1,21 @@
 import stat
 
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-from datareader.child_datareader import get_child_all_features
+from datareader.child_datareader import get_child_all_features, simple_get_child_2024_all_features, \
+    simple_get_child_2023_all_features
 from datareader.datareader_stu import get_stu_all_features, simple_get_stu_all_features
 from prototype.constant import Constant
 from statistic.stat_common import calc_df_features
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
-K = 6
+K = 3
 features_number = 9
 slice_length = 20
 # 大学生 - 9 features
@@ -23,8 +25,8 @@ slice_length = 20
 
 # origin_data = get_stu_all_features(slice_length)
 
-# 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_stu_all_features(slice_length, type= 'df')
+# 全局变换之后的小学生数据(全局变换按照frame进行)
+origin_data = simple_get_child_2023_all_features(slice_length, type= 'df')
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -48,47 +50,42 @@ kmeans.fit(normal_result)
 labels = kmeans.labels_  # 每个样本的聚类标签
 centroids = kmeans.cluster_centers_  # 聚类质心
 
-print(f'Simples number:{train_data.shape[0]}')
 
-true_label_in_cluster = [] * 6
-for i in range(K):
-    indices = np.where(labels == i)[0]
+# 6. 使用 numpy 计数每个聚类的样本数量
+unique, counts = np.unique(labels, return_counts=True)
 
-    all_gt = [0] * K
-    print(f'Cluster {i}: {len(indices)}')
+# 7. 打印每个聚类的样本数量
+print("每个聚类的样本数量：")
+for cluster, count in zip(unique, counts):
+    print(f"聚类 {cluster}: {count} 个样本")
 
-    for j in range(len(indices)):
-        true_label = int(origin_data_np[indices[j], 1, 9].item())
-        all_gt[true_label - 1] += 1
+# 初始化列表用于存储索引
+indices = {0: [], 1: [], 2: [],}
 
-    true_label_in_cluster.append(all_gt)
-    print('    ground truth:', all_gt)
+# 遍历数据并记录索引
+for index, value in enumerate(labels):
+    if value in indices:
+        indices[value].append(index)
 
 
-# choose random data to show
+# 3. 随机选择每种索引中的 5 个样本
+sample_data = {key: np.random.choice(value, size=5, replace=False) for key, value in indices.items()}
 
-fig, axs = plt.subplots(6,5, figsize=(30, 30))
+# 4. 打印和可视化
+fig, axes = plt.subplots(nrows=3, ncols=5, figsize=(15, 10))
 
-for i in range(K):
-    # index arr
-    index = np.random.choice(np.where(labels == i)[0],size=5, replace=False)
+for i, (key, samples) in enumerate(sample_data.items()):
+    for j, sample_index in enumerate(samples):
+        sample_data = origin_data_np[sample_index]
 
-    # len(index) == 5
-    for j in range(len(index)):
+        # 绘制折线图
+        axes[i, j].plot(sample_data[:, 0], label='Feature 0', color='r')  # 第 0 个特征
+        axes[i, j].plot(sample_data[:, 1], label='Feature 1', color='g')  # 第 1 个特征
+        axes[i, j].plot(sample_data[:, 2], label='Feature 2', color='b')  # 第 2 个特征
 
-        num = origin_data_np[index[j]]
-        # (data_num , seq_data_index , feature(第9个是标签))
-        ground_truth = int(origin_data_np[index[j], 1, 9].item())
+        # 设置图例和标题
+        axes[i, j].set_title(f'Group {key}, Sample {j + 1}')
+        axes[i, j].grid()
 
-        ground_truth_name = find_key_by_value(Constant.uStudent.action_map_en,ground_truth)
-
-        axs[i, j].set_title(f'Cluster: {i}, Data No: {index[j]}, Ground Truth:{ground_truth_name}')
-        axs[i, j].set_xlabel('time')
-        axs[i, j].set_ylabel('value')
-
-        axs[i, j].plot(num[:, 0], label='acc X')
-        axs[i, j].plot(num[:, 1], label='acc Y')
-        axs[i, j].plot(num[:, 2], label='acc Z')
-
-plt.tight_layout()  # 自动调整子图之间的间距
+plt.tight_layout()
 plt.show()

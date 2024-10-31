@@ -20,7 +20,7 @@ for d in train_data:
     features_list.append(df_features.values.flatten())
 
 train_data = np.array(features_list)
-pca = PCA(n_components=5, random_state=3407)
+pca = PCA(n_components=10, random_state=3407)
 scaler = StandardScaler()
 # n_components specifies how many principal components to keep
 normal_latent = scaler.fit_transform(train_data)
