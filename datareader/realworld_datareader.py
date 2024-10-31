@@ -140,8 +140,8 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
     random.shuffle(final_data)
 
     # 提取输入和标签
-    input_features = np.array([arr[:, :features_num] for arr in final_data])
-    labels = np.array([arr[:, 9] for arr in final_data])[:, 0]
+    input_features = np.array([arr.iloc[:, :features_num] for arr in final_data])
+    labels = np.array([arr.iloc[:, 9] for arr in final_data])[:, 0]
 
     # 将NumPy数组转换为Tensor
     data_tensor = torch.tensor(input_features, dtype=torch.float32).to(device)
