@@ -69,9 +69,8 @@ def show_me_data1(df, col_name):
     ax.legend()
     plt.show()
 
-def show_me_hotmap(mat, show=True):
-    label_map = Constant.RealWorld.action_map
 
+def show_me_hotmap(mat, show=True, label_map=Constant.RealWorld.action_map):
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
     plt.title('Heatmap using Matplotlib')
