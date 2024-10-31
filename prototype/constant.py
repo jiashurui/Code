@@ -158,6 +158,12 @@ class Constant:
 
     # Realworld 数据集与长冈科技大学学生交叉
     class realworld_x_uStudent:
+        action_map = {
+            'stand':0,
+            'jump':1,
+            'walk':2,
+            'run':3
+        }
         action_map_en_reverse = {
             0: 'stand',
             1: 'jump',

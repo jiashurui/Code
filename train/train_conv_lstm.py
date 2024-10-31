@@ -4,7 +4,6 @@ import numpy as np
 import torch
 from torch import nn
 
-from cnn.cnn import DeepOneDimCNN
 from cnn.conv_lstm import ConvLSTM
 from datareader.realworld_datareader import get_realworld_for_recon
 from prototype.constant import Constant
@@ -15,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 50
+epochs = 1
 in_channel = 6
 out_channel = 8
 # realworld
@@ -27,8 +26,9 @@ loss_function = nn.CrossEntropyLoss()
 # 表明是否要将该数据集迁移到别的数据集上
 filtered = True
 if filtered:
-    filtered_label = [0,1,3,5]
+    filtered_label = [0, 1, 3, 5]
     label_map = Constant.realworld_x_uStudent.action_map_en_reverse
+    label_map_str = Constant.realworld_x_uStudent.action_map
     mapping_label = Constant.realworld_x_uStudent.mapping_realworld
 
 else:
@@ -111,12 +111,9 @@ def train_model():
 
     print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-    heatmap_plot = show.show_me_hotmap(confusion_matrix, label_map=label_map)
-    fig = heatmap_plot.gcf()
-    report.save_plot(heatmap_plot, 'heat-map')
+    show.show_me_hotmap(confusion_matrix, label_map=label_map_str)
 
 model_load_flag = False
-
 def apply_conv_lstm(test_data):
     global model_load_flag
     model_apply = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
