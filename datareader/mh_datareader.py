@@ -402,5 +402,5 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
 
 
 if __name__ == '__main__':
-    t, f = get_mh_data_1d_3ch_for_test(128)
+    t= simple_get_mh_all_features(128)
     print(t)
