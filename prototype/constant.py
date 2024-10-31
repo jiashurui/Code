@@ -29,6 +29,7 @@ class Constant:
             6: 'standing',
             7: 'walking'
         }
+
     class UCI:
         place_map = {}  # waist
         action_map = {
@@ -47,6 +48,7 @@ class Constant:
             5: 'STANDING',
             6: 'LAYING'
         }
+
     class CHA:
         place_map = {}  # pocket (thigh)
         action_map = {
@@ -57,6 +59,7 @@ class Constant:
             'STANDING': 5,
             'LAYING': 6
         }
+
     class mHealth:
         place_map = {}  # pocket (thigh)
         action_map = {
@@ -77,17 +80,17 @@ class Constant:
         action_map_reverse = {
             0: 'Null',
             1: 'STANDING',
-            2:'Sitting',
-            3:'Lying',
-            4:'Walking',
-            5:'Climbing stairs',
-            6:'Waist bends forward',
-            7:'Frontal elevation of arms',
-            8:'Knees bending',
-            9:'Cycling',
-            10:'Jogging',
-            11:'Running',
-            12:'Jump front & back'
+            2: 'Sitting',
+            3: 'Lying',
+            4: 'Walking',
+            5: 'Climbing stairs',
+            6: 'Waist bends forward',
+            7: 'Frontal elevation of arms',
+            8: 'Knees bending',
+            9: 'Cycling',
+            10: 'Jogging',
+            11: 'Running',
+            12: 'Jump front & back'
         }
         data_columns = ['chest_x', 'chest_y', 'chest_z',
                         'electrocardiogram_1', 'electrocardiogram_2',
@@ -98,6 +101,7 @@ class Constant:
                         'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
                         'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
                         'label']
+
     class ChildWalk:
         place_map = {}
         action_map = {
@@ -118,11 +122,12 @@ class Constant:
             3: 'run',
         }
         orient_map = {
-            '前を向く':0,
-            '下を向く':1,
-            '振り返る(左)':2,
-            '右を向く':3
+            '前を向く': 0,
+            '下を向く': 1,
+            '振り返る(左)': 2,
+            '右を向く': 3
         },
+
     # 長岡技大学生行動
     class uStudent:
         place_map = {}
@@ -143,12 +148,12 @@ class Constant:
             'run': 6
         }
         action_map_en_reverse = {
-            1 : 'stand',
-            2 : 'Wandering',
-            3 : 'squat',
-            4 : 'jump',
-            5 : 'walk',
-            6 : 'run'
+            1: 'stand',
+            2: 'Wandering',
+            3: 'squat',
+            4: 'jump',
+            5: 'walk',
+            6: 'run'
         }
 
     # Realworld 数据集与长冈科技大学学生交叉
@@ -162,10 +167,10 @@ class Constant:
         mapping_realworld = {
             # 'climbingdown': 0,
             # 'climbingup': 1,
-            2: 2, # 'jumping': 2,
+            2: 2,  # 'jumping': 2,
             # 'lying': 3,
-            4 :4 ,# 'running': 4,
+            4: 4,  # 'running': 4,
             # 'sitting': 5,
-            6 : 1,  # 'standing': 6,
-            7 : 3    # 'walking': 7,
+            6: 1,  # 'standing': 6,
+            7: 3  # 'walking': 7,
         }

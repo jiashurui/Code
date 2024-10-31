@@ -108,6 +108,9 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
     for file_name in file_list:
         data = pd.read_csv(file_name)
 
+        # 标签按照整数读取
+        data['label'] = data['label'].astype(int)
+
         # Global Transformed
         data = transform_sensor_data_to_df(data)
 
@@ -119,7 +122,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
 
         # 过滤指定标签数据
         if filtered_label:
-            data = data[data['label'].isin(filtered_label)]
+            data = data[~data['label'].isin(filtered_label)]
             data['label'] = data['label'].map(mapping_label)
 
         # 分割后的数据 100个 X组
