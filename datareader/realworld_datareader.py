@@ -120,7 +120,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
             data['label'] = data['label'].map(mapping_label)
 
         # 分割后的数据 100个 X组
-        data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
+        data_sliced_list = slide_window2(data, slide_window_length, 0.5)
 
         # 对每一个时间片进行处理
         transformed_list = []
