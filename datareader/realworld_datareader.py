@@ -178,7 +178,7 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_tra
             # 全局转换
             transformed_frame = transform_sensor_data_to_df2(d)
             # 归一化
-            transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+            # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
             transformed_list.append(transformed_frame)
 
