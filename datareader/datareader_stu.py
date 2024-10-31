@@ -167,23 +167,25 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     df['label'] = df['label'].astype(int)
     df = df[df['label'] != -1]
 
+    # 对标签进行filter
     if filtered_label:
         df = df[~df['label'].isin(filtered_label)]
         df['label'] = df['label'].map(mapping_label)
 
+    # 提取数据, 读取数据和标签(去除掉时间)
     df = df.iloc[:, 1:11]
-    # 全局变换
-    df = transform_sensor_data_to_df(df)
 
-    # 归一化
-    # df.iloc[:, :9] = scaler.fit_transform(df.iloc[:, :9])
-
+    # 滑动窗口
     df_list = slide_window2(df, slide_window_length, 0.5)
 
+    # 对每一个时间片进行处理
     transformed_list = []
     for d in df_list:
         transformed_frame = transform_sensor_data_to_df(d)
+        transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+
         transformed_list.append(transformed_frame)
+
     np_arr = np.array(transformed_list)
     data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)
 

@@ -1,15 +1,20 @@
-import torch
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-# 假设我们有一个形状为 (N, *) 的张量
-tensor = torch.randn(10, 3)  # 示例张量，形状为 (10, 3)
+# 创建示例 DataFrame
+data = {
+    'Feature1': [1.0, 2.0, 3.0, 4.0],
+    'Feature2': [5.0, 6.0, 7.0, 8.0],
+    'Feature3': [9.0, 10.0, 11.0, 12.0],
+}
+df = pd.DataFrame(data)
 
-# 获取第一个维度的大小
-N = tensor.size(0)
+# 初始化 MinMaxScaler
+scaler = StandardScaler()
 
-# 生成随机采样的索引
-random_indices = torch.randperm(5)
+# 对整个 DataFrame 进行归一化
+df_normalized = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
 
-# 对第一个维度进行采样
-sampled_tensor = tensor[random_indices]
-
-print(sampled_tensor)
+# 打印归一化后的 DataFrame
+print("Min-Max Normalized DataFrame:")
+print(df_normalized)

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 from matplotlib import pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from prototype.constant import Constant
 from prototype.global_tramsform import transform_sensor_data, transform_sensor_data_to_df, transform_sensor_data_to_df0
@@ -16,7 +16,7 @@ from utils.slidewindow import slide_window2
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 初始化 MinMaxScaler(Normalization [-1,1])
-scaler = MinMaxScaler(feature_range=(-1, 1))
+scaler = StandardScaler()
 
 def read_data():
     file_name = '../data/realworld/*/shin_merged.csv'
@@ -111,14 +111,8 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
         # 标签按照整数读取
         data['label'] = data['label'].astype(int)
 
-        # Global Transformed
-        data = transform_sensor_data_to_df(data)
-
-        # 去除头部
+        # 去除头部 (Realworld 特有, 每段大数据前面有停止一段时间)
         data = data[stop_simple: len(data)]
-
-        # 归一化
-        # data.iloc[:, :9] = scaler.fit_transform(data.iloc[:, :9])
 
         # 过滤指定标签数据
         if filtered_label:
@@ -128,8 +122,18 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
         # 分割后的数据 100个 X组
         data_sliced_list = slide_window2(data.to_numpy(), slide_window_length, 0.5)
 
+        # 对每一个时间片进行处理
+        transformed_list = []
+        for d in data_sliced_list:
+            # 全局转换
+            transformed_frame = transform_sensor_data_to_df(d)
+            # 归一化
+            transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+
+            transformed_list.append(transformed_frame)
+
         # 对于每一个dataframe , 滑动窗口分割数据
-        final_data.extend(data_sliced_list)
+        final_data.extend(transformed_list)
         print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
 
     # shuffle data
