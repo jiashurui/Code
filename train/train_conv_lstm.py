@@ -36,6 +36,7 @@ model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 loss_function = nn.CrossEntropyLoss()
 
+
 def train_model():
     #
     train_data, train_labels, test_data, test_labels = get_realworld_for_recon(slide_window_length,in_channel, filtered_label=[0,1,3,5], mapping_label=mapping_label)
