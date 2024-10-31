@@ -7,7 +7,7 @@ import torch
 from sklearn.preprocessing import MinMaxScaler
 
 from prototype import constant
-from prototype.global_tramsform import transform_sensor_data_to_df
+from prototype.global_tramsform2 import transform_sensor_data_to_df2
 from utils.slidewindow import slide_window2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -183,7 +183,7 @@ def get_mh_data_1d_9ch(slide_window_length, features_num):
     big_df = big_df.iloc[:, 14:24]
 
     # Global Transformed
-    big_df = transform_sensor_data_to_df(big_df)
+    big_df = transform_sensor_data_to_df2(big_df)
 
     # 归一化
     # big_df.iloc[:, :features_num] = scaler.fit_transform(big_df.iloc[:, :features_num])
@@ -324,7 +324,7 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
                         'label']
 
         # Global Transform
-        data = transform_sensor_data_to_df(data)
+        data = transform_sensor_data_to_df2(data)
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
