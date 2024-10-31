@@ -23,15 +23,7 @@ def get_mh_data(slide_window_length):
         print(file_name)
         data = pd.read_csv(file_name,sep='\t',header=None)
 
-        data.columns = ['chest_x', 'chest_y', 'chest_z',
-                        'electrocardiogram_1', 'electrocardiogram_2',
-                        'ankle_x', 'ankle_y', 'ankle_z',
-                        'gyro_x', 'gyro_y', 'gyro_z',
-                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
-                        'arm_x', 'arm_y', 'arm_z',
-                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
-                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
-                        'label']
+        data.columns = constant.Constant.mHealth.data_columns
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
@@ -165,7 +157,7 @@ def get_mh_data_1d_3ch(slide_window_length):
 
     return train_data, train_labels, test_data, test_labels
 
-def get_mh_data_1d_9ch(slide_window_length, features_num):
+def get_mh_data_forearm(slide_window_length, features_num):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
     appended_data = []
@@ -233,6 +225,49 @@ def get_mh_data_1d_9ch(slide_window_length, features_num):
     return train_data, train_labels, test_data, test_labels
 
 
+# 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
+
+def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}):
+    file_list = glob.glob('../data/mHealth/mHealth_*.log')
+    final_data = []
+    appended_data = []
+
+    for file_name in file_list:
+        print(file_name)
+        data = pd.read_csv(file_name, sep='\t', header=None)
+
+        data.columns = constant.Constant.mHealth.data_columns
+        appended_data.append(data)
+
+    df = pd.concat(appended_data, ignore_index=True)
+
+    # forearm data
+    df = df.iloc[:, 14:24]
+
+    # 过滤无效标签
+    df['label'] = df['label'].astype(int)
+    df = df[df['label'] != 0]
+
+    # 对标签进行filter
+    if filtered_label:
+        df = df[~df['label'].isin(filtered_label)]
+        df['label'] = df['label'].map(mapping_label)
+
+    # 滑动窗口
+    df_list = slide_window2(df, slide_window_length, 0.5)
+
+    # 对每一个时间片进行处理
+    transformed_list = []
+    for d in df_list:
+        transformed_frame = transform_sensor_data_to_df2(d)
+        transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+
+        transformed_list.append(transformed_frame)
+
+    np_arr = np.array(transformed_list)
+    data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    return data_tensor
 
 # 使用别的数据集,在 mhealth数据集上面进行测试
 # walking waiting running
@@ -244,15 +279,7 @@ def get_mh_data_1d_3ch_for_test(slide_window_length):
     for file_name in file_list:
         data = pd.read_csv(file_name, sep='\t', header=None)
 
-        data.columns = ['chest_x', 'chest_y', 'chest_z',
-                        'electrocardiogram_1', 'electrocardiogram_2',
-                        'ankle_x', 'ankle_y', 'ankle_z',
-                        'gyro_x', 'gyro_y', 'gyro_z',
-                        'magnetometer_x', 'magnetometer_y', 'magnetometer_z',
-                        'arm_x', 'arm_y', 'arm_z',
-                        'gyro_arm_x', 'gyro_arm_y', 'gyro_arm_z',
-                        'magnetometer_arm_x', 'magnetometer_arm_y', 'magnetometer_arm_z',
-                        'label']
+        data.columns = constant.Constant.mHealth.data_columns
 
         # filter 1:standing 4:walking 11:running
         filtered_df = data[data['label'].isin([1,4,11])]
@@ -373,6 +400,7 @@ def get_mh_data_for_abnormal_test(slide_window_length, features_num):
 
     return tensor_walk_tensor[:, :, :features_num], tensor_not_walk_tensor[:, :, :features_num]
 
+
 if __name__ == '__main__':
-    t, f = get_mh_data(128)
+    t, f = get_mh_data_1d_3ch_for_test(128)
     print(t)

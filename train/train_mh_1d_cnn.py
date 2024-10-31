@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 from cnn.cnn import DeepOneDimCNN
-from datareader.mh_datareader import get_mh_data_1d_9ch
+from datareader.mh_datareader import get_mh_data_forearm
 from prototype import constant
 from utils import show, report
 
@@ -27,7 +27,7 @@ loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     # mHealth
-    train_data, train_labels, test_data, test_labels = get_mh_data_1d_9ch(slide_window_length, in_channel)
+    train_data, train_labels, test_data, test_labels = get_mh_data_forearm(slide_window_length, in_channel)
     train_labels = train_labels - 1
     test_labels = test_labels - 1
     # CNN need transformed
