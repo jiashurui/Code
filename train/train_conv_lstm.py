@@ -44,11 +44,11 @@ def train_model():
     train_data = train_data.transpose(1, 2)
     test_data = test_data.transpose(1, 2)
 
-    # train
-    model.train()
-
     lost_arr = []
     for epoch in range(epochs):
+        # train
+        model.train()
+
         permutation = torch.randperm(train_data.size()[0])
         correct_train = 0
         num_sum_train = 0
@@ -76,8 +76,11 @@ def train_model():
             optimizer.step()
 
         lost_arr.append(loss_per_epoch)
+
         print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
         print(f'Accuracy: {correct_train}/{num_sum_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
+
+        test_model(model, test_data, test_labels)
 
     # 展示训练Loss
     show.show_me_data0(lost_arr)
@@ -88,7 +91,13 @@ def train_model():
     # Load Model
     model_load.load_state_dict(torch.load('../model/Conv-LSTM.pth'))
 
-    model_load.eval()
+    # 测试模型
+    confusion_matrix = test_model(model_load, test_data, test_labels)
+
+    show.show_me_hotmap(confusion_matrix, label_map=label_map_str)
+
+def test_model(model ,test_data ,test_label):
+    model.eval()
     num_sum = 0
     correct = 0
     test_loss = 0
@@ -96,11 +105,11 @@ def train_model():
 
     with torch.no_grad():
         for i in range(0, test_data.size()[0], batch_size):
-            input_data, label = test_data[i: i + batch_size], test_labels[i: i + batch_size]
+            input_data, label = test_data[i: i + batch_size], test_label[i: i + batch_size]
             if label.size(0) != batch_size:
                 continue
 
-            outputs = model_load(input_data)
+            outputs = model(input_data)
             pred = outputs.argmax(dim=1, keepdim=True)  # 获取概率最大的索引
 
             for (expected, actual) in zip(pred, label.reshape(batch_size, 1)):
@@ -112,7 +121,7 @@ def train_model():
 
     print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-    show.show_me_hotmap(confusion_matrix, label_map=label_map_str)
+    return confusion_matrix
 
 model_load_flag = False
 def apply_conv_lstm(test_data):
