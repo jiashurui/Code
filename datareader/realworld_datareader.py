@@ -18,7 +18,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # scaler = StandardScaler()
 
 def read_data():
-    file_name = '../data/realworld/*/shin_merged.csv'
+    file_name = '../data/realworld/*/forearm_merged.csv'
     file_list = glob.glob(file_name)
     appended_data = []
 
