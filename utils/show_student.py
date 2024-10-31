@@ -19,7 +19,7 @@ def real_time_show_file_data(file_name = '../data/student/0726_lab/merge_labeled
         appended_data.append(data)
 
     big_df = pd.concat(appended_data, ignore_index=True)
-    big_df = big_df.iloc[:,1:]
+    big_df = big_df.iloc[:, 1:]
 
     big_df = big_df[big_df['label'] != 3]  # 去除蹲下
     big_df = big_df[big_df['label'] != -1]  # 去除None
