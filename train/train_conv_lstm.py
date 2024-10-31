@@ -15,13 +15,6 @@ slide_window_length = 128  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
 epochs = 1
-in_channel = 6
-out_channel = 8
-# realworld
-model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
-model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
-loss_function = nn.CrossEntropyLoss()
 
 # 表明是否要将该数据集迁移到别的数据集上
 filtered = True
@@ -34,6 +27,14 @@ if filtered:
 else:
     filtered_label = []
     label_map = Constant.RealWorld.action_map
+
+in_channel = 6
+out_channel = len(label_map)
+# realworld
+model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
+model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     #

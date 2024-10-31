@@ -108,7 +108,6 @@ def get_stu_all_features(slide_window_length, option='with_label'):
     # 对 DataFrame 的每一列进行归一化
     # df.iloc[:, 1:10] = scaler.fit_transform(df.iloc[:, 1:10])
 
-
     record_diff = []
     pre_val = -2
     # 按照label,分成各个label单位的小组
@@ -140,7 +139,6 @@ def get_stu_all_features(slide_window_length, option='with_label'):
     # shuffle data
     random.shuffle(final_data)
 
-
     if option == 'with_label':
         # 提取输入和标签
         data = np.array([arr[:, 1:11].astype(np.float64) for arr in final_data])
@@ -159,10 +157,14 @@ def get_stu_all_features(slide_window_length, option='with_label'):
 
         return data_tensor, label_tensor
 
+
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
-def simple_get_stu_all_features(slide_window_length, type = 'tensor', filtered_label=[], mapping_label={}):
+def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_label=[], mapping_label={}):
     file = glob.glob('../data/student/0726_lab/merge_labeled.csv')
     df = pd.read_csv(file[0])
+
+    # 按照int读取数据
+    df['label'] = df['label'].astype(int)
     df = df[df['label'] != -1]
 
     if filtered_label:
@@ -188,6 +190,7 @@ def simple_get_stu_all_features(slide_window_length, type = 'tensor', filtered_l
 
     return data_tensor
 
+
 # 传递出所有特征(不带标签)
 def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_test):
     all_features_data = get_stu_all_features(slide_window_length)
@@ -197,7 +200,7 @@ def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_t
 
     # 使用布尔索引进行分割
     tensor_train = all_features_data[~condition[:, 0]]  # 不满足条件
-    tensor_test = all_features_data[condition[:, 0]]    # 满足条件
+    tensor_test = all_features_data[condition[:, 0]]  # 满足条件
 
     # TODO long lat
     return tensor_train[:, :, :feature_num], tensor_test[:, :, :feature_num]

@@ -7,8 +7,6 @@ from prototype.constant import Constant
 from utils import show
 
 # Parameter
-in_channel = 6
-out_channel = 6
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 
@@ -19,21 +17,24 @@ filtered = True
 if filtered:
     filtered_label = [2,3]
     label_map = Constant.realworld_x_uStudent.action_map_en_reverse
+    label_map_str = Constant.realworld_x_uStudent.action_map
     mapping_label = Constant.realworld_x_uStudent.mapping_stu
 
 else:
     filtered_label = []
     label_map = Constant.uStudent.action_map_en
 
+in_channel = 6
+out_channel = len(label_map)
+
 # Data
-origin_data = simple_get_stu_all_features(25, filtered_label, mapping_label)
+origin_data = simple_get_stu_all_features(25, filtered_label=filtered_label, mapping_label=mapping_label)
 test_data = origin_data[:, :, :in_channel]
+test_data = test_data.transpose(1, 2)
 test_labels = origin_data[:, :, 9][:, 0].to(torch.long)
 
-test_data = test_data.transpose(1, 2)
-label_map = Constant.RealWorld.action_map
-
 model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
+model_load.load_state_dict(torch.load('../model/Conv-LSTM.pth', map_location=device))
 
 model_load.eval()
 num_sum = 0
@@ -59,7 +60,7 @@ with torch.no_grad():
 
 print(f'\nTest set: Average loss: {test_loss / num_sum:.4f}, Accuracy: {correct}/{num_sum} ({100. * correct / num_sum:.0f}%)\n')
 
-heatmap_plot = show.show_me_hotmap(confusion_matrix)
+show.show_me_hotmap(confusion_matrix, label_map=label_map_str)
 
 
 
