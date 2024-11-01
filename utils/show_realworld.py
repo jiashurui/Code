@@ -32,7 +32,12 @@ def real_time_show_file_data(file_name='../data/realworld/*/forearm_merged.csv')
         transformed, rpy = global_tramsform2.transform_sensor_data_to_np2(data)
 
         pred = train_conv_lstm.apply_conv_lstm(transformed)
-        pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
+
+        # 4 基础分类(共通)
+        pred_label = constant.Constant.realworld_x_uStudent.action_map_en_reverse.get(pred.item())
+
+        # 8分类(realworld)
+        # pred_label = constant.Constant.RealWorld.action_map_reverse.get(pred.item())
         ground_truth = constant.Constant.RealWorld.action_map_reverse.get(data[1, 9])
         all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[-show_length:, :]
         real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy, ground_truth= ground_truth)

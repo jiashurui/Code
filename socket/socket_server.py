@@ -19,7 +19,7 @@ sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路�
 apply_model = 'realworld'
 # apply_model = 'mHealth'
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
-task = 'abnormal'  # pred ,abnormal
+task = 'pred'  # pred ,abnormal
 # 接收完整数据的函数
 def receive_data(conn, data_size):
     data = b''

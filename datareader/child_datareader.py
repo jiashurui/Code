@@ -285,11 +285,20 @@ def simple_get_child_2023_all_features(slide_window_length, type = 'tensor'):
         data = transform_sensor_data_to_df(data)
         appended_data.append(data)
 
+
     df = pd.concat(appended_data, ignore_index=True)
 
     df_list = slide_window2(df, slide_window_length, 0.5)
 
-    np_arr = np.array(df_list)
+    # 对每一个时间片进行处理
+    transformed_list = []
+    for d in df_list:
+        transformed_frame = transform_sensor_data_to_df(d)
+        # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+
+        transformed_list.append(transformed_frame)
+
+    np_arr = np.array(transformed_list)
 
     tensor_data = torch.tensor(np_arr, dtype=torch.float32).to(device)
 
