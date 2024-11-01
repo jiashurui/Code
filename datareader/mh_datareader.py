@@ -227,8 +227,7 @@ def get_mh_data_forearm(slide_window_length, features_num):
 
 
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
-
-def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}):
+def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor'):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     final_data = []
     appended_data = []
@@ -267,6 +266,11 @@ def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_l
 
     np_arr = np.array(transformed_list)
     data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    if type == 'df':
+        return transformed_list
+    elif type == 'np':
+        return np_arr
 
     return data_tensor
 

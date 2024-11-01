@@ -303,7 +303,7 @@ def simple_get_child_2023_all_features(slide_window_length, type = 'tensor'):
     tensor_data = torch.tensor(np_arr, dtype=torch.float32).to(device)
 
     if type == 'df':
-        return df_list
+        return transformed_list
     elif type == 'np':
         return np_arr
     return tensor_data
