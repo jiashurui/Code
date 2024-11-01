@@ -273,9 +273,10 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy, g
 
 
 # 实时展示异常检测结果
-def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, loss):
+# 定义红色段的长度
+RED_SEGMENT_LENGTH = 128
+def real_time_show_abnormal_data(origin_data, transformed_data, model_recon, loss):
     plt.ion()  # 开启交互模式
-    # 获取当前数据前三列
     x_data = np.arange(origin_data.shape[0])
     y1_data = origin_data[:, 0]  # 第一列
     y2_data = origin_data[:, 1]  # 第二列
@@ -289,117 +290,104 @@ def real_time_show_abnormal_data(origin_data,transformed_data, model_recon, loss
     y2_data_3 = model_recon[:, 1]  # 重建后第2列
     y3_data_3 = model_recon[:, 2]  # 重建后第3列
 
-
     # 如果是第一次调用，初始化图表
-    if not hasattr(real_time_show_phone_data, 'initialized'):
-        real_time_show_phone_data.fig, real_time_show_phone_data.ax = plt.subplots(3, 1)
+    if not hasattr(real_time_show_abnormal_data, 'initialized'):
+        real_time_show_abnormal_data.fig, real_time_show_abnormal_data.ax = plt.subplots(3, 1)
         plt.title('acc_data')
 
         # 第1行: 原始数据
-        real_time_show_phone_data.line1, = real_time_show_phone_data.ax[0].plot(x_data, y1_data, label='acc_x',color='red')
-        real_time_show_phone_data.line2, = real_time_show_phone_data.ax[0].plot(x_data, y2_data, label='acc_y',color='green')
-        real_time_show_phone_data.line3, = real_time_show_phone_data.ax[0].plot(x_data, y3_data, label='acc_z',color='blue')
-
-        real_time_show_phone_data.ax[0].legend()
-        real_time_show_phone_data.ax[0].set_title('Origin Data')
-
+        real_time_show_abnormal_data.line1, = real_time_show_abnormal_data.ax[0].plot(x_data, y1_data, label='acc_x', color='red')
+        real_time_show_abnormal_data.line2, = real_time_show_abnormal_data.ax[0].plot(x_data, y2_data, label='acc_y', color='green')
+        real_time_show_abnormal_data.line3, = real_time_show_abnormal_data.ax[0].plot(x_data, y3_data, label='acc_z', color='blue')
+        real_time_show_abnormal_data.ax[0].legend()
+        real_time_show_abnormal_data.ax[0].set_title('Origin Data')
 
         # 第2行: 全局变换后
-        real_time_show_phone_data.line2_1, = real_time_show_phone_data.ax[1].plot(x_data, y1_data_2,
-                                                                                     label='acc_x_t',
-                                                                                     color='#8B0000'
-                                                                               , linestyle='--'
-                                                                               )
-        real_time_show_phone_data.line2_2, = real_time_show_phone_data.ax[1].plot(x_data, y2_data_2,
-                                                                                     label='acc_y_t',
-                                                                                     color='#006400'
-                                                                               , linestyle='--'
-                                                                               )
-        real_time_show_phone_data.line2_3, = real_time_show_phone_data.ax[1].plot(x_data, y3_data_2,
-                                                                                     label='acc_z_t',
-                                                                                     color='#00008B'
-                                                                               , linestyle='--')
-        real_time_show_phone_data.ax[1].legend()
-        real_time_show_phone_data.ax[1].set_title('Transformed Data')
+        real_time_show_abnormal_data.line2_1, = real_time_show_abnormal_data.ax[1].plot(x_data, y1_data_2, label='acc_x_t', color='#8B0000', linestyle='--')
+        real_time_show_abnormal_data.line2_2, = real_time_show_abnormal_data.ax[1].plot(x_data, y2_data_2, label='acc_y_t', color='#006400', linestyle='--')
+        real_time_show_abnormal_data.line2_3, = real_time_show_abnormal_data.ax[1].plot(x_data, y3_data_2, label='acc_z_t', color='#00008B', linestyle='--')
+        real_time_show_abnormal_data.ax[1].legend()
+        real_time_show_abnormal_data.ax[1].set_title('Transformed Data')
 
         # 第3行: 重建后
-        real_time_show_phone_data.line3_1, = real_time_show_phone_data.ax[2].plot(x_data, y1_data_3,
-                                                                                     label='acc_x_r',
-                                                                                     color= '#8B0000'
-                                                                               , linestyle='--'
-                                                                               )
-        real_time_show_phone_data.line3_2, = real_time_show_phone_data.ax[2].plot(x_data, y2_data_3,
-                                                                                     label='acc_y_r',
-                                                                                     color= '#006400'
-                                                                               , linestyle='--'
-                                                                               )
-        real_time_show_phone_data.line3_3, = real_time_show_phone_data.ax[2].plot(x_data, y3_data_3,
-                                                                                     label='acc_z_r',
-                                                                                     color='#00008B'
-                                                                               , linestyle='--')
-        real_time_show_phone_data.ax[2].legend()
-        real_time_show_phone_data.ax[2].set_title('Reconstruction Data')
+        real_time_show_abnormal_data.line3_1, = real_time_show_abnormal_data.ax[2].plot(x_data, y1_data_3, label='acc_x_r', color='#8B0000', linestyle='--')
+        real_time_show_abnormal_data.line3_2, = real_time_show_abnormal_data.ax[2].plot(x_data, y2_data_3, label='acc_y_r', color='#006400', linestyle='--')
+        real_time_show_abnormal_data.line3_3, = real_time_show_abnormal_data.ax[2].plot(x_data, y3_data_3, label='acc_z_r', color='#00008B', linestyle='--')
+        real_time_show_abnormal_data.ax[2].legend()
+        real_time_show_abnormal_data.ax[2].set_title('Reconstruction Data')
+
+        # 初始化红色段位置列表
+        real_time_show_abnormal_data.red_segments = []
 
         # 设置 x 和 y 轴的限制
-        for ax in real_time_show_phone_data.ax:
+        for ax in real_time_show_abnormal_data.ax:
             ax.set_xlim(0, origin_data.shape[0])
             ax.set_ylim(np.min(origin_data[:, :3]), np.max(origin_data[:, :3]))
 
-        real_time_show_phone_data.initialized = True
+        real_time_show_abnormal_data.initialized = True
     else:
-        # 更新数据而不是重新绘制图表
-        real_time_show_phone_data.line1.set_xdata(x_data)
-        real_time_show_phone_data.line1.set_ydata(y1_data)
-        real_time_show_phone_data.line2.set_xdata(x_data)
-        real_time_show_phone_data.line2.set_ydata(y2_data)
-        real_time_show_phone_data.line3.set_xdata(x_data)
-        real_time_show_phone_data.line3.set_ydata(y3_data)
+        # 更新数据
+        real_time_show_abnormal_data.line1.set_xdata(x_data)
+        real_time_show_abnormal_data.line1.set_ydata(y1_data)
+        real_time_show_abnormal_data.line2.set_xdata(x_data)
+        real_time_show_abnormal_data.line2.set_ydata(y2_data)
+        real_time_show_abnormal_data.line3.set_xdata(x_data)
+        real_time_show_abnormal_data.line3.set_ydata(y3_data)
 
-        # 更新第二组数据的线条
-        real_time_show_phone_data.line2_1.set_xdata(x_data)
-        real_time_show_phone_data.line2_1.set_ydata(y1_data_2)
-        real_time_show_phone_data.line2_2.set_xdata(x_data)
-        real_time_show_phone_data.line2_2.set_ydata(y2_data_2)
-        real_time_show_phone_data.line2_3.set_xdata(x_data)
-        real_time_show_phone_data.line2_3.set_ydata(y3_data_2)
+        # 更新第二组数据
+        real_time_show_abnormal_data.line2_1.set_xdata(x_data)
+        real_time_show_abnormal_data.line2_1.set_ydata(y1_data_2)
+        real_time_show_abnormal_data.line2_2.set_xdata(x_data)
+        real_time_show_abnormal_data.line2_2.set_ydata(y2_data_2)
+        real_time_show_abnormal_data.line2_3.set_xdata(x_data)
+        real_time_show_abnormal_data.line2_3.set_ydata(y3_data_2)
 
+        # 更新第三组数据
+        real_time_show_abnormal_data.line3_1.set_xdata(x_data)
+        real_time_show_abnormal_data.line3_1.set_ydata(y1_data_3)
+        real_time_show_abnormal_data.line3_2.set_xdata(x_data)
+        real_time_show_abnormal_data.line3_2.set_ydata(y2_data_3)
+        real_time_show_abnormal_data.line3_3.set_xdata(x_data)
+        real_time_show_abnormal_data.line3_3.set_ydata(y3_data_3)
 
-        # 更新第三组数据的线条
-        real_time_show_phone_data.line3_1.set_xdata(x_data)
-        real_time_show_phone_data.line3_1.set_ydata(y1_data_3)
-        real_time_show_phone_data.line3_2.set_xdata(x_data)
-        real_time_show_phone_data.line3_2.set_ydata(y2_data_3)
-        real_time_show_phone_data.line3_3.set_xdata(x_data)
-        real_time_show_phone_data.line3_3.set_ydata(y3_data_3)
+        # 检查是否需要绘制红色段
+        if loss > 3000:
+            # 将最新的 128 个点的范围添加到红色段列表
+            real_time_show_abnormal_data.red_segments.append((len(x_data) - RED_SEGMENT_LENGTH, len(x_data)))
 
-        # 判断 model_recon 是否超过阈值
-        if np.max(model_recon) > 5000:
-            # 修改最新 128 个数据点的颜色
-            real_time_show_abnormal_data.line3_1.set_color('red')
-            real_time_show_abnormal_data.line3_2.set_color('red')
-            real_time_show_abnormal_data.line3_3.set_color('red')
-        else:
-            # 恢复正常颜色
-            real_time_show_abnormal_data.line3_1.set_color('#8B0000')
-            real_time_show_abnormal_data.line3_2.set_color('#006400')
-            real_time_show_abnormal_data.line3_3.set_color('#00008B')
+        # 移动红色段，并逐渐消失
+        updated_segments = []
+        for start, end in real_time_show_abnormal_data.red_segments:
+            # 如果红色段还在可视范围内，更新位置
+            if end < len(x_data):
+                updated_segments.append((start + 128, end + 128))
+
+        # 更新红色段位置
+        real_time_show_abnormal_data.red_segments = updated_segments
+
+        # 清除旧的红色段并绘制最新的红色段
+        for start, end in real_time_show_abnormal_data.red_segments:
+            real_time_show_abnormal_data.ax[2].plot(x_data[start:end], y1_data_3[start:end], color='red')
+            real_time_show_abnormal_data.ax[2].plot(x_data[start:end], y2_data_3[start:end], color='red')
+            real_time_show_abnormal_data.ax[2].plot(x_data[start:end], y3_data_3[start:end], color='red')
 
         # 重新调整 x 和 y 轴的范围
         show_range_percent = 1.2  # 120%
 
-        real_time_show_phone_data.ax[0].set_xlim(0, origin_data.shape[0] * show_range_percent)
-        real_time_show_phone_data.ax[0].set_ylim(np.min(origin_data[:, :3]) * show_range_percent,np.max(origin_data[:, :3]) * show_range_percent)
-        real_time_show_phone_data.ax[1].set_xlim(0, transformed_data.shape[0] * show_range_percent)
-        real_time_show_phone_data.ax[1].set_ylim(np.min(transformed_data[:, :3]) * show_range_percent,np.max(transformed_data[:, :3]) * show_range_percent)
-        real_time_show_phone_data.ax[2].set_xlim(0, model_recon.shape[0] * show_range_percent)
-        real_time_show_phone_data.ax[2].set_ylim(np.min(model_recon[:, :3]) * show_range_percent,np.max(model_recon[:, :3]) * show_range_percent)
+        real_time_show_abnormal_data.ax[0].set_xlim(0, origin_data.shape[0] * show_range_percent)
+        real_time_show_abnormal_data.ax[0].set_ylim(np.min(origin_data[:, :3]) * show_range_percent,
+                                                 np.max(origin_data[:, :3]) * show_range_percent)
+        real_time_show_abnormal_data.ax[1].set_xlim(0, transformed_data.shape[0] * show_range_percent)
+        real_time_show_abnormal_data.ax[1].set_ylim(np.min(transformed_data[:, :3]) * show_range_percent,
+                                                 np.max(transformed_data[:, :3]) * show_range_percent)
+        real_time_show_abnormal_data.ax[2].set_xlim(0, model_recon.shape[0] * show_range_percent)
+        real_time_show_abnormal_data.ax[2].set_ylim(np.min(model_recon[:, :3]) * show_range_percent,
+                                                 np.max(model_recon[:, :3]) * show_range_percent)
 
-    real_time_show_phone_data.ax[2].set_title(f'loss:{loss}')
-
-
-    plt.tight_layout()  # 调整子图布局以避免重叠
-    plt.draw()  # 重绘当前图表
-    plt.pause(0.01)  # 短暂停以确保图表刷新
+        real_time_show_abnormal_data.ax[2].set_title(f'loss: {loss}')
+        plt.tight_layout()  # 调整子图布局以避免重叠
+        plt.draw()  # 重绘当前图表
+        plt.pause(0.01)  # 短暂停以确保图表刷新
 
 if __name__ == '__main__':
     real_time_show_file_data()
