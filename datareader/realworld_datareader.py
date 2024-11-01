@@ -10,39 +10,15 @@ from prototype.constant import Constant
 from prototype.global_tramsform2 import transform_sensor_data_to_df2
 from utils.show import show_acc_data_before_transformed
 from utils.slidewindow import slide_window2
-from .convert_common import convert_df_columns_name
 
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 # 初始化 MinMaxScaler(Normalization [-1,1])
 # scaler = StandardScaler()
 
-def read_data():
-    file_name = '../data/realworld/*/forearm_merged.csv'
-    file_list = glob.glob(file_name)
-    appended_data = []
-
-    for file_name in file_list:
-        data = pd.read_csv(file_name)
-        appended_data.append(data)
-
-    df = pd.concat(appended_data, ignore_index=True)
-
-    # 进行数据筛选, 仅仅选择步行数据
-    df = df[df['label'] == 7]
-
-    # 进行列名转换
-    df = convert_df_columns_name(df)
-
-    # Global Transform
-    df , df_transformed = transform_sensor_data_to_df2(df)
-
-    # 数据展示
-    show_acc_data_before_transformed(df , df_transformed,300,400)
-
-    return df
-
-
+# 筛选realworld数据,用于异常检测
 def get_realworld_for_abnormal(slide_window_length):
     # 创建示例输入数据 TODO 这里只用waist做实验, UCI是waist(腰部),mHealth是chest(胸部)
     file_list = glob.glob('../data/realworld/*/acc_*_waist.csv')
@@ -101,7 +77,6 @@ def get_realworld_for_abnormal(slide_window_length):
 
 # 读取Realworld数据用于训练模型
 def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[], mapping_label={}):
-    # 创建示例输入数据
     file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
     final_data = []
     for file_name in file_list:
@@ -118,7 +93,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
             data = data[~data['label'].isin(filtered_label)]
             data['label'] = data['label'].map(mapping_label)
 
-        # 分割后的数据 100个 X组
+        # 对于每一个dataframe , 滑动窗口分割数据
         data_sliced_list = slide_window2(data, slide_window_length, 0.5)
 
         # 对每一个时间片进行处理
@@ -131,7 +106,6 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
 
             transformed_list.append(transformed_frame)
 
-        # 对于每一个dataframe , 滑动窗口分割数据
         final_data.extend(transformed_list)
         print(f'Total number of files: {len(file_list)}, now is No. {file_list.index(file_name)}')
 
@@ -155,7 +129,52 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
     train_labels = data_label[:split_point].to(device)
     test_labels = data_label[split_point:].to(device)
 
-    return train_data,train_labels,test_data,test_labels
+    return train_data, train_labels, test_data, test_labels
+
+
+# 简单地获取realworld所有数据
+def simple_get_realworld_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor'):
+    file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
+    appended_data = []
+
+    for file_name in file_list:
+        print(file_name)
+        data = pd.read_csv(file_name)
+        # 去除头部 (Realworld 特有, 每段大数据前面有停止一段时间)
+        data = data[stop_simple: len(data)]
+        appended_data.append(data)
+
+    df = pd.concat(appended_data, ignore_index=True)
+
+    df['label'] = df['label'].astype(int)
+
+    # 过滤指定标签数据
+    if filtered_label:
+        df = df[~data['label'].isin(filtered_label)]
+        df['label'] = df['label'].map(mapping_label)
+
+    # 对于每一个dataframe , 滑动窗口分割数据
+    data_sliced_list = slide_window2(df, slide_window_length, 0.5)
+
+    # 对每一个时间片进行处理
+    transformed_list = []
+    for d in data_sliced_list:
+        # 全局转换
+        transformed_frame = transform_sensor_data_to_df2(d)
+        # 归一化
+        # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
+
+        transformed_list.append(transformed_frame)
+
+    np_arr = np.array(transformed_list)
+    data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)
+
+    if type == 'df':
+        return transformed_list
+    elif type == 'np':
+        return np_arr
+
+    return data_tensor
 
 
 # 读取realworld数据(不做任何处理变换)
@@ -212,13 +231,15 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_tra
     train_normal_data = tensor_walking[:split_point].to(device)
     test_abnormal_data = tensor_walking[split_point:].to(device)
 
-    return train_normal_data[:, :, :features_num], test_abnormal_data[:, :, :features_num], tensor_not_walking[:, :, :features_num]
+    return train_normal_data[:, :, :features_num], test_abnormal_data[:, :, :features_num], tensor_not_walking[:, :,
+                                                                                            :features_num]
 
 
 # 读取realworld数据用于异常检测
 def get_realworld_transformed_for_abnormal(slide_window_length, features_num):
     return get_realworld_raw_for_abnormal(slide_window_length, features_num, global_transform=True)
 
+
 if __name__ == '__main__':
-    normal,abnormal,test_abnormal = get_realworld_transformed_for_abnormal(128, 6)
+    result = simple_get_realworld_all_features(128)
     print()

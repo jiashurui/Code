@@ -229,7 +229,6 @@ def get_mh_data_forearm(slide_window_length, features_num):
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
 def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor'):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
-    final_data = []
     appended_data = []
 
     for file_name in file_list:
