@@ -4,25 +4,19 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import TSNE
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 from datareader.child_datareader import get_child_all_features
 from datareader.datareader_stu import get_stu_all_features, simple_get_stu_all_features
 from prototype.constant import Constant
-from statistic.stat_common import calc_df_features
+from statistic.stat_common import calc_df_features, calc_fft_spectral_energy
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
 K = 6
 features_number = 9
 slice_length = 20
-# 大学生 - 9 features
-# train_data = get_stu_all_features(slice_length)
-
-# 大学生 - 3 features(加速度のみ)
-
-# origin_data = get_stu_all_features(slice_length)
-
 # 全局变换之后的大学生数据(全局变换按照frame进行)
 origin_data = simple_get_stu_all_features(slice_length, type= 'df')
 origin_data_np = np.array(origin_data)
@@ -30,19 +24,38 @@ origin_data_np = np.array(origin_data)
 features_list = []
 for d in origin_data:
     df_features, _ = calc_df_features(d.iloc[:, :9])
+
+    # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+    # aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
+    # gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
+    # mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
+    # df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+
+    # 舍弃掉磁力数据(结果会变坏)
+    # df_features = df_features.iloc[:6, :]
     features_list.append(df_features.values.flatten())
 
 train_data = np.array(features_list)
+# 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨
 pca = PCA(n_components=10, random_state=3407)
+
+# PCA 和T-SNE结果差不错,没什么太大区别
+# t_sne = TSNE(n_components=2, random_state=3407, perplexity=50, n_jobs=-1, method='exact')
+
+# StandardScaler > MinMaxScaler(-1,1) > MinMaxScaler(0,1)
 scaler = StandardScaler()
-# n_components specifies how many principal components to keep
+
+# PCA之前必须要进行正则化,不然结果也会很糟糕
 normal_latent = scaler.fit_transform(train_data)
 normal_result = pca.fit_transform(normal_latent)
+
+# PCA 结果可视化
+plt.scatter(normal_result[:, 0], normal_result[:, 1],color='lightblue', alpha=0.5, s=5)  # 淡蓝色, 半透明, 点大小为1
+plt.show()
 
 # 使用 KMeans 进行聚类
 kmeans = KMeans(n_clusters=K, random_state=123)
 kmeans.fit(normal_result)
-
 
 # 获取聚类结果
 labels = kmeans.labels_  # 每个样本的聚类标签

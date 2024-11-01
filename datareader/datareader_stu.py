@@ -178,6 +178,8 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     # 滑动窗口
     df_list = slide_window2(df, slide_window_length, 0.5)
 
+    # random.shuffle(df_list)
+
     # 对每一个时间片进行处理
     transformed_list = []
     for d in df_list:

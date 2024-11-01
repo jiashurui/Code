@@ -18,12 +18,6 @@ from utils.dict_utils import find_key_by_value
 K = 3
 features_number = 9
 slice_length = 20
-# 大学生 - 9 features
-# train_data = get_stu_all_features(slice_length)
-
-# 大学生 - 3 features(加速度のみ)
-
-# origin_data = get_stu_all_features(slice_length)
 
 # 全局变换之后的小学生数据(全局变换按照frame进行)
 origin_data = simple_get_child_2023_all_features(slice_length, type= 'df')
