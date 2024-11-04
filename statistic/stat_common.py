@@ -174,15 +174,15 @@ def calc_df_features(df):
     # 对数能量(Log energy) 1e-10 是防止对数取0
     log_energy = df.apply(lambda x: np.log(np.sum(x ** 2) + 1e-10))
     # 方差
-    var = df.apply(lambda x: x.var(), axis=1)
+    # var = df.apply(lambda x: x.var(), axis=1)
 
     # 皮尔森相关系数
     df_pearson = df.corr(method='pearson')
 
     df_stat = pd.concat([df_mean, df_min, df_max, df_median, df_std, cv, skewness, kurt, signal_power, rms,
-                         ptp, zcr, mcr, log_energy, var], axis=1)
+                         ptp, zcr, mcr, log_energy], axis=1)
     df_stat.columns = ['mean', 'min', 'max', 'median', 'std', 'coefficient variation', 'skewness', 'kurt',
-                       'signal_power', 'rms', 'ptp', 'zcr', 'mcr', 'log_energy', 'var']
+                       'signal_power', 'rms', 'ptp', 'zcr', 'mcr', 'log_energy']
 
     return df_stat, df_pearson
 

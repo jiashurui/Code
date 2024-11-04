@@ -13,7 +13,7 @@ from utils.dict_utils import find_key_by_value
 # K = 6 に設定する
 K = 6
 features_number = 9
-slice_length = 20
+slice_length = 40
 # 全局变换之后的大学生数据(全局变换按照frame进行)
 origin_data = simple_get_stu_all_features(slice_length, type= 'df')
 origin_data_np = np.array(origin_data)
@@ -24,14 +24,14 @@ for d in origin_data:
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
     aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
-    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
+    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='y(rad/s)', acc_z_name='z(rad/s)', T=10)
+    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='y(μT)', acc_z_name='z(μT)', T=10)
     df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
     aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
-    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
+    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='y(rad/s)', acc_z_name='z(rad/s)', T=10)
+    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='y(μT)', acc_z_name='z(μT)', T=10)
     df_features['fft_spectral_entropy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
 
     centroid_arr = []
