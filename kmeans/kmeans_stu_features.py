@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from datareader.datareader_stu import simple_get_stu_all_features
 from prototype.constant import Constant
 from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, spectral_centroid, \
-    dominant_frequency
+    dominant_frequency, calc_acc_sma
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
@@ -48,7 +48,14 @@ for d in origin_data:
 
     # 舍弃掉磁力数据(结果会变坏)
     # df_features = df_features.iloc[:6, :]
-    features_list.append(df_features.values.flatten())
+
+    # 特征打平
+    flatten_val = df_features.values.flatten()
+    # 单独一维特征
+    # 加速度XYZ
+    acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
+    flatten_val = np.append(flatten_val, acc_sma)
+    features_list.append(flatten_val)
 
 train_data = np.array(features_list)
 # 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨

@@ -145,11 +145,15 @@ def calc_hanmming_window(data, N):
 
 # 计算数据的各维度特征量
 def calc_df_features(df):
-    #
+    # 均值(Mean)
     df_mean = df.mean()
+    # 最小值(Min)
     df_min = df.min()
+    # 最大值(Max)
     df_max = df.max()
+    # 中位值(Median)
     df_median = df.median()
+    # 标准差(Standard Deviation)
     df_std = df.std()
     # 计算变异系数 (CV)
     cv = df.std() / df.mean()
@@ -161,14 +165,31 @@ def calc_df_features(df):
     signal_power = df.apply(lambda x: np.mean(x ** 2))
     # 二乘平方根 (Root Mean Square, RMS)
     rms = df.apply(lambda x: np.sqrt(np.mean(x ** 2)))
+    # 峰值振幅 (Peak-to-Peak Amplitude)
+    ptp = df.apply(lambda x: np.ptp(x))
+    # 过零率(Zero-Crossing Rate)
+    zcr = df.apply(lambda x: np.sum(np.diff(np.sign(x)) != 0) / len(x))
+    # 过均值率(Mean Crossing Rate)
+    mcr = df.apply(lambda x: np.sum(np.diff(np.sign(x - x.mean())) != 0) / len(x))
+    # 对数能量(Log energy) 1e-10 是防止对数取0
+    log_energy = df.apply(lambda x: np.log(np.sum(x ** 2) + 1e-10))
+    # 方差
+    var = df.apply(lambda x: x.var(), axis=1)
+
     # 皮尔森相关系数
     df_pearson = df.corr(method='pearson')
 
-    df_stat = pd.concat([df_mean, df_min, df_max, df_median, df_std, cv, skewness, kurt, signal_power, rms], axis=1)
+    df_stat = pd.concat([df_mean, df_min, df_max, df_median, df_std, cv, skewness, kurt, signal_power, rms,
+                         ptp, zcr, mcr, log_energy, var], axis=1)
     df_stat.columns = ['mean', 'min', 'max', 'median', 'std', 'coefficient variation', 'skewness', 'kurt',
-                       'signal_power', 'rms']
+                       'signal_power', 'rms', 'ptp', 'zcr', 'mcr', 'log_energy', 'var']
 
     return df_stat, df_pearson
+
+# XYZ 合计信号幅值面积
+# Signal Magnitude Area
+def calc_acc_sma(acc_x , acc_y , acc_z):
+    return np.sum((np.abs(acc_x) + np.abs(acc_y) + np.abs(acc_z)))/ len(acc_x)
 
 
 # 保存FFT变换的结果
