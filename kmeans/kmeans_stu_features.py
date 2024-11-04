@@ -1,16 +1,13 @@
-import stat
-
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
-from datareader.child_datareader import get_child_all_features
-from datareader.datareader_stu import get_stu_all_features, simple_get_stu_all_features
+from datareader.datareader_stu import simple_get_stu_all_features
 from prototype.constant import Constant
-from statistic.stat_common import calc_df_features, calc_fft_spectral_energy
+from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, spectral_centroid, \
+    dominant_frequency
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
@@ -26,10 +23,28 @@ for d in origin_data:
     df_features, _ = calc_df_features(d.iloc[:, :9])
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    # aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    # gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
-    # mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
-    # df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
+    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
+    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
+    df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+
+    # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+    aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
+    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
+    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
+    df_features['fft_spectral_entropy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+
+    centroid_arr = []
+    dominant_frequency_arr = []
+    for i in (range(features_number)):
+        centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
+        dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
+
+        centroid_arr.append(centroid_feature)
+        dominant_frequency_arr.append(dominant_frequency_feature)
+
+    df_features['fft_spectral_centroid'] = np.array(centroid_arr)
+    df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
 
     # 舍弃掉磁力数据(结果会变坏)
     # df_features = df_features.iloc[:6, :]

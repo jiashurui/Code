@@ -122,6 +122,20 @@ def spectral_centroid(series, sampling_rate=10):
     centroid = np.sum(frequency * magnitude) / np.sum(magnitude)
     return centroid
 
+# 定义计算主频率的函数
+# {Param: series: np }
+def dominant_frequency(series, sampling_rate=10):
+    # 计算傅里叶变换
+    spectrum = np.fft.fft(series)
+    # 获取频谱的幅度
+    magnitude = np.abs(spectrum)
+    # 获取频率轴
+    freqs = np.fft.fftfreq(len(series), d=1 / sampling_rate)
+
+    # 找到幅值最大的频率
+    dominant_freq = freqs[np.argmax(magnitude[1:]) + 1]  # 忽略直流分量 (DC 分量)
+    return dominant_freq
+
 
 # 对数据进行汉明窗变换
 def calc_hanmming_window(data, N):
