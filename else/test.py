@@ -1,20 +1,74 @@
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.datasets import load_iris
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 
-# 创建示例 DataFrame
-data = {
-    'Feature1': [1.0, 2.0, 3.0, 4.0],
-    'Feature2': [5.0, 6.0, 7.0, 8.0],
-    'Feature3': [9.0, 10.0, 11.0, 12.0],
-}
-df = pd.DataFrame(data)
+# Load the dataset
+data = load_iris()
+X = data.data
+y = data.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
 
-# 初始化 MinMaxScaler
-scaler = StandardScaler()
+# Init Model
+lda = LinearDiscriminantAnalysis()
+svm = SVC(kernel="linear", random_state=0)
+log_reg = LogisticRegression(random_state=0,max_iter=1000)
+#################################################################
+# LDA
+lda.fit(X_train, y_train)
 
-# 对整个 DataFrame 进行归一化
-df_normalized = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+# LDAの予測値を取得
+y_train_lda = lda.predict(X_train)
+y_pred_lda = lda.predict(X_test)
 
-# 打印归一化后的 DataFrame
-print("Min-Max Normalized DataFrame:")
-print(df_normalized)
+# Accuracyを計算
+accuracy_train_lda = accuracy_score(y_train, y_train_lda)
+accuracy_test_lda = accuracy_score(y_test, y_pred_lda)
+
+print("LDA Train Accuracy:", accuracy_train_lda)
+print("LDA Test Accuracy:", accuracy_test_lda)
+
+# 混同行列を計算(Test集)
+conf_matrix_lda = confusion_matrix(y_test, y_pred_lda)
+print(f"LDA Confusion Matrix:\n{conf_matrix_lda}")
+
+#################################################################
+# SVM
+svm.fit(X_train, y_train)
+
+# LDAの予測値を取得
+y_train_svm = svm.predict(X_train)
+y_pred_svm = svm.predict(X_test)
+
+# Accuracyを計算
+accuracy_train_svm = accuracy_score(y_train, y_train_svm)
+accuracy_test_svm = accuracy_score(y_test, y_pred_svm)
+
+print("SVM Train Accuracy:", accuracy_train_svm)
+print("SVM Test Accuracy:", accuracy_test_svm)
+
+# 混同行列を計算(Test集)
+conf_matrix_lda = confusion_matrix(y_test, y_pred_svm)
+print(f"SVM Confusion Matrix:\n{conf_matrix_lda}")
+
+#################################################################
+# LogicRegression
+log_reg.fit(X_train, y_train)
+
+# LDAの予測値を取得
+y_train_log = log_reg.predict(X_train)
+y_pred_log = log_reg.predict(X_test)
+
+# Accuracyを計算
+accuracy_train_log = accuracy_score(y_train, y_train_log)
+accuracy_test_log = accuracy_score(y_test, y_pred_log)
+
+print("LogisticRegression Train Accuracy:", accuracy_train_log)
+print("LogisticRegression Test Accuracy:", accuracy_test_log)
+
+# 混同行列を計算(Test集)
+conf_matrix_log = confusion_matrix(y_test, y_pred_log)
+print(f"LogisticRegression Confusion Matrix:\n{conf_matrix_log}")

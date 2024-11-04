@@ -5,16 +5,17 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 from datareader.mh_datareader import simple_get_mh_all_features
+from datareader.realworld_datareader import simple_get_realworld_all_features
 from prototype.constant import Constant
 from statistic.stat_common import calc_df_features
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
-K = 12
+K = 8
 features_number = 9
-slice_length = 128
+slice_length = 256
 # 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_mh_all_features(slice_length, type='df')
+origin_data = simple_get_realworld_all_features(slice_length, type='df')
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -89,7 +90,7 @@ for i in range(K):
         # (data_num , seq_data_index , feature(第9个是标签))
         ground_truth = int(origin_data_np[index[j], 1, 9].item())
 
-        ground_truth_name = find_key_by_value(Constant.mHealth.action_map, ground_truth)
+        ground_truth_name = find_key_by_value(Constant.RealWorld.action_map, ground_truth)
 
         axs[i, j].set_title(f'Cluster: {i}, Data No: {index[j]}, Ground Truth:{ground_truth_name}')
         axs[i, j].set_xlabel('time')
