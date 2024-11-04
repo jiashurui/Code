@@ -7,14 +7,14 @@ from sklearn.preprocessing import StandardScaler
 from datareader.mh_datareader import simple_get_mh_all_features
 from datareader.realworld_datareader import simple_get_realworld_all_features
 from prototype.constant import Constant
-from statistic.stat_common import calc_df_features
+from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy
 from utils.dict_utils import find_key_by_value
 
-# K = 6 に設定する
+# K = 8 に設定する
 K = 8
 features_number = 9
 slice_length = 256
-# 全局变换之后的大学生数据(全局变换按照frame进行)
+# 全局变换之后RealWorld数据(全局变换按照frame进行)
 origin_data = simple_get_realworld_all_features(slice_length, type='df')
 origin_data_np = np.array(origin_data)
 
@@ -23,10 +23,16 @@ for d in origin_data:
     df_features, _ = calc_df_features(d.iloc[:, :9])
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    # aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    # gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
-    # mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
-    # df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=50)
+    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=50)
+    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=50)
+
+    # 分别对9维数据XYZ求FFT的熵(结果会变坏)
+    aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=50)
+    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=50)
+    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=50)
+
+    df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
 
     # 舍弃掉磁力数据(结果会变坏)
     # df_features = df_features.iloc[:6, :]
@@ -60,7 +66,6 @@ centroids = kmeans.cluster_centers_  # 聚类质心
 
 print(f'Simples number:{train_data.shape[0]}')
 
-true_label_in_cluster = [] * 6
 for i in range(K):
     indices = np.where(labels == i)[0]
 
@@ -69,9 +74,8 @@ for i in range(K):
 
     for j in range(len(indices)):
         true_label = int(origin_data_np[indices[j], 1, 9].item())
-        all_gt[true_label - 1] += 1
+        all_gt[true_label] += 1
 
-    true_label_in_cluster.append(all_gt)
     print('    ground truth:', all_gt)
 
 
