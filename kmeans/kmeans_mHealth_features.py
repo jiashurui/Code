@@ -6,15 +6,17 @@ from sklearn.preprocessing import StandardScaler
 
 from datareader.mh_datareader import simple_get_mh_all_features
 from prototype.constant import Constant
-from statistic.stat_common import calc_df_features
+from statistic.stat_common import calc_df_features, spectral_centroid, dominant_frequency, calculate_ar_coefficients, \
+    calc_fft_spectral_energy, spectral_entropy, calc_acc_sma
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
 K = 12
+simpling = 50
 features_number = 9
-slice_length = 128
+slice_length = 256
 # 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_mh_all_features(slice_length, type='df')
+origin_data = simple_get_mh_all_features(slice_length, type='df', with_rpy= True)
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -22,18 +24,53 @@ for d in origin_data:
     df_features, _ = calc_df_features(d.iloc[:, :9])
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    # aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    # gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='x(rad/s)', acc_z_name='x(rad/s)', T=10)
-    # mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='x(μT)', acc_z_name='x(μT)', T=10)
-    # df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='arm_x', acc_y_name='arm_y', acc_z_name='arm_z', T=simpling)
+    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='gyro_arm_x', acc_y_name='gyro_arm_y', acc_z_name='gyro_arm_z', T=simpling)
+    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='magnetometer_arm_x', acc_y_name='magnetometer_arm_y', acc_z_name='magnetometer_arm_z', T=simpling)
+    df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+
+    # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+    aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='arm_x', acc_y_name='arm_y', acc_z_name='arm_z', T=simpling)
+    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='gyro_arm_x', acc_y_name='gyro_arm_y', acc_z_name='gyro_arm_z', T=simpling)
+    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='magnetometer_arm_x', acc_y_name='magnetometer_arm_y', acc_z_name='magnetometer_arm_z', T=simpling)
+    df_features['fft_spectral_entropy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+
+    centroid_arr = []
+    dominant_frequency_arr = []
+    ar_co_arr = []
+    for i in (range(features_number)):
+        centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
+        dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
+        ar_coefficients = calculate_ar_coefficients(d.iloc[:, i].values)
+
+        centroid_arr.append(centroid_feature)
+        dominant_frequency_arr.append(dominant_frequency_feature)
+        ar_co_arr.append(ar_coefficients)
+
+    df_features['fft_spectral_centroid'] = np.array(centroid_arr)
+    df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
 
     # 舍弃掉磁力数据(结果会变坏)
     # df_features = df_features.iloc[:6, :]
-    features_list.append(df_features.values.flatten())
+
+    # 特征打平
+    flatten_val = df_features.values.flatten()
+    # 单独一维特征
+    # 加速度XYZ
+    acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
+    roll_avg = d.iloc[:, 10].mean()
+    pitch_avg = d.iloc[:, 11].mean()
+    yaw_avg = d.iloc[:, 12].mean()
+
+    flatten_val = np.append(flatten_val, acc_sma)
+    flatten_val = np.append(flatten_val, roll_avg)
+    flatten_val = np.append(flatten_val, pitch_avg)
+    flatten_val = np.append(flatten_val, yaw_avg)
+    features_list.append(flatten_val)
 
 train_data = np.array(features_list)
 # 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨
-pca = PCA(n_components=10, random_state=3407)
+pca = PCA(n_components=0.7, random_state=3407)
 
 # PCA 和T-SNE结果差不错,没什么太大区别
 # t_sne = TSNE(n_components=2, random_state=3407, perplexity=50, n_jobs=-1, method='exact')
@@ -44,6 +81,13 @@ scaler = StandardScaler()
 # PCA之前必须要进行正则化,不然结果也会很糟糕
 normal_latent = scaler.fit_transform(train_data)
 normal_result = pca.fit_transform(normal_latent)
+
+
+explained_variance = pca.explained_variance_ratio_
+print("PCA 维度:", len(explained_variance))
+print("方差解释率:", explained_variance)
+print("方差累计解释率:", np.sum(explained_variance))
+
 
 # PCA 结果可视化
 plt.scatter(normal_result[:, 0], normal_result[:, 1],color='lightblue', alpha=0.5, s=5)  # 淡蓝色, 半透明, 点大小为1

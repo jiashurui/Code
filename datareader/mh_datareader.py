@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from prototype import constant
+from prototype import constant, global_tramsform3
 from prototype.global_tramsform2 import transform_sensor_data_to_df2
 from utils.slidewindow import slide_window2
 
@@ -227,7 +227,7 @@ def get_mh_data_forearm(slide_window_length, features_num):
 
 
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
-def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor'):
+def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor', with_rpy= False):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     appended_data = []
 
@@ -258,7 +258,14 @@ def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_l
     # 对每一个时间片进行处理
     transformed_list = []
     for d in df_list:
-        transformed_frame = transform_sensor_data_to_df2(d)
+
+        if with_rpy:
+            # 全局转换
+            transformed_frame = global_tramsform3.transform_sensor_data_to_df2(d)
+        else:
+            transformed_frame = global_tramsform3.transform_sensor_data_to_df1(d)
+
+        # transformed_frame = transform_sensor_data_to_df2(d)
         # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
         transformed_list.append(transformed_frame)
