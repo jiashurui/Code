@@ -6,6 +6,7 @@ from scipy.fft import fft, fftfreq
 from scipy.signal import welch
 from scipy.signal.windows import hamming
 from scipy.stats import kurtosis, skew
+from statsmodels.tsa.ar_model import AutoReg
 
 
 # 对单个dataframe整体进行FFT变换
@@ -191,6 +192,16 @@ def calc_df_features(df):
 def calc_acc_sma(acc_x , acc_y , acc_z):
     return np.sum((np.abs(acc_x) + np.abs(acc_y) + np.abs(acc_z)))/ len(acc_x)
 
+def calculate_ar_coefficients(data, lags=1):
+    """
+    计算自回归系数
+    data: numpy数组，表示时间序列数据
+    lags: 滞后阶数，默认设置为1阶自回归
+    返回: 自回归系数
+    """
+    model = AutoReg(data, lags=lags, old_names=False)
+    model_fit = model.fit()
+    return model_fit.params[1:]  # 返回自回归系数，去掉常数项
 
 # 保存FFT变换的结果
 def save_fft_result(fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, file_name):

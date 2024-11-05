@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from datareader.datareader_stu import simple_get_stu_all_features
 from prototype.constant import Constant
 from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, spectral_centroid, \
-    dominant_frequency, calc_acc_sma
+    dominant_frequency, calc_acc_sma, calculate_ar_coefficients
 from utils.dict_utils import find_key_by_value
 
 # K = 6 に設定する
@@ -36,15 +36,20 @@ for d in origin_data:
 
     centroid_arr = []
     dominant_frequency_arr = []
+    ar_co_arr = []
     for i in (range(features_number)):
         centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
         dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
+        ar_coefficients = calculate_ar_coefficients(d.iloc[:, i].values)
 
         centroid_arr.append(centroid_feature)
         dominant_frequency_arr.append(dominant_frequency_feature)
+        ar_co_arr.append(ar_coefficients)
+
 
     df_features['fft_spectral_centroid'] = np.array(centroid_arr)
     df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
+    df_features['ar_coefficients'] = np.array(ar_co_arr)
 
     # 舍弃掉磁力数据(结果会变坏)
     # df_features = df_features.iloc[:6, :]

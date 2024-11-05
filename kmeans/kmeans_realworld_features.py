@@ -8,7 +8,7 @@ from datareader.mh_datareader import simple_get_mh_all_features
 from datareader.realworld_datareader import simple_get_realworld_all_features
 from prototype.constant import Constant
 from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, calc_acc_sma, \
-    spectral_centroid, dominant_frequency
+    spectral_centroid, dominant_frequency, calculate_ar_coefficients
 from utils.dict_utils import find_key_by_value
 
 # K = 8 に設定する
@@ -38,12 +38,15 @@ for d in origin_data:
 
     centroid_arr = []
     dominant_frequency_arr = []
+    ar_co_arr = []
     for i in (range(features_number)):
-        centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=simpling)
-        dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=simpling)
+        centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
+        dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
+        ar_coefficients = calculate_ar_coefficients(d.iloc[:, i].values)
 
         centroid_arr.append(centroid_feature)
         dominant_frequency_arr.append(dominant_frequency_feature)
+        ar_co_arr.append(ar_coefficients)
 
     df_features['fft_spectral_centroid'] = np.array(centroid_arr)
     df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
@@ -61,7 +64,7 @@ for d in origin_data:
 
 train_data = np.array(features_list)
 # 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨
-pca = PCA(n_components=10, random_state=3407)
+pca = PCA(n_components=2, random_state=3407)
 
 # PCA 和T-SNE结果差不错,没什么太大区别
 # t_sne = TSNE(n_components=2, random_state=3407, perplexity=50, n_jobs=-1, method='exact')
