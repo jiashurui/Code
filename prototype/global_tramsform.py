@@ -128,12 +128,13 @@ def transform_sensor_data_to_df(data):
 
 def transform_sensor_data_to_df1(data):
     np_acc = transform_sensor_data(data)
-    data.iloc[:, :3] = np_acc[:, :3]
-    data['roll'] = np_acc[:, 3]
-    data['pitch'] = np_acc[:, 4]
-    data['yaw'] = np_acc[:, 5]
+    result = data.copy()
+    result.iloc[:, :3] = np_acc[:, :3]
+    result.loc[:, 'roll'] = np_acc[:, 3]
+    result.loc[:, 'pitch'] = np_acc[:, 4]
+    result.loc[:, 'yaw'] = np_acc[:, 5]
 
-    return data
+    return result
 
 def transform_sensor_data_to_np(data):
     np_acc = transform_sensor_data(data)
