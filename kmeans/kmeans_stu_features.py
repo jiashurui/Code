@@ -1,8 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans, DBSCAN
-from sklearn.decomposition import PCA, FastICA
-from sklearn.mixture import GaussianMixture
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 from datareader.datareader_stu import simple_get_stu_all_features
@@ -56,6 +55,7 @@ for d in origin_data:
 
     # 特征打平
     flatten_val = df_features.values.flatten()
+
     # 单独一维特征
     # 加速度XYZ
     acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
@@ -72,7 +72,7 @@ for d in origin_data:
 
 train_data = np.array(features_list)
 # 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨
-pca = PCA(n_components=10, random_state=3407)
+pca = PCA(n_components=0.70, random_state=3407)
 # ica = FastICA(n_components=10, random_state=3407)
 
 # PCA 和T-SNE结果差不错,没什么太大区别

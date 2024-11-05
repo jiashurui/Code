@@ -107,9 +107,16 @@ def transform_sensor_data(data):
         # 构造旋转矩阵
         R_matrix = r.as_matrix()
 
+        # 重力分量，通常为 [0, 0, 9.81] m/s²
+        g_global = R_matrix @ np.array([[0], [0], [9.81]])
+
         # 转换到全局加速度
         a_global = R_matrix @ acc.reshape((3, 1))
-        acc_global.append(np.append(a_global.flatten(), [roll, pitch, yaw]))
+
+        # 去除重力分量
+        a_global_without_g = a_global - g_global
+
+        acc_global.append(np.append(a_global_without_g.flatten(), [roll, pitch, yaw]))
 
     acc_global = np.array(acc_global)
     return acc_global

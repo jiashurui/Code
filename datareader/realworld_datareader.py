@@ -6,8 +6,9 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+from filter.filter import butter_lowpass_filter
 from prototype.constant import Constant
-from prototype.global_tramsform2 import transform_sensor_data_to_df2
+from prototype.global_tramsform3 import transform_sensor_data_to_df2, transform_sensor_data_to_df1
 from utils.show import show_acc_data_before_transformed
 from utils.slidewindow import slide_window2
 
@@ -133,7 +134,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
 
 
 # 简单地获取realworld所有数据
-def simple_get_realworld_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor'):
+def simple_get_realworld_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor', with_rpy=True):
     file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
     appended_data = []
 
@@ -159,8 +160,15 @@ def simple_get_realworld_all_features(slide_window_length, filtered_label=[], ma
     # 对每一个时间片进行处理
     transformed_list = []
     for d in data_sliced_list:
-        # 全局转换
-        transformed_frame = transform_sensor_data_to_df2(d)
+        # 低通滤波器
+        d = d.apply(lambda x: butter_lowpass_filter(x, 24, 50, 4))
+
+        if with_rpy:
+            # 全局转换
+            transformed_frame = transform_sensor_data_to_df2(d)
+        else:
+            transformed_frame = transform_sensor_data_to_df1(d)
+
         # 归一化
         # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 

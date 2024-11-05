@@ -17,7 +17,7 @@ simpling = 50
 features_number = 9
 slice_length = 256
 # 全局变换之后RealWorld数据(全局变换按照frame进行)
-origin_data = simple_get_realworld_all_features(slice_length, type='df')
+origin_data = simple_get_realworld_all_features(slice_length, type='df', with_rpy= True)
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -59,12 +59,19 @@ for d in origin_data:
     # 单独一维特征
     # 加速度XYZ
     acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
+    roll_avg = d.iloc[:, 10].mean()
+    pitch_avg = d.iloc[:, 11].mean()
+    yaw_avg = d.iloc[:, 12].mean()
+
     flatten_val = np.append(flatten_val, acc_sma)
+    flatten_val = np.append(flatten_val, roll_avg)
+    flatten_val = np.append(flatten_val, pitch_avg)
+    flatten_val = np.append(flatten_val, yaw_avg)
     features_list.append(flatten_val)
 
 train_data = np.array(features_list)
 # 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨
-pca = PCA(n_components=2, random_state=3407)
+pca = PCA(n_components=0.7, random_state=3407)
 
 # PCA 和T-SNE结果差不错,没什么太大区别
 # t_sne = TSNE(n_components=2, random_state=3407, perplexity=50, n_jobs=-1, method='exact')
@@ -75,6 +82,13 @@ scaler = StandardScaler()
 # PCA之前必须要进行正则化,不然结果也会很糟糕
 normal_latent = scaler.fit_transform(train_data)
 normal_result = pca.fit_transform(normal_latent)
+
+
+explained_variance = pca.explained_variance_ratio_
+print("PCA 维度:", len(explained_variance))
+print("方差解释率:", explained_variance)
+print("方差累计解释率:", np.sum(explained_variance))
+
 
 # PCA 结果可视化
 plt.scatter(normal_result[:, 0], normal_result[:, 1],color='lightblue', alpha=0.5, s=5)  # 淡蓝色, 半透明, 点大小为1
