@@ -1,7 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.decomposition import PCA, FastICA
+from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
 from datareader.datareader_stu import simple_get_stu_all_features
@@ -58,7 +59,7 @@ for d in origin_data:
     # 单独一维特征
     # 加速度XYZ
     acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
-    roll_avg  = d.iloc[:, 10].mean()
+    roll_avg = d.iloc[:, 10].mean()
     pitch_avg = d.iloc[:, 11].mean()
     yaw_avg = d.iloc[:, 12].mean()
 
@@ -71,7 +72,8 @@ for d in origin_data:
 
 train_data = np.array(features_list)
 # 必须要用PCA降低维度, 不然90维度Kmeans 结果很糟糕,几乎没法分辨
-pca = PCA(n_components=0.8, random_state=3407)
+pca = PCA(n_components=10, random_state=3407)
+# ica = FastICA(n_components=10, random_state=3407)
 
 # PCA 和T-SNE结果差不错,没什么太大区别
 # t_sne = TSNE(n_components=2, random_state=3407, perplexity=50, n_jobs=-1, method='exact')
@@ -95,10 +97,11 @@ print("方差累计解释率:", np.sum(explained_variance))
 # 使用 KMeans 进行聚类
 kmeans = KMeans(n_clusters=K, random_state=123)
 kmeans.fit(normal_result)
-
 # 获取聚类结果
 labels = kmeans.labels_  # 每个样本的聚类标签
 centroids = kmeans.cluster_centers_  # 聚类质心
+
+
 
 print(f'Simples number:{train_data.shape[0]}')
 

@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+from filter.filter import butter_lowpass_filter
 from prototype.global_tramsform import transform_sensor_data_to_df, transform_sensor_data_to_np, \
     transform_sensor_data_to_df1
 from utils.config_utils import get_value_from_config
@@ -184,6 +185,8 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     # 对每一个时间片进行处理
     transformed_list = []
     for d in df_list:
+        # 低通滤波器
+        d = d.apply(lambda x: butter_lowpass_filter(x, 3, 10, 4))
 
         if with_rpy:
             transformed_frame = transform_sensor_data_to_df1(d)
