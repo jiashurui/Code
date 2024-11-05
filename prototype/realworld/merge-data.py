@@ -59,6 +59,10 @@ def merge_data(index):
                         # 读取CSV文件，舍弃时间和ID列
                         df = pd.read_csv(file_path, usecols=lambda x: x not in ['attr_time', 'id'])
 
+                        stop_simple = 800  # 数据静止的个数
+
+                        df = df[stop_simple: len(df)]
+
                         # 根据传感器类型，添加前缀并存储在相应的组中
                         if sensor_type == 'acc':
                             df = df.add_prefix('acc_')

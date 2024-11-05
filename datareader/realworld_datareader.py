@@ -141,8 +141,6 @@ def simple_get_realworld_all_features(slide_window_length, filtered_label=[], ma
     for file_name in file_list:
         print(file_name)
         data = pd.read_csv(file_name)
-        # 去除头部 (Realworld 特有, 每段大数据前面有停止一段时间)
-        data = data[stop_simple: len(data)]
         appended_data.append(data)
 
     df = pd.concat(appended_data, ignore_index=True)

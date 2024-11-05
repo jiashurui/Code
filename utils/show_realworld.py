@@ -5,12 +5,13 @@ from time import sleep
 import numpy as np
 import pandas as pd
 
-from prototype import constant, global_tramsform2
+from prototype import constant
+from prototype.global_tramsform3 import transform_sensor_data_to_np2
 from train import train_conv_lstm
 from utils.show import real_time_show_phone_data
 
 
-def real_time_show_file_data(file_name='../data/realworld/*/forearm_merged.csv'):
+def real_time_show_file_data(file_name='../data/realworld/*/chest_merged.csv'):
     file_list = glob.glob(file_name)
     appended_data = []
 
@@ -29,8 +30,16 @@ def real_time_show_file_data(file_name='../data/realworld/*/forearm_merged.csv')
     for start_row in range(0, len(big_df), chunk_size):
         data = big_df.iloc[start_row:start_row + chunk_size].values
         all_data = np.vstack([all_data, data[:, :3]])[-show_length:, :]
-        transformed, rpy = global_tramsform2.transform_sensor_data_to_np2(data)
 
+        # 计算全局变换前的总能量
+        original_energy = calculate_total_energy(data)
+
+        transformed, rpy = transform_sensor_data_to_np2(data)
+
+        # 计算全局变换后的总能量
+        transformed_energy = calculate_total_energy(transformed)
+
+        #模型预测
         pred = train_conv_lstm.apply_conv_lstm(transformed)
 
         # 4 基础分类(共通)
@@ -42,7 +51,12 @@ def real_time_show_file_data(file_name='../data/realworld/*/forearm_merged.csv')
         all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[-show_length:, :]
         real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy, ground_truth= ground_truth)
 
-        sleep(0.5)
+        print(f"before transformation: {original_energy}, after transformation: {transformed_energy}")
+        sleep(0.2)
+
+def calculate_total_energy(data):
+    # 计算加速度向量的平方和
+    return np.sum(np.linalg.norm(data[:, :3], axis=1) ** 2)
 
 
 if __name__ == '__main__':

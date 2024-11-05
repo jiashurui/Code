@@ -390,4 +390,4 @@ def real_time_show_abnormal_data(origin_data, transformed_data, model_recon, los
         plt.pause(0.01)  # 短暂停以确保图表刷新
 
 if __name__ == '__main__':
-    real_time_show_file_data()
+    print()

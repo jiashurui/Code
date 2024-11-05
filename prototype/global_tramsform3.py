@@ -77,7 +77,7 @@ dt = 1 / HZ
 def transform_sensor_data(data):
     global Q, R
     Q = np.eye(4) * 0.01  # 过程噪声协方差矩阵
-    R = np.eye(4) * 0.12  # 测量噪声协方差矩阵
+    R = np.eye(4) * 0.2  # 测量噪声协方差矩阵
 
     # 初始状态和协方差
     x = np.array([[0], [0], [0], [1]])  # 初始四元数，表示无旋转
