@@ -126,6 +126,15 @@ def transform_sensor_data_to_df(data):
     data.iloc[:, :3] = np_acc[:, :3]
     return data
 
+def transform_sensor_data_to_df1(data):
+    np_acc = transform_sensor_data(data)
+    data.iloc[:, :3] = np_acc[:, :3]
+    data['roll'] = np_acc[:, 3]
+    data['pitch'] = np_acc[:, 4]
+    data['yaw'] = np_acc[:, 5]
+
+    return data
+
 def transform_sensor_data_to_np(data):
     np_acc = transform_sensor_data(data)
     data[:, :3] = np_acc[:, :3]

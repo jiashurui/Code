@@ -15,7 +15,7 @@ K = 6
 features_number = 9
 slice_length = 40
 # 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_stu_all_features(slice_length, type= 'df')
+origin_data = simple_get_stu_all_features(slice_length, type= 'df', with_rpy= True)
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -46,7 +46,6 @@ for d in origin_data:
         dominant_frequency_arr.append(dominant_frequency_feature)
         ar_co_arr.append(ar_coefficients)
 
-
     df_features['fft_spectral_centroid'] = np.array(centroid_arr)
     df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
     df_features['ar_coefficients'] = np.array(ar_co_arr)
@@ -59,7 +58,15 @@ for d in origin_data:
     # 单独一维特征
     # 加速度XYZ
     acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
+    roll_avg  = d.iloc[:, 10].mean()
+    pitch_avg = d.iloc[:, 11].mean()
+    yaw_avg = d.iloc[:, 12].mean()
+
     flatten_val = np.append(flatten_val, acc_sma)
+    flatten_val = np.append(flatten_val, roll_avg)
+    flatten_val = np.append(flatten_val, pitch_avg)
+    flatten_val = np.append(flatten_val, yaw_avg)
+
     features_list.append(flatten_val)
 
 train_data = np.array(features_list)
