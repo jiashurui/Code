@@ -241,35 +241,33 @@ class Constant:
     class simple_action_set:
         action_map = {
             'stand': 0,
-            'jump': 1,
-            'walk': 2,
-            'run': 3
+            'walk': 1,
+            'run': 2
         }
         action_map_en_reverse = {
             0: 'stand',
-            1: 'jump',
-            2: 'walk',
-            3: 'run'
+            1: 'walk',
+            2: 'run'
         }
         # 将realworld的标签转换
         mapping_realworld = {
             # 0: 4, # 'climbingdown': 0,
             # 1: 4, # 'climbingup': 1,
-            2: 1,  # 'jumping': 2,
+            # 2: 1,  # 'jumping': 2,
             # 'lying': 3,
-            4: 3,  # 'running': 4,
+            4: 2,  # 'running': 4,
             # 'sitting': 5,
             6: 0,  # 'standing': 6,
-            7: 2  # 'walking': 7,
+            7: 1  # 'walking': 7,
         }
         # 将大学生的标签转换
         mapping_stu = {
             1: 0,  # 1: 'stand',
             # 2: 'Wandering',
             # 3: 'squat',
-            4: 1 , # 4: 'jump',
-            5: 2 , # 5: 'walk',
-            6: 3 # 6: 'run'
+            # 4: 1 , # 4: 'jump',
+            5: 1 , # 5: 'walk',
+            6: 2 # 6: 'run'
         }
         # 将mHealth的标签转换
         mapping_mh = {
@@ -277,14 +275,14 @@ class Constant:
             1:0,# 1: 'STANDING',
             # 2:5,# 2: 'Sitting',
             # 3:4,# 3: 'Lying',
-            4:2,# 4: 'Walking',
+            4:1,# 4: 'Walking',
             # 5:6,# 5: 'Climbing stairs',
             # 6: 'Waist bends forward',
             # 7: 'Frontal elevation of arms',
             # 8: 'Knees bending',
             # 9: 'Cycling',
             # 10: 'Jogging',
-            11:3,# 11: 'Running',
-            12:1# 12: 'Jump front & back'
+            11:2,# 11: 'Running',
+            # 12:1# 12: 'Jump front & back'
         }
         # 将mHealth的标签转换
