@@ -59,8 +59,8 @@ for epoch in range(epochs):
         fake_data = generator(z)
 
         # 判别器训练：分辨真实和生成数据
-        real_labels = torch.ones(batch_size, 1)
-        fake_labels = torch.zeros(batch_size, 1)
+        real_labels = torch.ones(batch_size, 1).to(device)
+        fake_labels = torch.zeros(batch_size, 1).to(device)
 
         # 判别器损失（真实数据）
         real_preds = discriminator(real_data)
