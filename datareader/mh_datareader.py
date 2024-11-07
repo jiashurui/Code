@@ -230,7 +230,7 @@ def get_mh_data_forearm(slide_window_length, features_num):
 
 
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
-def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor', with_rpy= False):
+def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor', with_rpy=False, need_transform=True):
     file_list = glob.glob('../data/mHealth/mHealth_*.log')
     appended_data = []
 
@@ -262,12 +262,14 @@ def simple_get_mh_all_features(slide_window_length, filtered_label=[], mapping_l
     transformed_list = []
     for d in df_list:
 
-        if with_rpy:
-            # 全局转换
-            transformed_frame = global_tramsform3.transform_sensor_data_to_df2(d)
+        if need_transform:
+            if with_rpy:
+                # 全局转换
+                transformed_frame = global_tramsform3.transform_sensor_data_to_df2(d)
+            else:
+                transformed_frame = global_tramsform3.transform_sensor_data_to_df1(d)
         else:
-            transformed_frame = global_tramsform3.transform_sensor_data_to_df1(d)
-
+            transformed_frame = d
         # transformed_frame = transform_sensor_data_to_df2(d)
         # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 

@@ -136,7 +136,7 @@ def get_realworld_for_recon(slide_window_length, features_num, filtered_label=[]
 
 
 # 简单地获取realworld所有数据
-def simple_get_realworld_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor', with_rpy=True):
+def simple_get_realworld_all_features(slide_window_length, filtered_label=[], mapping_label={}, type='tensor', with_rpy=True, need_transform=True):
     file_list = glob.glob('../data/realworld/*/forearm_merged.csv')
     appended_data = []
 
@@ -161,14 +161,15 @@ def simple_get_realworld_all_features(slide_window_length, filtered_label=[], ma
     transformed_list = []
     for d in data_sliced_list:
         # 低通滤波器
-        d = d.apply(lambda x: butter_lowpass_filter(x, 24, 50, 4))
-
-        if with_rpy:
-            # 全局转换
-            transformed_frame = transform_sensor_data_to_df2(d)
+        # d = d.apply(lambda x: butter_lowpass_filter(x, 24, 50, 4))
+        if need_transform:
+            if with_rpy:
+                # 全局转换
+                transformed_frame = transform_sensor_data_to_df2(d)
+            else:
+                transformed_frame = transform_sensor_data_to_df1(d)
         else:
-            transformed_frame = transform_sensor_data_to_df1(d)
-
+            transformed_frame = d
         # 归一化
         # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
