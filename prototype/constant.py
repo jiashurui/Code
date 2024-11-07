@@ -253,8 +253,8 @@ class Constant:
         }
         # 将realworld的标签转换
         mapping_realworld = {
-            # 'climbingdown': 0,
-            # 'climbingup': 1,
+            # 0: 4, # 'climbingdown': 0,
+            # 1: 4, # 'climbingup': 1,
             2: 1,  # 'jumping': 2,
             # 'lying': 3,
             4: 3,  # 'running': 4,
@@ -271,6 +271,7 @@ class Constant:
             5: 2 , # 5: 'walk',
             6: 3 # 6: 'run'
         }
+        # 将mHealth的标签转换
         mapping_mh = {
             # 0: 'Null',
             1:0,# 1: 'STANDING',
@@ -286,3 +287,4 @@ class Constant:
             11:3,# 11: 'Running',
             12:1# 12: 'Jump front & back'
         }
+        # 将mHealth的标签转换

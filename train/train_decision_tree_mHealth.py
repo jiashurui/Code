@@ -1,17 +1,12 @@
 import numpy as np
-from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.metrics import davies_bouldin_score, confusion_matrix, accuracy_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
 from datareader.mh_datareader import simple_get_mh_all_features
-from prototype.constant import Constant
 from statistic.stat_common import calc_df_features, spectral_centroid, dominant_frequency, calculate_ar_coefficients, \
     calc_fft_spectral_energy, spectral_entropy, calc_acc_sma
-from utils.dict_utils import find_key_by_value
+from joblib import dump, load
 
 # K = 6 に設定する
 K = 12
@@ -97,5 +92,9 @@ accuracy = accuracy_score(y_test, y_pred)
 recall = recall_score(y_test, y_pred, average='weighted')
 f1 = f1_score(y_test, y_pred, average='weighted')
 print("Test Accuracy:", accuracy)
+
+# 保存模型到文件
+dump(clf, '../model/decision_tree_mHealth.joblib')
+
 
 
