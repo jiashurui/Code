@@ -9,7 +9,7 @@ from prototype import constant
 from utils.pair_dataloader import PairedDataset
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-epochs = 1000
+epochs = 10
 batch_size = 64
 
 slice_length = 256
@@ -29,21 +29,22 @@ origin_data = origin_data[:,:,:9].astype(np.float32)
 ################################################
 #  Target Data
 
-filtered_label_real_world = [0, 1, 2, 3, 5]
+filtered_label_real_world = [0, 1, 2, 3, 4, 5, 6]
 mapping_realworld = constant.Constant.simple_action_set.mapping_realworld
 
 # 全局变换之后RealWorld数据(全局变换按照frame进行)
-target_data = simple_get_realworld_all_features(slice_length, type='df',
+target_data = simple_get_realworld_all_features(slice_length, type='np',
                                                 filtered_label=filtered_label_real_world,
                                                 mapping_label=mapping_realworld,
                                                 with_rpy=False)
 
+target_data = target_data[:, :, :9].astype(np.float32)
 paired_dataset = PairedDataset(origin_data, target_data)
 data_loader = DataLoader(paired_dataset, batch_size=batch_size, shuffle=True)
 
 
 # Network Param
-z_dim = 10       # 噪声向量的维度
+z_dim = 9       # 噪声向量的维度
 hidden_dim = 30  # LSTM 的隐藏层维度
 output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 
