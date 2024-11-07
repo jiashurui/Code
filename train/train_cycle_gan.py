@@ -6,10 +6,11 @@ from datareader.mh_datareader import simple_get_mh_all_features
 from datareader.realworld_datareader import simple_get_realworld_all_features
 from gan.cycle_gan import Generator, Discriminator, adversarial_loss, cycle_consistency_loss
 from prototype import constant
+from utils import show
 from utils.pair_dataloader import PairedDataset
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-epochs = 100
+epochs = 10
 batch_size = 8
 
 slice_length = 256
@@ -58,8 +59,16 @@ f_optimizer = torch.optim.Adam(F.parameters(), lr=0.0002, betas=(0.5, 0.999))
 dx_optimizer = torch.optim.Adam(D_X.parameters(), lr=0.0002, betas=(0.5, 0.999))
 dy_optimizer = torch.optim.Adam(D_Y.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
+# Loss
+g_loss_arr = []
+d_loss_arr = []
+
 # 训练循环
 for epoch in range(epochs):
+
+    g_loss_per_epoch = 0.0
+    d_loss_per_epoch = 0.0
+
     for real_x, real_y in data_loader:  # real_x 来自源域，real_y 来自目标域
         real_x, real_y = real_x.to(device), real_y.to(device)
 
@@ -105,13 +114,24 @@ for epoch in range(epochs):
 
         # 总生成器损失
         total_g_loss = g_loss + f_loss + 10 * cycle_loss
+
+        # 累加每个batch_size损失
+        g_loss_per_epoch = g_loss_per_epoch + total_g_loss/batch_size
+        d_loss_per_epoch = d_loss_per_epoch + (g_loss + f_loss)/batch_size
+
         g_optimizer.zero_grad()
         f_optimizer.zero_grad()
         total_g_loss.backward()
         g_optimizer.step()
         f_optimizer.step()
 
+    # 记录数据
+    g_loss_arr.append(g_loss_per_epoch.item())
+    d_loss_arr.append(d_loss_per_epoch.item())
     print(f"Epoch [{epoch}/{epochs}], D_X Loss: {dx_loss.item()}, D_Y Loss: {dy_loss.item()}, G Loss: {total_g_loss.item()}")
+
+show.show_me_data0(g_loss_arr)
+show.show_me_data0(d_loss_arr)
 
 # 假设 generator 和 discriminator 是训练好的生成器和判别器模型
 # 保存生成器的参数
