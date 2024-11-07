@@ -6,7 +6,7 @@ import torch.optim as optim
 class Generator(nn.Module):
     def __init__(self, z_dim, hidden_dim, output_dim):
         super(Generator, self).__init__()
-        self.lstm = nn.LSTM(z_dim, hidden_dim, num_layers=3, batch_first=True, dropout=0.1)
+        self.lstm = nn.LSTM(z_dim, hidden_dim, num_layers=1, batch_first=True, dropout=0.1)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, z):
