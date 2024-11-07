@@ -1,5 +1,6 @@
 from prototype import constant
 
+
 # 对标签进行映射
 def stand_label(label, dataset):
     if dataset == 'mHealth':
@@ -11,3 +12,8 @@ def stand_label(label, dataset):
 
     return [label_mapping[label] for label in label]
 
+
+# 对列名进行标准化
+def stand_column_name(col):
+    # TODO
+    print()
