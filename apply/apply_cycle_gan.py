@@ -40,8 +40,6 @@ F = Generator(z_dim, hidden_dim, output_dim)
 D_X = Discriminator(output_dim, hidden_dim).to(device)
 D_Y = Discriminator(output_dim, hidden_dim).to(device)
 
-discriminator = Discriminator(output_dim, hidden_dim)
-
 G.load_state_dict(torch.load('../model/cycle_g_generator.pth', map_location=device, weights_only=True))
 F.load_state_dict(torch.load('../model/cycle_f_generator.pth', map_location=device, weights_only=True))
 
