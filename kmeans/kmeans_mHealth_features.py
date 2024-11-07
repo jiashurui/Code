@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.metrics import davies_bouldin_score
 from sklearn.preprocessing import StandardScaler
 
 from datareader.mh_datareader import simple_get_mh_all_features
@@ -99,6 +100,9 @@ kmeans.fit(normal_result)
 
 # 获取聚类结果
 labels = kmeans.labels_  # 每个样本的聚类标签
+db_score = davies_bouldin_score(normal_result, labels)
+print(f"Davies-Bouldin Score: {db_score}")
+
 centroids = kmeans.cluster_centers_  # 聚类质心
 
 print(f'Simples number:{train_data.shape[0]}')
