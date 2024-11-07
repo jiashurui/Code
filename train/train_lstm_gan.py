@@ -48,6 +48,8 @@ for epoch in range(epochs):
     d_loss_per_epoch = 0.0
 
     for real_data in data_loader:  # data_loader 应该提供 shape 为 (batch_size, seq_len, output_dim) 的真实数据
+        real_data = real_data[0].to(device)  # real_data 是一个元组，取出实际的张量
+
         batch_size = real_data.size(0)
 
         # 生成噪声
