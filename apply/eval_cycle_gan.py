@@ -94,8 +94,8 @@ for epoch in range(num_epochs):
 torch.save(model.state_dict(), "../model/eval_cycle_gan_lstm.pth")
 
 
-G = Generator(z_dim, hidden_dim, output_dim)
-F = Generator(z_dim, hidden_dim, output_dim)
+G = Generator(z_dim, hidden_dim, output_dim).to(device)
+F = Generator(z_dim, hidden_dim, output_dim).to(device)
 D_X = Discriminator(output_dim, hidden_dim).to(device)
 D_Y = Discriminator(output_dim, hidden_dim).to(device)
 
