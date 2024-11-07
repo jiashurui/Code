@@ -5,10 +5,10 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from datareader.mh_datareader import simple_get_mh_all_features
-from datareader.realworld_datareader import simple_get_realworld_all_features
 from gan.lstm_gan import Generator, Discriminator
 from prototype import constant
 from utils import show
+from utils.show import GradientUtils
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 epochs = 1000
@@ -32,6 +32,9 @@ output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 
 generator = Generator(z_dim, hidden_dim, output_dim).to(device)
 discriminator = Discriminator(output_dim, hidden_dim).to(device)
+
+gradient_utils_g = GradientUtils(generator)
+gradient_utils_d = GradientUtils(discriminator)
 
 # 优化器
 g_optimizer = optim.Adam(generator.parameters(), lr=0.001)
@@ -83,6 +86,9 @@ for epoch in range(epochs):
         g_loss_per_epoch = g_loss_per_epoch + g_loss.item()/batch_size
         d_loss_per_epoch = d_loss_per_epoch + d_loss.item()/batch_size
 
+        gradient_utils_g.record_gradient_norm()
+        gradient_utils_d.record_gradient_norm()
+
         g_optimizer.zero_grad()
         g_loss.backward()
         g_optimizer.step()
@@ -96,6 +102,9 @@ for epoch in range(epochs):
 
 show.show_me_data0(g_loss_arr)
 show.show_me_data0(d_loss_arr)
+# 展示梯度数据
+gradient_utils_g.show()
+gradient_utils_d.show()
 
 # 假设 generator 和 discriminator 是训练好的生成器和判别器模型
 # 保存生成器的参数
