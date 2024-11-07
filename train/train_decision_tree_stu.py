@@ -5,11 +5,9 @@ from sklearn.tree import DecisionTreeClassifier
 
 from datareader.datareader_stu import simple_get_stu_all_features, get_features
 from prototype import constant
-from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, spectral_centroid, \
-    dominant_frequency, calc_acc_sma, calculate_ar_coefficients
 from joblib import dump
 
-features_number = 9
+# Param
 slice_length = 40
 filtered_label = [2, 3]
 mapping = constant.Constant.simple_action_set.mapping_stu
@@ -17,7 +15,7 @@ mapping = constant.Constant.simple_action_set.mapping_stu
 # 全局变换之后的大学生数据(全局变换按照frame进行)
 origin_data = simple_get_stu_all_features(slice_length, type='df',
                                           filtered_label=filtered_label,
-                                          mapping_label= mapping, with_rpy=True)
+                                          mapping_label=mapping, with_rpy=True)
 origin_data_np = np.array(origin_data)
 # 抽取特征
 features_list = get_features(origin_data)

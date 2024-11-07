@@ -12,6 +12,8 @@ from prototype.global_tramsform3 import transform_sensor_data_to_df2, transform_
 from utils.show import show_acc_data_before_transformed
 from utils.slidewindow import slide_window2
 
+from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, calc_acc_sma, \
+    spectral_centroid, dominant_frequency, calculate_ar_coefficients
 stop_simple = 500  # 数据静止的个数
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -245,6 +247,64 @@ def get_realworld_raw_for_abnormal(slide_window_length, features_num, global_tra
 def get_realworld_transformed_for_abnormal(slide_window_length, features_num):
     return get_realworld_raw_for_abnormal(slide_window_length, features_num, global_transform=True)
 
+def get_features(origin_data):
+    features_list = []
+    simpling = 50
+    for d in origin_data:
+        df_features, _ = calc_df_features(d.iloc[:, :9])
+
+        # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+        aex, aey, aez, aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='acc_attr_x', acc_y_name='acc_attr_y',
+                                                      acc_z_name='acc_attr_z', T=simpling)
+        gex, gey, gez, get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='gyro_attr_x', acc_y_name='gyro_attr_y',
+                                                      acc_z_name='gyro_attr_z', T=simpling)
+        mex, mey, mez, met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='mag_attr_x', acc_y_name='mag_attr_y',
+                                                      acc_z_name='mag_attr_z', T=simpling)
+        df_features['fft_spectral_energy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
+
+        # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+        aex, aey, aez, aet = spectral_entropy(d.iloc[:, :9], acc_x_name='acc_attr_x', acc_y_name='acc_attr_y',
+                                              acc_z_name='acc_attr_z', T=simpling)
+        gex, gey, gez, get = spectral_entropy(d.iloc[:, :9], acc_x_name='gyro_attr_x', acc_y_name='gyro_attr_y',
+                                              acc_z_name='gyro_attr_z', T=simpling)
+        mex, mey, mez, met = spectral_entropy(d.iloc[:, :9], acc_x_name='mag_attr_x', acc_y_name='mag_attr_y',
+                                              acc_z_name='mag_attr_z', T=simpling)
+        df_features['fft_spectral_entropy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
+
+        centroid_arr = []
+        dominant_frequency_arr = []
+        ar_co_arr = []
+        for i in (range(9)):
+            centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
+            dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
+            ar_coefficients = calculate_ar_coefficients(d.iloc[:, i].values)
+
+            centroid_arr.append(centroid_feature)
+            dominant_frequency_arr.append(dominant_frequency_feature)
+            ar_co_arr.append(ar_coefficients)
+
+        df_features['fft_spectral_centroid'] = np.array(centroid_arr)
+        df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
+        df_features['ar_coefficients'] = np.array(ar_co_arr)
+
+        # 舍弃掉磁力数据(结果会变坏)
+        # df_features = df_features.iloc[:6, :]
+
+        # 特征打平
+        flatten_val = df_features.values.flatten()
+        # 单独一维特征
+        # 加速度XYZ
+        acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
+        roll_avg = d.iloc[:, 10].mean()
+        pitch_avg = d.iloc[:, 11].mean()
+        yaw_avg = d.iloc[:, 12].mean()
+
+        flatten_val = np.append(flatten_val, acc_sma)
+        flatten_val = np.append(flatten_val, roll_avg)
+        flatten_val = np.append(flatten_val, pitch_avg)
+        flatten_val = np.append(flatten_val, yaw_avg)
+        features_list.append(flatten_val)
+    return features_list
 
 if __name__ == '__main__':
     result = simple_get_realworld_all_features(128)
