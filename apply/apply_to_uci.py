@@ -2,7 +2,6 @@ import torch
 from torch import nn
 
 from anormal.AEModel import VAE, LSTMFCAutoencoder, ConvLSTMAutoencoder, LSTM_VAE, ConvLSTM_VAE
-from datareader.datareader_stu import get_stu_part_features
 from datareader.show_child_2024 import show_tensor_data
 from utils import show
 from utils.uci_datareader import get_uci_all_data
