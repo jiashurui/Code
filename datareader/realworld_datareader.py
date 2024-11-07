@@ -149,7 +149,7 @@ def simple_get_realworld_all_features(slide_window_length, filtered_label=[], ma
 
     # 过滤指定标签数据
     if filtered_label:
-        df = df[~data['label'].isin(filtered_label)]
+        df = df[~df['label'].isin(filtered_label)]
         df['label'] = df['label'].map(mapping_label)
 
     # 对于每一个dataframe , 滑动窗口分割数据

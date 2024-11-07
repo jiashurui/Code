@@ -1,26 +1,25 @@
 import numpy as np
-from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
 from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-from datareader.mh_datareader import simple_get_mh_all_features
 from datareader.realworld_datareader import simple_get_realworld_all_features
-from prototype.constant import Constant
+from prototype import constant
 from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, calc_acc_sma, \
     spectral_centroid, dominant_frequency, calculate_ar_coefficients
-from utils.dict_utils import find_key_by_value
+from joblib import dump
 
-# K = 8 に設定する
-K = 8
 simpling = 50
 features_number = 9
 slice_length = 256
+filtered_label = [0, 1, 3, 5]
+mapping = constant.Constant.simple_action_set.mapping_stu
+
 # 全局变换之后RealWorld数据(全局变换按照frame进行)
-origin_data = simple_get_realworld_all_features(slice_length, type='df', with_rpy= True)
+origin_data = simple_get_realworld_all_features(slice_length, type='df',
+                                                filtered_label=filtered_label,
+                                                mapping_label=mapping,
+                                                with_rpy=True)
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -28,16 +27,22 @@ for d in origin_data:
     df_features, _ = calc_df_features(d.iloc[:, :9])
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='acc_attr_x', acc_y_name='acc_attr_y', acc_z_name='acc_attr_z', T=simpling)
-    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='gyro_attr_x', acc_y_name='gyro_attr_y', acc_z_name='gyro_attr_z', T=simpling)
-    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='mag_attr_x', acc_y_name='mag_attr_y', acc_z_name='mag_attr_z', T=simpling)
-    df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex, aey, aez, aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='acc_attr_x', acc_y_name='acc_attr_y',
+                                                  acc_z_name='acc_attr_z', T=simpling)
+    gex, gey, gez, get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='gyro_attr_x', acc_y_name='gyro_attr_y',
+                                                  acc_z_name='gyro_attr_z', T=simpling)
+    mex, mey, mez, met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='mag_attr_x', acc_y_name='mag_attr_y',
+                                                  acc_z_name='mag_attr_z', T=simpling)
+    df_features['fft_spectral_energy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='acc_attr_x', acc_y_name='acc_attr_y', acc_z_name='acc_attr_z', T=simpling)
-    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='gyro_attr_x', acc_y_name='gyro_attr_y', acc_z_name='gyro_attr_z', T=simpling)
-    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='mag_attr_x', acc_y_name='mag_attr_y', acc_z_name='mag_attr_z', T=simpling)
-    df_features['fft_spectral_entropy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex, aey, aez, aet = spectral_entropy(d.iloc[:, :9], acc_x_name='acc_attr_x', acc_y_name='acc_attr_y',
+                                          acc_z_name='acc_attr_z', T=simpling)
+    gex, gey, gez, get = spectral_entropy(d.iloc[:, :9], acc_x_name='gyro_attr_x', acc_y_name='gyro_attr_y',
+                                          acc_z_name='gyro_attr_z', T=simpling)
+    mex, mey, mez, met = spectral_entropy(d.iloc[:, :9], acc_x_name='mag_attr_x', acc_y_name='mag_attr_y',
+                                          acc_z_name='mag_attr_z', T=simpling)
+    df_features['fft_spectral_entropy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
 
     centroid_arr = []
     dominant_frequency_arr = []
@@ -74,12 +79,6 @@ for d in origin_data:
 
 train_data = np.array(features_list)
 
-
-# 假设你已经训练好了一个决策树模型
-clf = DecisionTreeClassifier()
-
-
-
 # np round 是因为,标签在转换过程中出现了浮点数,导致astype int的时候,标签错误
 label = np.round(origin_data_np[:, 0, 9]).astype(int)
 
@@ -105,4 +104,5 @@ recall = recall_score(y_test, y_pred, average='weighted')
 f1 = f1_score(y_test, y_pred, average='weighted')
 print("Test Accuracy:", accuracy)
 
-
+# 保存模型到文件
+dump(clf, '../model/decision_tree_realworld.joblib')

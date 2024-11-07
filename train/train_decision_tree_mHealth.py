@@ -4,17 +4,22 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
 from datareader.mh_datareader import simple_get_mh_all_features
+from prototype import constant
 from statistic.stat_common import calc_df_features, spectral_centroid, dominant_frequency, calculate_ar_coefficients, \
     calc_fft_spectral_energy, spectral_entropy, calc_acc_sma
-from joblib import dump, load
+from joblib import dump
 
-# K = 6 に設定する
-K = 12
 simpling = 50
 features_number = 9
 slice_length = 256
+
+filtered_label = [0, 2, 3, 5, 6, 7, 8, 9, 10]
+mapping = constant.Constant.simple_action_set.mapping_mh
+
 # 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_mh_all_features(slice_length, type='df', with_rpy= True)
+origin_data = simple_get_mh_all_features(slice_length, type='df',
+                                         filtered_label=filtered_label,
+                                         mapping_label=mapping, with_rpy=True)
 origin_data_np = np.array(origin_data)
 
 features_list = []
@@ -22,16 +27,23 @@ for d in origin_data:
     df_features, _ = calc_df_features(d.iloc[:, :9])
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='arm_x', acc_y_name='arm_y', acc_z_name='arm_z', T=simpling)
-    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='gyro_arm_x', acc_y_name='gyro_arm_y', acc_z_name='gyro_arm_z', T=simpling)
-    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='magnetometer_arm_x', acc_y_name='magnetometer_arm_y', acc_z_name='magnetometer_arm_z', T=simpling)
-    df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex, aey, aez, aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='arm_x', acc_y_name='arm_y',
+                                                  acc_z_name='arm_z', T=simpling)
+    gex, gey, gez, get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='gyro_arm_x', acc_y_name='gyro_arm_y',
+                                                  acc_z_name='gyro_arm_z', T=simpling)
+    mex, mey, mez, met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='magnetometer_arm_x',
+                                                  acc_y_name='magnetometer_arm_y', acc_z_name='magnetometer_arm_z',
+                                                  T=simpling)
+    df_features['fft_spectral_energy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
 
     # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='arm_x', acc_y_name='arm_y', acc_z_name='arm_z', T=simpling)
-    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='gyro_arm_x', acc_y_name='gyro_arm_y', acc_z_name='gyro_arm_z', T=simpling)
-    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='magnetometer_arm_x', acc_y_name='magnetometer_arm_y', acc_z_name='magnetometer_arm_z', T=simpling)
-    df_features['fft_spectral_entropy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
+    aex, aey, aez, aet = spectral_entropy(d.iloc[:, :9], acc_x_name='arm_x', acc_y_name='arm_y', acc_z_name='arm_z',
+                                          T=simpling)
+    gex, gey, gez, get = spectral_entropy(d.iloc[:, :9], acc_x_name='gyro_arm_x', acc_y_name='gyro_arm_y',
+                                          acc_z_name='gyro_arm_z', T=simpling)
+    mex, mey, mez, met = spectral_entropy(d.iloc[:, :9], acc_x_name='magnetometer_arm_x',
+                                          acc_y_name='magnetometer_arm_y', acc_z_name='magnetometer_arm_z', T=simpling)
+    df_features['fft_spectral_entropy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
 
     centroid_arr = []
     dominant_frequency_arr = []
@@ -95,6 +107,3 @@ print("Test Accuracy:", accuracy)
 
 # 保存模型到文件
 dump(clf, '../model/decision_tree_mHealth.joblib')
-
-
-
