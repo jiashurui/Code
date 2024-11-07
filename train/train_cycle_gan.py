@@ -9,13 +9,10 @@ from prototype import constant
 from utils.pair_dataloader import PairedDataset
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-epochs = 10
-batch_size = 64
+epochs = 100
+batch_size = 8
 
 slice_length = 256
-
-
-
 ################################################
 #  Origin Data
 filtered_label = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12]
