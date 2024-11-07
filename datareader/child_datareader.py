@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
 
+from prototype import global_tramsform4
 from prototype.constant import Constant
 from prototype.global_tramsform import transform_sensor_data_to_df
 from utils.config_utils import get_value_from_config
@@ -293,7 +294,7 @@ def simple_get_child_2023_all_features(slide_window_length, type = 'tensor'):
     # 对每一个时间片进行处理
     transformed_list = []
     for d in df_list:
-        transformed_frame = transform_sensor_data_to_df(d)
+        transformed_frame = global_tramsform4.transform_sensor_data_to_df2(d)
         # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
 
         transformed_list.append(transformed_frame)
