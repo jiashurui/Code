@@ -53,7 +53,7 @@ for epoch in range(epochs):
         batch_size = real_data.size(0)
 
         # 生成噪声
-        z = torch.randn(batch_size, slice_length, z_dim)
+        z = torch.randn(batch_size, slice_length, z_dim).to(device)
 
         # 生成假数据
         fake_data = generator(z)
