@@ -6,7 +6,7 @@ import torch.optim as optim
 class Generator(nn.Module):
     def __init__(self, z_dim, hidden_dim, output_dim):
         super(Generator, self).__init__()
-        self.lstm = nn.LSTM(z_dim, hidden_dim, num_layers=1, batch_first=True, dropout=0.1)
+        self.lstm = nn.LSTM(z_dim, hidden_dim, num_layers=1, batch_first=True, dropout=0)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, z):
@@ -19,7 +19,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(Discriminator, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=1, batch_first=True, dropout=0.1)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=1, batch_first=True, dropout=0)
         self.fc = nn.Linear(hidden_dim, 1)
 
     def forward(self, x):
