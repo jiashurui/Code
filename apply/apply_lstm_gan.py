@@ -47,7 +47,7 @@ random_sample = origin_data[np.random.choice(origin_data.shape[0])]
 
 plt.figure(figsize=(12, 6))
 # 真实数据
-plt.subplot(1, 2, 1)
+plt.subplot(2, 1, 1)
 plt.plot(x, random_sample[:,0], label='origin acc_x', color='red')
 plt.plot(x, random_sample[:,1], label='origin acc_y', color='green')
 plt.plot(x, random_sample[:,2], label='origin acc_z', color='blue')
@@ -57,7 +57,7 @@ plt.title('Real Data')
 plt.grid(True)
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 # 虚假数据
 plt.plot(x, dim1, label='generated acc_x', color='red')
 plt.plot(x, dim2, label='generated acc_y', color='green')
