@@ -19,7 +19,7 @@ filtered_label = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12]
 mapping = constant.Constant.simple_action_set.mapping_mh
 origin_data = simple_get_mh_all_features(slice_length, type='np',
                                          filtered_label=filtered_label,
-                                         mapping_label=mapping, with_rpy=False)
+                                         mapping_label=mapping, with_rpy=False, need_transform=False)
 # 去除标签
 origin_data = origin_data[:,:,:9].astype(np.float32)
 # data_loader = DataLoader(origin_data, batch_size=batch_size, shuffle=True)
@@ -33,7 +33,7 @@ mapping_realworld = constant.Constant.simple_action_set.mapping_realworld
 target_data = simple_get_realworld_all_features(slice_length, type='np',
                                                 filtered_label=filtered_label_real_world,
                                                 mapping_label=mapping_realworld,
-                                                with_rpy=False)
+                                                with_rpy=False, need_transform=False)
 
 target_data = target_data[:, :, :9].astype(np.float32)
 paired_dataset = PairedDataset(origin_data, target_data)
