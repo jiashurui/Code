@@ -3,6 +3,7 @@ import torch
 from matplotlib import pyplot as plt
 
 from datareader.mh_datareader import simple_get_mh_all_features
+from datareader.realworld_datareader import simple_get_realworld_all_features
 from gan.lstm_gan import Generator, Discriminator
 from prototype import constant
 
@@ -17,14 +18,22 @@ output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 slice_length = 256
 filtered_label = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12]
 mapping = constant.Constant.simple_action_set.mapping_mh
-
+###############################################################
 origin_data = simple_get_mh_all_features(slice_length, type='np',
                                          filtered_label=filtered_label,
                                          mapping_label=mapping, with_rpy=False)
 
 # 去除标签
 origin_data = origin_data[:,:,:9].astype(np.float32)
+###############################################################
+filtered_label_real_world = [0, 1, 2, 3, 4, 5, 6]
+mapping_realworld = constant.Constant.simple_action_set.mapping_realworld
+target_data = simple_get_realworld_all_features(slice_length, type='np',
+                                                filtered_label=filtered_label_real_world,
+                                                mapping_label=mapping_realworld,
+                                                with_rpy=False)
 
+target_data = target_data[:, :, :9].astype(np.float32)
 ###############################################################
 G = Generator(z_dim, hidden_dim, output_dim)
 F = Generator(z_dim, hidden_dim, output_dim)
@@ -43,6 +52,7 @@ D_Y.load_state_dict(torch.load('../model/cycle_dy_discriminator.pth', map_locati
 
 # 原始数据
 random_sample = origin_data[np.random.choice(origin_data.shape[0])][np.newaxis, ...]
+random_sample2 = target_data[np.random.choice(target_data.shape[0])]
 
 generated_sequence = G(torch.tensor(random_sample))
 random_sample = random_sample[0]
@@ -54,9 +64,9 @@ x = range(data.shape[0])
 dim1, dim2, dim3 = data[:, 0], data[:, 1], data[:, 2]
 
 
-plt.figure(figsize=(16, 8))
+plt.figure(figsize=(30, 8))
 # 真实数据
-plt.subplot(2, 1, 1)
+plt.subplot(3, 1, 1)
 plt.plot(x, random_sample[:,0], label='origin acc_x', color='red')
 plt.plot(x, random_sample[:,1], label='origin acc_y', color='green')
 plt.plot(x, random_sample[:,2], label='origin acc_z', color='blue')
@@ -66,8 +76,21 @@ plt.title('Real Data')
 plt.grid(True)
 plt.legend()
 
-plt.subplot(2, 1, 2)
+
+# 真实数据2
+plt.subplot(3, 1, 2)
+plt.plot(x, random_sample2[:,0], label='target acc_x', color='red')
+plt.plot(x, random_sample2[:,1], label='target acc_y', color='green')
+plt.plot(x, random_sample2[:,2], label='target acc_z', color='blue')
+plt.xlabel('Time Steps')
+plt.ylabel('Value')
+plt.title('Target Domain Data')
+plt.grid(True)
+plt.legend()
+
+
 # 虚假数据
+plt.subplot(3, 1, 3)
 plt.plot(x, dim1, label='generated acc_x', color='red')
 plt.plot(x, dim2, label='generated acc_y', color='green')
 plt.plot(x, dim3, label='generated acc_z', color='blue')
