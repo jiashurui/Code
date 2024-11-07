@@ -30,9 +30,9 @@ dim1, dim2, dim3 = data[:, 0], data[:, 1], data[:, 2]
 
 # 绘制前3维的时间序列
 plt.figure(figsize=(12, 6))
-plt.plot(x, dim1, label='Dimension 1')
-plt.plot(x, dim2, label='Dimension 2')
-plt.plot(x, dim3, label='Dimension 3')
+plt.plot(x, dim1, label='generated acc_x', color='red')
+plt.plot(x, dim2, label='generated acc_y', color='green')
+plt.plot(x, dim3, label='generated acc_z', color='blue')
 plt.xlabel('Time Steps')
 plt.ylabel('Value')
 plt.title('Visualization of the First 3 Dimensions of 9D Data')
