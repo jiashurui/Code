@@ -273,7 +273,7 @@ def get_child_2024_all_features(slide_window_length):
     # TODO long lat
     return tensor_walk[:, :, :9], tensor_not_walk[:, :, :9]
 
-# 返回2024年井上小学生活动数据(9维无标签)
+# 返回2023年小学生活动数据(12维无标签)
 def simple_get_child_2023_all_features(slide_window_length, type = 'tensor'):
     file_list = glob.glob('../data/child/2023_03/merged_data/*.csv')
     appended_data = []
@@ -310,7 +310,7 @@ def simple_get_child_2023_all_features(slide_window_length, type = 'tensor'):
     return tensor_data
 
 
-# 返回2024年井上小学生活动数据(9维无标签)
+# 返回2024年井上小学生活动数据(12维无标签)
 def simple_get_child_2024_all_features(slide_window_length, type = 'tensor'):
     file_list = glob.glob('../data/child/2024_04/toyota_202404_crossing/*/*/*.csv')
     appended_data = []
@@ -319,7 +319,7 @@ def simple_get_child_2024_all_features(slide_window_length, type = 'tensor'):
         data = pd.read_csv(file_name)
 
         data = data.iloc[:, 1:10]
-        data = transform_sensor_data_to_df(data)
+        data = global_tramsform4.transform_sensor_data_to_df2(data)
         appended_data.append(data)
 
     df = pd.concat(appended_data, ignore_index=True)
