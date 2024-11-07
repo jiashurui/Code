@@ -11,7 +11,7 @@ from joblib import dump
 simpling = 50
 features_number = 9
 slice_length = 256
-filtered_label = [0, 1, 3, 5]
+filtered_label = [0, 1, 2, 3, 5]
 mapping = constant.Constant.simple_action_set.mapping_realworld
 
 # 全局变换之后RealWorld数据(全局变换按照frame进行)

@@ -10,7 +10,7 @@ from joblib import dump
 
 # Param
 slice_length = 40
-filtered_label = [2, 3]
+filtered_label = [2, 3, 4]
 mapping = constant.Constant.simple_action_set.mapping_stu
 
 # 全局变换之后的大学生数据(全局变换按照frame进行)
