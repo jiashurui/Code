@@ -168,6 +168,7 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     # 按照int读取数据
     df['label'] = df['label'].astype(int)
     df = df[df['label'] != -1]
+    df = df[df['label'] != 0]
 
     # 对标签进行filter
     if filtered_label:
