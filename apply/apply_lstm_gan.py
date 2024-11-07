@@ -19,3 +19,5 @@ discriminator.load_state_dict(torch.load('../model/discriminator.pth', map_locat
 
 z = torch.randn(batch_size, slice_length, z_dim)
 generated_sequence = generator(z)
+
+print(generated_sequence)
