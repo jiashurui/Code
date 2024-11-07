@@ -18,7 +18,6 @@ slice_length = 256
 filtered_label = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12]
 mapping = constant.Constant.simple_action_set.mapping_mh
 
-# 全局变换之后的大学生数据(全局变换按照frame进行)
 origin_data = simple_get_mh_all_features(slice_length, type='np',
                                          filtered_label=filtered_label,
                                          mapping_label=mapping, with_rpy=False)
