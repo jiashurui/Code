@@ -26,7 +26,7 @@ class Discriminator(nn.Module):
         # x 的维度: (batch_size, seq_len, input_dim)
 
         # 增加噪声
-        x = x + torch.normal(0, 0.001, size=x.size()).to(x.device)
+        # x = x + torch.normal(0, 0.001, size=x.size()).to(x.device)
         lstm_out, _ = self.lstm(x)
         # 取最后一个时间步的输出来判断真假
         out = self.fc(lstm_out[:, -1, :])  # 输出维度: (batch_size, 1)
