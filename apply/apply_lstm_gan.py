@@ -14,8 +14,8 @@ output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 generator = Generator(z_dim, hidden_dim, output_dim)
 discriminator = Discriminator(output_dim, hidden_dim)
 
-generator.load_state_dict(torch.load('../model/generator.pth', map_location=device))
-discriminator.load_state_dict(torch.load('../model/discriminator.pth', map_location=device))
+generator.load_state_dict(torch.load('../model/generator.pth', map_location=device, weights_only=True))
+discriminator.load_state_dict(torch.load('../model/discriminator.pth', map_location=device, weights_only=True))
 
 
 z = torch.randn(1, slice_length, z_dim)
