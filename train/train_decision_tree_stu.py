@@ -69,9 +69,6 @@ for d in origin_data:
 
 train_data = np.array(features_list)
 
-a = origin_data_np[:, 0, 9]
-result = a[a < 1]
-print(result)
 # np round 是因为,标签在转换过程中出现了浮点数,导致astype int的时候,标签错误
 label = np.round(origin_data_np[:, 0, 9]).astype(int)
 
