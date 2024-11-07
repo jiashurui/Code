@@ -45,7 +45,7 @@ dim1, dim2, dim3 = data[:, 0], data[:, 1], data[:, 2]
 # 原始数据
 random_sample = origin_data[np.random.choice(origin_data.shape[0])]
 
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(16, 8))
 # 真实数据
 plt.subplot(2, 1, 1)
 plt.plot(x, random_sample[:,0], label='origin acc_x', color='red')
