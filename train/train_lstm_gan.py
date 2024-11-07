@@ -10,6 +10,7 @@ from gan.lstm_gan import Generator, Discriminator
 from prototype import constant
 from utils import show
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 epochs = 1000
 batch_size = 64
 
@@ -30,8 +31,8 @@ z_dim = 10       # 噪声向量的维度
 hidden_dim = 30  # LSTM 的隐藏层维度
 output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 
-generator = Generator(z_dim, hidden_dim, output_dim)
-discriminator = Discriminator(output_dim, hidden_dim)
+generator = Generator(z_dim, hidden_dim, output_dim).to(device)
+discriminator = Discriminator(output_dim, hidden_dim).to(device)
 
 # 优化器
 g_optimizer = optim.Adam(generator.parameters(), lr=0.001)
