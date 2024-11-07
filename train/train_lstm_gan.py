@@ -36,7 +36,7 @@ discriminator = Discriminator(output_dim, hidden_dim).to(device)
 
 # 优化器
 g_optimizer = optim.Adam(generator.parameters(), lr=0.001)
-d_optimizer = optim.Adam(discriminator.parameters(), lr=0.001)
+d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0001)
 
 g_loss_arr = []
 d_loss_arr = []
@@ -59,7 +59,7 @@ for epoch in range(epochs):
         fake_data = generator(z)
 
         # 判别器训练：分辨真实和生成数据
-        real_labels = torch.ones(batch_size, 1).to(device)
+        real_labels = torch.ones(batch_size, 1).to(device) * 0.9
         fake_labels = torch.zeros(batch_size, 1).to(device)
 
         # 判别器损失（真实数据）
