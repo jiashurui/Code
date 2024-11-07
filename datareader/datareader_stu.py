@@ -9,6 +9,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from filter.filter import butter_lowpass_filter
 from prototype.global_tramsform import transform_sensor_data_to_df, transform_sensor_data_to_np, \
     transform_sensor_data_to_df1
+from statistic.stat_common import spectral_centroid, dominant_frequency, calculate_ar_coefficients, spectral_entropy, \
+    calc_fft_spectral_energy, calc_df_features, calc_acc_sma
 from utils.config_utils import get_value_from_config
 from utils.slidewindow import slide_window2
 
@@ -222,6 +224,67 @@ def get_stu_part_features(slide_window_length, feature_num, label_for_abnormal_t
     # TODO long lat
     return tensor_train[:, :, :feature_num], tensor_test[:, :, :feature_num]
 
+# 获取高维度特征
+
+def get_features(origin_data):
+    features_list = []
+    for d in origin_data:
+        df_features, _ = calc_df_features(d.iloc[:, :9])
+
+        # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+        aex, aey, aez, aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)',
+                                                      acc_z_name='z(m/s2)', T=10)
+        gex, gey, gez, get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='y(rad/s)',
+                                                      acc_z_name='z(rad/s)', T=10)
+        mex, mey, mez, met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='y(μT)',
+                                                      acc_z_name='z(μT)', T=10)
+        df_features['fft_spectral_energy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
+
+        # 分别对9维数据XYZ求FFT的能量(结果会变坏)
+        aex, aey, aez, aet = spectral_entropy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)',
+                                              acc_z_name='z(m/s2)', T=10)
+        gex, gey, gez, get = spectral_entropy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='y(rad/s)',
+                                              acc_z_name='z(rad/s)', T=10)
+        mex, mey, mez, met = spectral_entropy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='y(μT)', acc_z_name='z(μT)',
+                                              T=10)
+        df_features['fft_spectral_entropy'] = [aex, aey, aez, gex, gey, gez, mex, mey, mez]
+
+        centroid_arr = []
+        dominant_frequency_arr = []
+        ar_co_arr = []
+        for i in (range(9)):
+            centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
+            dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
+            ar_coefficients = calculate_ar_coefficients(d.iloc[:, i].values)
+
+            centroid_arr.append(centroid_feature)
+            dominant_frequency_arr.append(dominant_frequency_feature)
+            ar_co_arr.append(ar_coefficients)
+
+        df_features['fft_spectral_centroid'] = np.array(centroid_arr)
+        df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
+        df_features['ar_coefficients'] = np.array(ar_co_arr)
+
+        # 舍弃掉磁力数据(结果会变坏)
+        # df_features = df_features.iloc[:6, :]
+
+        # 特征打平
+        flatten_val = df_features.values.flatten()
+
+        # 单独一维特征
+        # 加速度XYZ
+        acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
+        roll_avg = d.iloc[:, 10].mean()
+        pitch_avg = d.iloc[:, 11].mean()
+        yaw_avg = d.iloc[:, 12].mean()
+
+        flatten_val = np.append(flatten_val, acc_sma)
+        flatten_val = np.append(flatten_val, roll_avg)
+        flatten_val = np.append(flatten_val, pitch_avg)
+        flatten_val = np.append(flatten_val, yaw_avg)
+
+        features_list.append(flatten_val)
+    return features_list
 
 if __name__ == '__main__':
     normal = get_stu_all_features(20)

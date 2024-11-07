@@ -3,13 +3,12 @@ from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_s
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-from datareader.datareader_stu import simple_get_stu_all_features
+from datareader.datareader_stu import simple_get_stu_all_features, get_features
 from prototype import constant
 from statistic.stat_common import calc_df_features, calc_fft_spectral_energy, spectral_entropy, spectral_centroid, \
     dominant_frequency, calc_acc_sma, calculate_ar_coefficients
 from joblib import dump
 
-# K = 6 に設定する
 features_number = 9
 slice_length = 40
 filtered_label = [2, 3]
@@ -20,58 +19,8 @@ origin_data = simple_get_stu_all_features(slice_length, type='df',
                                           filtered_label=filtered_label,
                                           mapping_label= mapping, with_rpy=True)
 origin_data_np = np.array(origin_data)
-
-features_list = []
-for d in origin_data:
-    df_features, _ = calc_df_features(d.iloc[:, :9])
-
-    # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    aex,aey,aez,aet = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    gex,gey,gez,get = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='y(rad/s)', acc_z_name='z(rad/s)', T=10)
-    mex,mey,mez,met = calc_fft_spectral_energy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='y(μT)', acc_z_name='z(μT)', T=10)
-    df_features['fft_spectral_energy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
-
-    # 分别对9维数据XYZ求FFT的能量(结果会变坏)
-    aex,aey,aez,aet = spectral_entropy(d.iloc[:, :9], acc_x_name='x(m/s2)', acc_y_name='y(m/s2)', acc_z_name='z(m/s2)', T=10)
-    gex,gey,gez,get = spectral_entropy(d.iloc[:, :9], acc_x_name='x(rad/s)', acc_y_name='y(rad/s)', acc_z_name='z(rad/s)', T=10)
-    mex,mey,mez,met = spectral_entropy(d.iloc[:, :9], acc_x_name='x(μT)', acc_y_name='y(μT)', acc_z_name='z(μT)', T=10)
-    df_features['fft_spectral_entropy'] = [aex,aey,aez,gex,gey,gez,mex,mey,mez]
-
-    centroid_arr = []
-    dominant_frequency_arr = []
-    ar_co_arr = []
-    for i in (range(features_number)):
-        centroid_feature = spectral_centroid(d.iloc[:, i].values, sampling_rate=10)
-        dominant_frequency_feature = dominant_frequency(d.iloc[:, i].values, sampling_rate=10)
-        ar_coefficients = calculate_ar_coefficients(d.iloc[:, i].values)
-
-        centroid_arr.append(centroid_feature)
-        dominant_frequency_arr.append(dominant_frequency_feature)
-        ar_co_arr.append(ar_coefficients)
-
-    df_features['fft_spectral_centroid'] = np.array(centroid_arr)
-    df_features['fft_dominant_frequency'] = np.array(dominant_frequency_arr)
-    df_features['ar_coefficients'] = np.array(ar_co_arr)
-
-    # 舍弃掉磁力数据(结果会变坏)
-    # df_features = df_features.iloc[:6, :]
-
-    # 特征打平
-    flatten_val = df_features.values.flatten()
-
-    # 单独一维特征
-    # 加速度XYZ
-    acc_sma = calc_acc_sma(d.iloc[:, 0], d.iloc[:, 1], d.iloc[:, 2])
-    roll_avg = d.iloc[:, 10].mean()
-    pitch_avg = d.iloc[:, 11].mean()
-    yaw_avg = d.iloc[:, 12].mean()
-
-    flatten_val = np.append(flatten_val, acc_sma)
-    flatten_val = np.append(flatten_val, roll_avg)
-    flatten_val = np.append(flatten_val, pitch_avg)
-    flatten_val = np.append(flatten_val, yaw_avg)
-
-    features_list.append(flatten_val)
+# 抽取特征
+features_list = get_features(origin_data)
 
 train_data = np.array(features_list)
 
