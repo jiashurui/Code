@@ -43,7 +43,7 @@ data_loader = DataLoader(paired_dataset, batch_size=batch_size, shuffle=True)
 
 # Network Param
 z_dim = 9       # 噪声向量的维度
-hidden_dim = 30  # LSTM 的隐藏层维度
+hidden_dim = 128  # LSTM 的隐藏层维度
 output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 
 
@@ -54,10 +54,10 @@ D_X = Discriminator(output_dim, hidden_dim).to(device)
 D_Y = Discriminator(output_dim, hidden_dim).to(device)
 
 # 优化器
-g_optimizer = torch.optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
-f_optimizer = torch.optim.Adam(F.parameters(), lr=0.0002, betas=(0.5, 0.999))
-dx_optimizer = torch.optim.Adam(D_X.parameters(), lr=0.0002, betas=(0.5, 0.999))
-dy_optimizer = torch.optim.Adam(D_Y.parameters(), lr=0.0002, betas=(0.5, 0.999))
+g_optimizer = torch.optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay=0.0001)
+f_optimizer = torch.optim.Adam(F.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay=0.0001)
+dx_optimizer = torch.optim.Adam(D_X.parameters(), lr=0.0001, betas=(0.5, 0.999), weight_decay=0.0001)
+dy_optimizer = torch.optim.Adam(D_Y.parameters(), lr=0.0001, betas=(0.5, 0.999), weight_decay=0.0001)
 
 # Loss
 g_loss_arr = []
@@ -73,8 +73,8 @@ for epoch in range(epochs):
         real_x, real_y = real_x.to(device), real_y.to(device)
 
         # 标签定义
-        real_label = torch.ones(real_x.size(0), 1).to(device)
-        fake_label = torch.zeros(real_x.size(0), 1).to(device)
+        real_label = torch.full((real_x.size(0), 1), 0.9, device=device)
+        fake_label = torch.full((real_x.size(0), 1), 0.1, device=device)
 
         # --------------------
         # 训练判别器 D_X

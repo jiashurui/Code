@@ -4,6 +4,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from torch import nn, optim
 from torch.utils.data import TensorDataset, random_split, DataLoader
 
+from cnn.conv_lstm import ConvLSTM
 from datareader.mh_datareader import simple_get_mh_all_features
 from datareader.realworld_datareader import simple_get_realworld_all_features
 from gan.cycle_gan import Generator, Discriminator
@@ -14,11 +15,10 @@ batch_size = 64
 
 slice_length = 256
 z_dim = 9       # 噪声向量的维度
-hidden_dim = 30  # LSTM 的隐藏层维度
 output_dim = 9   # 时间序列的特征维度，即加速度和角速度
 slice_length = 256
 predict_dim = 8
-
+hidden_dim = 30
 # 定义 LSTM 分类模型
 class LSTMClassifier(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1):
@@ -58,12 +58,12 @@ input_dim = 9         # 输入特征维度
 
 
 # 初始化模型、损失函数和优化器
-model = LSTMClassifier(input_dim, hidden_dim, predict_dim).to(device)
+model = ConvLSTM(input_dim, predict_dim).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # 示例训练过程
-num_epochs = 10
+num_epochs = 100
 for epoch in range(num_epochs):
     model.train()
     for batch_features, batch_labels in train_loader:

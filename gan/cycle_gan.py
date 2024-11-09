@@ -28,5 +28,8 @@ class Discriminator(nn.Module):
 def adversarial_loss(pred, target):
     return nn.BCELoss()(pred, target)
 
+def wasserstein_loss(pred, target):
+    return torch.mean(pred * target)
+
 def cycle_consistency_loss(real, reconstructed):
     return nn.L1Loss()(real, reconstructed)
