@@ -26,7 +26,7 @@ in_channel = 6
 out_channel = len(label_map)
 model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.05)
 loss_function = nn.CrossEntropyLoss()
 
 
