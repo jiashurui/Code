@@ -73,7 +73,7 @@ def show_me_data1(df, col_name):
 def show_me_hotmap(mat, show=True, label_map=Constant.RealWorld.action_map):
     plt.imshow(mat, cmap='Blues', interpolation='nearest')
     plt.colorbar()
-    plt.title('Heatmap using Matplotlib')
+    plt.title('Confusion Matrix')
     # 在每个单元格的中心显示数字
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
@@ -81,6 +81,7 @@ def show_me_hotmap(mat, show=True, label_map=Constant.RealWorld.action_map):
 
     # 添加颜色条
     plt.xticks(np.arange(mat.shape[0]), labels=list(label_map.keys()))
+    plt.xticks(rotation=90)
     plt.yticks(np.arange(mat.shape[1]), labels=list(label_map.keys()))
     if show:
         plt.show()
