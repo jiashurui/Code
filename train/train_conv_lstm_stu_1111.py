@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 
 from cnn.conv_lstm import ConvLSTM
+from datareader.datareader_stu import simple_get_stu_all_features
 from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features
 from datareader.realworld_datareader import get_realworld_for_recon
 from prototype.constant import Constant
@@ -16,12 +17,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 slide_window_length = 40  # 序列长度
 learning_rate: float = 0.0001
 batch_size = 64
-epochs = 200
+epochs = 1
 model_path = '../model/Conv_LSTM_STU_1111.pth'
-label_map = Constant.uStudent_1111.action_map_en_reverse
-label_map_str = Constant.uStudent_1111.action_map
+label_map = Constant.uStudent_merge.action_map_reverse
+label_map_str = Constant.uStudent_merge.action_map
 
-in_channel = 9
+in_channel = 6
 out_channel = len(label_map)
 model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
 model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
@@ -31,13 +32,19 @@ loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     #
+    origin_data_np1 = simple_get_stu_all_features(slide_window_length, type='np')
+    origin_data_np1[:, 0, 9] -=1
     origin_data_np = simple_get_stu_1111_all_features(slide_window_length, type='np')
+    origin_data_np[:, 0, 9] +=6
+
+    data = np.concatenate((origin_data_np1, origin_data_np), axis=0)
+
 
     # Label processing (rounding to avoid float errors)
-    label = np.round(origin_data_np[:, 0, 9]).astype(int)
+    label = np.round(data[:, 0, 9]).astype(int)
 
     # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(origin_data_np[:,:,:9], label, test_size=0.3, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(data[:,:,:in_channel], label, test_size=0.3, random_state=0)
 
     X_train = torch.tensor(X_train, dtype=torch.float32).to(device)
     X_test = torch.tensor(X_test, dtype=torch.float32).to(device)

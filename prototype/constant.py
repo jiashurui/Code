@@ -316,3 +316,45 @@ class Constant:
             # 12:1# 12: 'Jump front & back'
         }
         # 将mHealth的标签转换
+
+    class uStudent_merge:
+        action_map = {
+            'stand':0,
+            'Wandering':1,
+            'squat':2,
+            'jump':3,
+            'walk':4,
+            'run':5,
+            'Turn_Left_45':6,
+            'Turn_Left_90':7,
+            'Turn_Left_135':8,
+             'Turn_Right_45':9,
+             'Turn_Right_90':10,
+             'Turn_Right_135':11,
+             'Raise_Left_Low':12,
+             'Raise_Left_Medium':13,
+             'Raise_Left_High':14,
+             'Raise_Right_Low':15,
+             'Raise_Right_Medium':16,
+             'Raise_Right_High':17,
+        }
+        action_map_reverse = {
+            0: 'stand',
+            1: 'Wandering',
+            2: 'squat',
+            3: 'jump',
+            4: 'walk',
+            5: 'run',
+            6: 'Turn_Left_45',
+            7: 'Turn_Left_90',
+            8: 'Turn_Left_135',
+            9: 'Turn_Right_45',
+            10: 'Turn_Right_90',
+            11: 'Turn_Right_135',
+            12: 'Raise_Left_Low',
+            13: 'Raise_Left_Medium',
+            14: 'Raise_Left_High',
+            15: 'Raise_Right_Low',
+            16: 'Raise_Right_Medium',
+            17: 'Raise_Right_High',
+        }

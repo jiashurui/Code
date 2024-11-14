@@ -7,7 +7,7 @@ import numpy as np
 import sys
 
 from anormal.autoencoder2 import apply_conv_lstm_vae
-from train import train_1d_cnn, train_mh_1d_cnn, train_lstm, train_conv_lstm
+from train import train_1d_cnn, train_mh_1d_cnn, train_lstm, train_conv_lstm, train_conv_lstm_stu_1111
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data, real_time_show_abnormal_data
 from prototype import global_tramsform, constant
@@ -16,9 +16,13 @@ from prototype import global_tramsform, constant
 HOST = get_value_from_config('ip')  # 本地 IP 地址
 PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
-apply_model = 'realworld'
+# apply_model = 'realworld'
+apply_model = 'student'
+
 # apply_model = 'mHealth'
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
+model = 'conv-lstm'  # cnn, lstm ,conv-lstm, conv-lstm-vae
+
 task = 'pred'  # pred ,abnormal
 # 接收完整数据的函数
 def receive_data(conn, data_size):
@@ -103,6 +107,10 @@ def start_server():
                             elif task == 'abnormal':
                                 print()  # TODO
 
+                        if apply_model == 'student':
+                            if task == 'pred':
+                                pred = train_conv_lstm_stu_1111.apply_conv_lstm(transformed)
+                                pred_label = constant.Constant.uStudent_1111.action_map_en_reverse.get(pred.item())
 
                         elif apply_model == 'mHealth':
                             pred = train_mh_1d_cnn.apply_1d_cnn(transformed)
@@ -110,10 +118,10 @@ def start_server():
 
                         # 实时展示数据（仅展示最新数据）
                         all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[-1024:, :]
-                        model_recon = np.vstack([model_recon, output[:, :3]])[-1024:, :]
                         if task == 'pred':
                             real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy)
                         elif task == 'abnormal':
+                            model_recon = np.vstack([model_recon, output[:, :3]])[-1024:, :]
                             real_time_show_abnormal_data(all_data, all_transformed_data, model_recon, loss)
 
                         # use origin data to test
