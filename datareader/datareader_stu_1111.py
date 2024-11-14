@@ -35,7 +35,7 @@ scaler = MinMaxScaler(feature_range=(-1, 1))
 
 
 # 简单地获取一些特征(对比上面的, 活动区分没有那么精确)
-def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_label=[], mapping_label={}, with_rpy=False):
+def simple_get_stu_1111_all_features(slide_window_length, type='tensor', filtered_label=[], mapping_label={}, with_rpy=False):
     file = glob.glob('../data/student/1111_lab/merged.csv')
     df = pd.read_csv(file[0])
 
@@ -142,4 +142,6 @@ def get_features(origin_data):
     return features_list
 
 if __name__ == '__main__':
-    print()
+    data = simple_get_stu_all_features(20)
+
+    print(data)
