@@ -84,7 +84,7 @@ def train_model():
         print('epoch: {}, loss: {}'.format(epoch, loss_per_epoch))
         print(f'Accuracy: {correct_train}/{num_sum_train} ({100. * correct_train / num_sum_train:.0f}%)\n')
 
-        test_model(model, X_train, y_test)
+        test_model(model, X_test, y_test)
 
     # 展示训练Loss
     show.show_me_data0(lost_arr)
