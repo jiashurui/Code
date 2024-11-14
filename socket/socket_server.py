@@ -18,7 +18,7 @@ PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
 # apply_model = 'realworld'
 apply_model = 'student'
-
+seq_length = 20
 # apply_model = 'mHealth'
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
 model = 'conv-lstm'  # cnn, lstm ,conv-lstm, conv-lstm-vae
@@ -53,9 +53,9 @@ def start_server():
         print(f"Server started at {HOST}:{PORT}, waiting for connections...")
 
         # 初始化一个存储最新数据的数组 (限制为最新的 1024 行数据)
-        all_data = np.zeros((128, 3), np.float32)
-        all_transformed_data = np.zeros((128, 3), np.float32)
-        model_recon = np.zeros((128, 3), np.float32)
+        all_data = np.zeros((seq_length, 3), np.float32)
+        all_transformed_data = np.zeros((seq_length, 3), np.float32)
+        model_recon = np.zeros((seq_length, 3), np.float32)
         while True:
             conn, addr = server_socket.accept()  # 等待客户端连接
             with conn:
@@ -63,7 +63,7 @@ def start_server():
                 try:
                     while True:
                         # 定义预期的字节数 (128 行, 9 列，每个 float 4 字节)
-                        data_size = 9 * 128 * 4
+                        data_size = 9 * seq_length * 4
 
                         # 调用接收函数
                         data = receive_data(conn, data_size)
@@ -79,7 +79,7 @@ def start_server():
                         print(f"Received data, time: {datetime.now()}")
 
                         # 将字节流解析为 float[] (确保使用与客户端一致的字节序)
-                        float_array = struct.unpack(f'>{9 * 128}f', data)  # Big-endian 字节序
+                        float_array = struct.unpack(f'>{9 * seq_length}f', data)  # Big-endian 字节序
 
                         # 转换为二维数组并截取前三列
                         float_matrix = np.array([list(float_array[i:i + 9]) for i in range(0, len(float_array), 9)])
