@@ -272,6 +272,46 @@ def real_time_show_phone_data(float_matrix ,transformed_data, model_pred, rpy, g
     plt.pause(0.01)  # 短暂停以确保图表刷新
 
 
+# 实时展示数据的函数，接收一个二维数组 float_matrix，并展示前三列
+def real_time_show_raw_data(float_matrix):
+    plt.ion()  # 开启交互模式
+    # 获取当前数据的前三列
+    x_data = np.arange(float_matrix.shape[0])
+    y1_data = float_matrix[:, 0]  # 第一列
+    y2_data = float_matrix[:, 1]  # 第二列
+    y3_data = float_matrix[:, 2]  # 第三列
+
+    # 如果是第一次调用，初始化图表
+    if not hasattr(real_time_show_phone_data, 'initialized'):
+        real_time_show_phone_data.fig, real_time_show_phone_data.ax = plt.subplots()
+        plt.title('acc_data')
+        real_time_show_phone_data.line1, = real_time_show_phone_data.ax.plot(x_data, y1_data, label='acc_x',color='red')
+        real_time_show_phone_data.line2, = real_time_show_phone_data.ax.plot(x_data, y2_data, label='acc_y',color='green')
+        real_time_show_phone_data.line3, = real_time_show_phone_data.ax.plot(x_data, y3_data, label='acc_z',color='blue')
+
+        real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0])
+        real_time_show_phone_data.ax.set_ylim(np.min(float_matrix[:, :3]), np.max(float_matrix[:, :3]))
+        real_time_show_phone_data.ax.legend()
+
+        real_time_show_phone_data.initialized = True
+    else:
+        # 更新数据而不是重新绘制图表
+        real_time_show_phone_data.line1.set_xdata(x_data)
+        real_time_show_phone_data.line1.set_ydata(y1_data)
+        real_time_show_phone_data.line2.set_xdata(x_data)
+        real_time_show_phone_data.line2.set_ydata(y2_data)
+        real_time_show_phone_data.line3.set_xdata(x_data)
+        real_time_show_phone_data.line3.set_ydata(y3_data)
+
+        # 重新调整 x 和 y 轴的范围
+        show_range_percent = 1.1  # 150%
+        real_time_show_phone_data.ax.set_xlim(0, float_matrix.shape[0] * show_range_percent)
+
+        real_time_show_phone_data.ax.set_title(f'acc_data,')
+
+    plt.draw()  # 重绘当前图表
+    plt.pause(0.01)  # 短暂停以确保图表刷新
+
 # 实时展示异常检测结果
 # 定义红色段的长度
 RED_SEGMENT_LENGTH = 128

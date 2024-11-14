@@ -156,6 +156,36 @@ class Constant:
             6: 'run'
         }
 
+    class uStudent_1111:
+        action_map = {
+            'Turn_Left_45':0,
+            'Turn_Left_90':1,
+            'Turn_Left_135':2,
+            'Turn_Right_45':3,
+            'Turn_Right_90':4,
+            'Turn_Right_135':5,
+            'Raise_Left_Low':6,
+            'Raise_Left_Medium':7,
+            'Raise_Left_High':8,
+            'Raise_Right_Low':9,
+            'Raise_Right_Medium':10,
+            'Raise_Right_High':11,
+        }
+
+        action_map_en_reverse = {
+            0: 'Turn_Left_45',
+            1: 'Turn_Left_90',
+            2: 'Turn_Left_135',
+            3: 'Turn_Right_45',
+            4: 'Turn_Right_90',
+            5: 'Turn_Right_135',
+            6: 'Raise_Left_Low',
+            7: 'Raise_Left_Medium',
+            8: 'Raise_Left_High',
+            9: 'Raise_Right_Low',
+            10: 'Raise_Right_Medium',
+            11: 'Raise_Right_High',
+    }
     # Realworld 数据集与长冈科技大学学生交叉
     class realworld_x_uStudent:
         action_map = {
