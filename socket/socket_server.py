@@ -110,7 +110,7 @@ def start_server():
                         if apply_model == 'student':
                             if task == 'pred':
                                 pred = train_conv_lstm_stu_1111.apply_conv_lstm(transformed)
-                                pred_label = constant.Constant.uStudent_1111.action_map_en_reverse.get(pred.item())
+                                pred_label = constant.Constant.uStudent_merge.action_map_reverse.get(pred.item())
 
                         elif apply_model == 'mHealth':
                             pred = train_mh_1d_cnn.apply_1d_cnn(transformed)
