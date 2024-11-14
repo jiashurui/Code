@@ -83,6 +83,7 @@ def simple_get_stu_1111_all_features(slide_window_length, type='tensor', filtere
 # 获取高维度特征
 def get_features(origin_data):
     features_list = []
+    features_name = []
     for d in origin_data:
         df_features, _ = calc_df_features(d.iloc[:, :9])
 
@@ -133,15 +134,15 @@ def get_features(origin_data):
         pitch_avg = d.iloc[:, 11].mean()
         yaw_avg = d.iloc[:, 12].mean()
 
+        # features_name.extend(['acc_sma','roll_avg','pitch_avg','yaw_avg'])
+
         flatten_val = np.append(flatten_val, acc_sma)
         flatten_val = np.append(flatten_val, roll_avg)
         flatten_val = np.append(flatten_val, pitch_avg)
         flatten_val = np.append(flatten_val, yaw_avg)
 
         features_list.append(flatten_val)
-    return features_list
+    return features_list, features_name
 
 if __name__ == '__main__':
-    data = simple_get_stu_all_features(20)
-
-    print(data)
+    print()

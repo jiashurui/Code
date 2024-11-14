@@ -1,45 +1,75 @@
 import numpy as np
 from joblib import dump
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_score, precision_score
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.svm import SVC
-
+from sklearn.preprocessing import StandardScaler
 from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features, get_features
 
 # Param
 slice_length = 40
 
-# 全局变换之后的大学生数据(全局变换按照frame进行)
+# 读取并处理数据
 origin_data = simple_get_stu_1111_all_features(slice_length, type='df', with_rpy=True)
 origin_data_np = np.array(origin_data)
-# 抽取特征
-features_list = get_features(origin_data)
 
+# 提取特征
+features_list, features_name = get_features(origin_data)
 train_data = np.array(features_list)
 
-# np round 是因为,标签在转换过程中出现了浮点数,导致astype int的时候,标签错误
+# 标签处理（四舍五入并转换为整数）
 label = np.round(origin_data_np[:, 0, 9]).astype(int)
 
-clf = SVC(kernel='rbf', C=1.0, gamma='scale')
-
+# 数据分割
 X_train, X_test, y_train, y_test = train_test_split(train_data, label, test_size=0.3, random_state=0)
 
-clf = clf.fit(X_train, y_train)
+# 标准化
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-train_accuracy = clf.score(X_train, y_train)
-y_pred_train = clf.predict(X_train)
+# 定义 SVM 模型和参数搜索范围，包含多种核函数
+param_grid = {
+    'C': [0.1, 1, 10, 50],
+    'gamma': ['scale', 'auto', 0.01, 0.1, 1],
+    'kernel': ['linear', 'rbf', 'poly', 'sigmoid'],
+    'degree': [2, 3, 4],  # 多项式核的阶数
+    'coef0': [0.0, 0.1, 0.5]  # sigmoid 和 poly 核函数的独立项系数
+}
+svc = SVC()
+clf = GridSearchCV(svc, param_grid, scoring='accuracy', cv=5)
 
-cm_train = confusion_matrix(y_train, y_pred_train)
-print("Train Confusion Matrix:\n", cm_train)
-print(f'Train Accuracy: {train_accuracy}')
+# 执行网格搜索以找到最佳参数
+clf.fit(X_train, y_train)
 
-y_pred = clf.predict(X_test)
-cm = confusion_matrix(y_test, y_pred)
-print("Test Confusion Matrix:\n", cm)
+# 输出最佳参数和最佳得分
+print("Best Param:", clf.best_params_)
+print("Best Score (Cross Validation):", clf.best_score_)
 
-accuracy = accuracy_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred, average='weighted')
-f1 = f1_score(y_test, y_pred, average='weighted')
-print("Test Accuracy:", accuracy)
+# 用最佳模型预测训练集和测试集
+best_model = clf.best_estimator_
 
-dump(clf, '../model/svm_stu_1111.joblib')
+# 训练集评估
+y_pred_train = best_model.predict(X_train)
+train_accuracy = accuracy_score(y_train, y_pred_train)
+train_cm = confusion_matrix(y_train, y_pred_train)
+print("\nTrain Confusion Matrix:\n", train_cm)
+print("Train Accuracy:", train_accuracy)
+
+# 测试集评估
+y_pred_test = best_model.predict(X_test)
+test_accuracy = accuracy_score(y_test, y_pred_test)
+test_recall = recall_score(y_test, y_pred_test, average='weighted')
+test_f1 = f1_score(y_test, y_pred_test, average='weighted')
+test_precision = precision_score(y_test, y_pred_test, average='weighted')
+test_cm = confusion_matrix(y_test, y_pred_test)
+
+print("\nTest Confusion Matrix:\n", test_cm)
+print("Test Accuracy:", test_accuracy)
+print("Test Recall:", test_recall)
+print("Test F1 Score:", test_f1)
+print("Test Precision:", test_precision)
+
+# 保存最佳模型
+dump(best_model, '../model/svm_stu_1111_optimized.joblib')
+print("最佳模型已保存。")

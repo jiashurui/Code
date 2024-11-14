@@ -16,7 +16,7 @@ slice_length = 40
 origin_data = simple_get_stu_1111_all_features(slice_length, type='df', with_rpy=True)
 origin_data_np = np.array(origin_data)
 # 抽取特征
-features_list = get_features(origin_data)
+features_list, features_name = get_features(origin_data)
 
 train_data = np.array(features_list)
 
