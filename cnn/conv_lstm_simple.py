@@ -29,7 +29,7 @@ class ConvLSTM_SIMPLE(nn.Module):
         self.dropout = nn.Dropout(0.1)
 
         # Layer Norm
-        self.layer_norm1 = nn.LayerNorm(128)
+        self.layer_norm1 = nn.LayerNorm(256)
 
         # Batch Norm
         self.batch_norm1 = nn.BatchNorm1d(16)
