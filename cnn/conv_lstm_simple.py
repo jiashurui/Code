@@ -12,29 +12,29 @@ class ConvLSTM_SIMPLE(nn.Module):
         self.pool = nn.AvgPool1d(2)
 
         # CONV
-        self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=8, kernel_size=3, stride=stride,
+        self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=16, kernel_size=3, stride=stride,
                                padding=padding)
-        self.conv2 = nn.Conv1d(in_channels=8, out_channels=16, kernel_size=kernel_size, stride=stride,
+        self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=kernel_size, stride=stride,
                                padding=padding)
-        self.conv3 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=kernel_size, stride=stride,
+        self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=kernel_size, stride=stride,
                                padding=padding)
 
         # LSTM
-        self.lstm = nn.LSTM(32, 64, num_layers, batch_first=True, dropout=0,
+        self.lstm = nn.LSTM(64, 128, num_layers, batch_first=True, dropout=0,
                                     bidirectional=False)
         # FC
-        self.fc = nn.Linear(64, output_dim)
+        self.fc = nn.Linear(128, output_dim)
 
         # dropout
         self.dropout = nn.Dropout(0.1)
 
         # Layer Norm
-        self.layer_norm1 = nn.LayerNorm(64)
+        self.layer_norm1 = nn.LayerNorm(128)
 
         # Batch Norm
-        self.batch_norm1 = nn.BatchNorm1d(8)
-        self.batch_norm2 = nn.BatchNorm1d(16)
-        self.batch_norm3 = nn.BatchNorm1d(32)
+        self.batch_norm1 = nn.BatchNorm1d(16)
+        self.batch_norm2 = nn.BatchNorm1d(32)
+        self.batch_norm3 = nn.BatchNorm1d(64)
 
         # Init Weight
         self.init_weights()
