@@ -104,7 +104,7 @@ def train_model():
     # 测试模型
     confusion_matrix = test_model(model_load, X_test, y_test)
 
-    show.show_me_hotmap(confusion_matrix, label_map=label_map_str)
+    show.show_me_hotmap(confusion_matrix.astype(int), label_map=label_map_str)
 
 def test_model(model ,test_data ,test_label):
     model.eval()
