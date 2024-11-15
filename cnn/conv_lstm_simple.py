@@ -9,7 +9,7 @@ class ConvLSTM_SIMPLE(nn.Module):
         stride = 1
         padding = 1
         self.relu = nn.LeakyReLU()
-        self.pool = nn.AvgPool1d(2)
+        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
 
         # CONV
         self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=16, kernel_size=3, stride=stride,
