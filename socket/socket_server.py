@@ -19,6 +19,7 @@ sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路�
 # apply_model = 'realworld'
 apply_model = 'student'
 seq_length = 20
+show_size = -1 * seq_length * 8
 # apply_model = 'mHealth'
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
 model = 'conv-lstm'  # cnn, lstm ,conv-lstm, conv-lstm-vae
@@ -85,7 +86,7 @@ def start_server():
                         float_matrix = np.array([list(float_array[i:i + 9]) for i in range(0, len(float_array), 9)])
 
                         # 拼接新数据到 `all_data`，保留最新的 1024 行
-                        all_data = np.vstack([all_data, float_matrix[:, :3]])[-1024:, :]
+                        all_data = np.vstack([all_data, float_matrix[:, :3]])[show_size:, :]
 
                         # Global Transformed
                         transformed,rpy = global_tramsform.fake_transform_sensor_data_to_np(float_matrix)
@@ -117,11 +118,11 @@ def start_server():
                             pred_label = constant.Constant.mHealth.action_map_reverse.get(pred.item())
 
                         # 实时展示数据（仅展示最新数据）
-                        all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[-1024:, :]
+                        all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[show_size:, :]
                         if task == 'pred':
                             real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy)
                         elif task == 'abnormal':
-                            model_recon = np.vstack([model_recon, output[:, :3]])[-1024:, :]
+                            model_recon = np.vstack([model_recon, output[:, :3]])[show_size:, :]
                             real_time_show_abnormal_data(all_data, all_transformed_data, model_recon, loss)
 
                         # use origin data to test
