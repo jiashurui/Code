@@ -5,7 +5,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch import nn
 
-from cnn.conv_lstm import ConvLSTM
+from cnn.conv_lstm_simple import ConvLSTM_SIMPLE
 from datareader.datareader_stu import simple_get_stu_all_features
 from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features
 from prototype.constant import Constant
@@ -23,8 +23,8 @@ label_map_str = Constant.uStudent_merge.action_map
 
 in_channel = 6
 out_channel = len(label_map)
-model = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
-model_load = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
+model = ConvLSTM_SIMPLE(input_dim=in_channel, output_dim=out_channel).to(device)
+model_load = ConvLSTM_SIMPLE(input_dim=in_channel, output_dim=out_channel).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.05)
 loss_function = nn.CrossEntropyLoss()
 
@@ -135,7 +135,7 @@ def test_model(model ,test_data ,test_label):
 
 def apply_conv_lstm(test_data, model_apply=None):
     if model_apply is None:
-        model_apply = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
+        model_apply = ConvLSTM_SIMPLE(input_dim=in_channel, output_dim=out_channel).to(device)
         model_apply.load_state_dict(torch.load(model_path, map_location=device))
         model_apply.eval()
 
