@@ -8,9 +8,8 @@ from torch import nn
 from cnn.conv_lstm import ConvLSTM
 from datareader.datareader_stu import simple_get_stu_all_features
 from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features
-from datareader.realworld_datareader import get_realworld_for_recon
 from prototype.constant import Constant
-from utils import show, report
+from utils import show
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
