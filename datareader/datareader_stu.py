@@ -189,7 +189,7 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
     transformed_list = []
     for d in df_list:
         # 低通滤波器
-        d = d.apply(lambda x: butter_lowpass_filter(x, 3, 10, 4))
+        # d = d.apply(lambda x: butter_lowpass_filter(x, 3, 10, 4))
 
         if with_rpy:
             transformed_frame = transform_sensor_data_to_df1(d)
