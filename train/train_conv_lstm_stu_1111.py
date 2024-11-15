@@ -133,18 +133,13 @@ def test_model(model ,test_data ,test_label):
 
     return confusion_matrix
 
-model_load_flag = False
-def apply_conv_lstm(test_data):
-    global model_load_flag
-    model_apply = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
-
-    if not model_load_flag:
+def apply_conv_lstm(test_data, model_apply=None):
+    if model_apply is None:
+        model_apply = ConvLSTM(input_dim=in_channel, output_dim=out_channel).to(device)
         model_apply.load_state_dict(torch.load(model_path, map_location=device))
         model_apply.eval()
 
     start_time = datetime.now()
-    # 归一化(128, 9)
-    # test_data = standlize(test_data)
     tensor_data = torch.tensor(test_data, dtype=torch.float32).to(device)
     data = tensor_data.unsqueeze(0).transpose(1, 2)[:, :in_channel, :]
     outputs = model_apply(data)
