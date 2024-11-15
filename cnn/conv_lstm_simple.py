@@ -20,10 +20,10 @@ class ConvLSTM_SIMPLE(nn.Module):
                                padding=padding)
 
         # LSTM
-        self.lstm = nn.LSTM(64, 128, num_layers, batch_first=True, dropout=0,
-                                    bidirectional=False)
+        self.lstm = nn.LSTM(64, 128, num_layers, batch_first=True, dropout=0.1,
+                                    bidirectional=True)
         # FC
-        self.fc = nn.Linear(128, output_dim)
+        self.fc = nn.Linear(256, output_dim)
 
         # dropout
         self.dropout = nn.Dropout(0.1)
@@ -57,14 +57,17 @@ class ConvLSTM_SIMPLE(nn.Module):
         x = self.batch_norm1(x)
         x = self.relu(x)
         x = self.pool(x)
+        x = self.dropout(x)
         x = self.conv2(x)
         x = self.batch_norm2(x)
         x = self.relu(x)
         x = self.pool(x)
+        x = self.dropout(x)
         x = self.conv3(x)
         x = self.batch_norm3(x)
         x = self.relu(x)
         x = self.pool(x)
+        x = self.dropout(x)
 
         # CNN 的第二个维度和第三个维度(batch_size, features, seq_len)
         # LSTM(batch_size, seq_len, features)
