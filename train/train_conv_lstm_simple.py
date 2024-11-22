@@ -21,9 +21,9 @@ slide_window_length = 20  # 序列长度
 learning_rate: float = 0.001
 batch_size = 64
 epochs = 200
-model_path = '../model/Conv_LSTM_STU_SUB_ACTION.pth'
-label_map = Constant.uStudent_1111.action_map_en_reverse
-label_map_str = Constant.uStudent_1111.action_map
+model_path = '../model/Conv_LSTM_STU_ACTION.pth'
+label_map = Constant.uStudent.action_map_en_reverse
+label_map_str = Constant.uStudent.action_map_en
 
 in_channel = 6
 out_channel = len(label_map)
@@ -35,9 +35,9 @@ loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     #
-    # origin_data_np1 = simple_get_stu_all_features(slide_window_length, type='np')
-    # origin_data_np1[:, 0, 9] -=1
-    data = simple_get_stu_1111_all_features(slide_window_length, type='np')
+    data = simple_get_stu_all_features(slide_window_length, type='np')
+    data[:, 0, 9] -=1
+    # data = simple_get_stu_1111_all_features(slide_window_length, type='np')
     # origin_data_np[:, 0, 9] +=6
 
     # data = np.concatenate((origin_data_np1, origin_data_np), axis=0)
@@ -137,7 +137,7 @@ def test_model(model ,test_data ,test_label):
 
     return confusion_matrix
 
-def apply_conv_lstm(test_data, model_apply=None):
+def apply_conv_lstm_action(test_data, model_apply=None):
     if model_apply is None:
         model_apply = ConvLSTM_SIMPLE(input_dim=in_channel, output_dim=out_channel).to(device)
         model_apply.load_state_dict(torch.load(model_path, map_location=device))

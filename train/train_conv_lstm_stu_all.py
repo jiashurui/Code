@@ -21,9 +21,9 @@ slide_window_length = 20  # 序列长度
 learning_rate: float = 0.001
 batch_size = 64
 epochs = 200
-model_path = '../model/Conv_LSTM_STU_SUB_ACTION.pth'
-label_map = Constant.uStudent_1111.action_map_en_reverse
-label_map_str = Constant.uStudent_1111.action_map
+model_path = '../model/Conv_LSTM_STU_ALL.pth'
+label_map = Constant.uStudent_merge.action_map_en_reverse
+label_map_str = Constant.uStudent_merge.action_map
 
 in_channel = 6
 out_channel = len(label_map)
@@ -35,12 +35,12 @@ loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     #
-    # origin_data_np1 = simple_get_stu_all_features(slide_window_length, type='np')
-    # origin_data_np1[:, 0, 9] -=1
-    data = simple_get_stu_1111_all_features(slide_window_length, type='np')
-    # origin_data_np[:, 0, 9] +=6
+    origin_data_np1 = simple_get_stu_all_features(slide_window_length, type='np')
+    origin_data_np1[:, 0, 9] -=1
+    origin_data_np = simple_get_stu_1111_all_features(slide_window_length, type='np')
+    origin_data_np[:, 0, 9] +=6
 
-    # data = np.concatenate((origin_data_np1, origin_data_np), axis=0)
+    data = np.concatenate((origin_data_np1, origin_data_np), axis=0)
 
 
     # Label processing (rounding to avoid float errors)
