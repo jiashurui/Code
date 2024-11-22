@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 import numpy as np
@@ -12,11 +13,14 @@ from prototype.constant import Constant
 from utils import show
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.manual_seed(3407)
+np.random.seed(3407)
+random.seed(3407)
 
 slide_window_length = 20  # 序列长度
-learning_rate: float = 0.0001
+learning_rate: float = 0.001
 batch_size = 64
-epochs = 50
+epochs = 200
 model_path = '../model/Conv_LSTM_STU_1111.pth'
 label_map = Constant.uStudent_merge.action_map_reverse
 label_map_str = Constant.uStudent_merge.action_map
@@ -25,7 +29,7 @@ in_channel = 6
 out_channel = len(label_map)
 model = ConvLSTM_SIMPLE(input_dim=in_channel, output_dim=out_channel).to(device)
 model_load = ConvLSTM_SIMPLE(input_dim=in_channel, output_dim=out_channel).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.1)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 loss_function = nn.CrossEntropyLoss()
 
 
