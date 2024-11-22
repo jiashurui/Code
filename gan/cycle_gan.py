@@ -5,7 +5,7 @@ import torch.nn as nn
 class Generator(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(Generator, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim, batch_first=True)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=3, batch_first=True)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
@@ -17,7 +17,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(Discriminator, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim, batch_first=True)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=1, batch_first=True)
         self.fc = nn.Linear(hidden_dim, 1)
 
     def forward(self, x):
