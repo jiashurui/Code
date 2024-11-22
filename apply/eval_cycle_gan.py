@@ -70,6 +70,8 @@ for epoch in range(num_epochs):
         total, correct = 0, 0
         for batch_features, batch_labels in test_loader:
             batch_features, batch_labels = batch_features.to(device), batch_labels.to(device)
+            batch_features = batch_features.transpose(1, 2)  # 交换第0维和第1维
+
             outputs = model(batch_features)
             _, predicted = torch.max(outputs, 1)
             total += batch_labels.size(0)
