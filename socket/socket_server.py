@@ -7,7 +7,8 @@ import numpy as np
 import sys
 
 from anormal.autoencoder2 import apply_conv_lstm_vae
-from train import train_1d_cnn, train_mh_1d_cnn, train_lstm, train_conv_lstm, train_conv_lstm_stu_1111
+from train import train_1d_cnn, train_mh_1d_cnn, train_lstm, train_conv_lstm, train_conv_lstm_stu_1111, \
+    train_conv_lstm_simple
 from utils.config_utils import get_value_from_config
 from utils.show import real_time_show_phone_data, real_time_show_abnormal_data
 from prototype import global_tramsform, constant
@@ -24,7 +25,7 @@ show_size = -1 * seq_length * 8
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
 model = 'conv-lstm'  # cnn, lstm ,conv-lstm, conv-lstm-vae
 
-task = 'pred'  # pred ,abnormal
+task = 'pred'  # pred ,abnormal, pred_multi
 # 接收完整数据的函数
 def receive_data(conn, data_size):
     data = b''
@@ -113,6 +114,13 @@ def start_server():
                                 pred = train_conv_lstm_stu_1111.apply_conv_lstm(transformed)
                                 pred_label = constant.Constant.uStudent_merge.action_map_reverse.get(pred.item())
 
+                            if task == 'pred_multi':
+                                pred_1 = train_conv_lstm_simple.apply_conv_lstm_action(transformed)
+                                pred_2 = train_conv_lstm_stu_1111.apply_conv_lstm(transformed)
+
+                                pred_label1 = constant.Constant.uStudent_merge.action_map_reverse.get(pred_1.item())
+                                pred_label2 = constant.Constant.uStudent_1111.action_map_en_reverse.get(pred_2.item())
+                                pred_label = pred_label1 + '__' + pred_label2
                         elif apply_model == 'mHealth':
                             pred = train_mh_1d_cnn.apply_1d_cnn(transformed)
                             pred_label = constant.Constant.mHealth.action_map_reverse.get(pred.item())
