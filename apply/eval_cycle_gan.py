@@ -56,7 +56,7 @@ for epoch in range(num_epochs):
     for batch_features, batch_labels in train_loader:
         # 将数据移动到 device 上
         batch_features, batch_labels = batch_features.to(device), batch_labels.to(device)
-
+        batch_features = batch_features.transpose(1, 2)  # 交换第0维和第1维
         # 前向传播、计算损失和反向传播
         optimizer.zero_grad()
         outputs = model(batch_features)
