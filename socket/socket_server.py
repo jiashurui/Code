@@ -25,7 +25,7 @@ show_size = -1 * seq_length * 8
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
 model = 'conv-lstm'  # cnn, lstm ,conv-lstm, conv-lstm-vae
 
-task = 'pred'  # pred ,abnormal, pred_multi
+task = 'pred_multi'  # pred ,abnormal, pred_multi
 # 接收完整数据的函数
 def receive_data(conn, data_size):
     data = b''
@@ -90,7 +90,7 @@ def start_server():
                         all_data = np.vstack([all_data, float_matrix[:, :3]])[show_size:, :]
 
                         # Global Transformed
-                        transformed,rpy = global_tramsform.fake_transform_sensor_data_to_np(float_matrix)
+                        transformed,rpy = global_tramsform.transform_sensor_data_to_np(float_matrix)
 
                         # 模型预测
                         if apply_model == 'realworld':
@@ -127,7 +127,7 @@ def start_server():
 
                         # 实时展示数据（仅展示最新数据）
                         all_transformed_data = np.vstack([all_transformed_data, transformed[:, :3]])[show_size:, :]
-                        if task == 'pred':
+                        if task == 'pred' or task == 'pred_multi':
                             real_time_show_phone_data(all_data, all_transformed_data, pred_label, rpy)
                         elif task == 'abnormal':
                             model_recon = np.vstack([model_recon, output[:, :3]])[show_size:, :]
