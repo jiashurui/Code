@@ -22,7 +22,7 @@ learning_rate: float = 0.001
 batch_size = 64
 epochs = 200
 model_path = '../model/Conv_LSTM_STU_ALL.pth'
-label_map = Constant.uStudent_merge.action_map_en_reverse
+label_map = Constant.uStudent_merge.action_map_reverse
 label_map_str = Constant.uStudent_merge.action_map
 
 in_channel = 6
