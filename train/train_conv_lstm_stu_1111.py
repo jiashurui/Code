@@ -20,7 +20,7 @@ random.seed(3407)
 slide_window_length = 20  # 序列长度
 learning_rate: float = 0.001
 batch_size = 64
-epochs = 200
+epochs = 50
 model_path = '../model/Conv_LSTM_STU_SUB_ACTION.pth'
 label_map = Constant.uStudent_1111.action_map_en_reverse
 label_map_str = Constant.uStudent_1111.action_map
