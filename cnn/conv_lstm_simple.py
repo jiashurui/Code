@@ -8,7 +8,7 @@ class ConvLSTM_SIMPLE(nn.Module):
         kernel_size = 3
         stride = 1
         padding = 1
-        self.relu = nn.LeakyReLU()
+        self.relu = nn.LeakyReLU(negative_slope=0.2)
         self.pool = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
 
         # CONV
@@ -31,8 +31,7 @@ class ConvLSTM_SIMPLE(nn.Module):
         self.dropout = nn.Dropout(0.05)
 
         # Layer Norm
-        self.layer_norm1 = nn.LayerNorm(128)
-        self.layer_norm1 = nn.LayerNorm(256)
+        self.layer_norm1 = nn.LayerNorm(normalized_shape=128 * 2)
 
         # Batch Norm
         self.batch_norm1 = nn.BatchNorm1d(16)
@@ -43,8 +42,10 @@ class ConvLSTM_SIMPLE(nn.Module):
         self.init_weights()
 
     def init_weights(self):
-        # Xavier 初始化线性层
-        nn.init.xavier_normal_(self.fc.weight)
+        # Xavier 初始化所有线性层
+        for m in [self.fc, self.fc2, self.fc3]:
+            nn.init.xavier_normal_(m.weight)
+            nn.init.zeros_(m.bias)
 
         # 对LSTM层的权重进行Xavier初始化
         for name, param in self.lstm.named_parameters():
@@ -79,7 +80,9 @@ class ConvLSTM_SIMPLE(nn.Module):
         x = self.dropout(x)
         x = self.layer_norm1(x)
         result = self.fc(x[:, -1, :])
+        result = self.dropout(result)
         result = self.fc2(result)
+        result = self.dropout(result)
         result = self.fc3(result)
 
         return result
