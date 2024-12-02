@@ -35,12 +35,12 @@ loss_function = nn.CrossEntropyLoss()
 
 def train_model():
     #
-    # origin_data_np1 = simple_get_stu_all_features(slide_window_length, type='np')
-    # origin_data_np1[:, 0, 9] -=1
+    origin_data_np1 = simple_get_stu_all_features(slide_window_length, type='np')
+    origin_data_np1[:, 0, 9] = 12  # 何もしていない
     data = simple_get_stu_1111_all_features(slide_window_length, type='np')
     # origin_data_np[:, 0, 9] +=6
 
-    # data = np.concatenate((origin_data_np1, origin_data_np), axis=0)
+    data = np.concatenate((origin_data_np1, data), axis=0)
 
 
     # Label processing (rounding to avoid float errors)

@@ -170,6 +170,7 @@ class Constant:
             'Raise_Right_Low':9,
             'Raise_Right_Medium':10,
             'Raise_Right_High':11,
+            'None': 12
         }
 
         action_map_en_reverse = {
@@ -185,7 +186,8 @@ class Constant:
             9: 'Raise_Right_Low',
             10: 'Raise_Right_Medium',
             11: 'Raise_Right_High',
-    }
+            12: 'None'
+        }
     # Realworld 数据集与长冈科技大学学生交叉
     class realworld_x_uStudent:
         action_map = {
