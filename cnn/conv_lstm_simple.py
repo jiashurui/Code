@@ -28,7 +28,7 @@ class ConvLSTM_SIMPLE(nn.Module):
         # FC
         self.fc = nn.Linear(256, 128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, output_dim + 5)
+        self.fc3 = nn.Linear(64, output_dim)
 
         # dropout
         self.dropout = nn.Dropout(0.1)
