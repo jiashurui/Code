@@ -17,7 +17,7 @@ torch.manual_seed(3407)
 np.random.seed(3407)
 random.seed(3407)
 
-slide_window_length = 40  # 序列长度
+slide_window_length = 20  # 序列长度
 learning_rate: float = 0.001
 batch_size = 64
 epochs = 200
