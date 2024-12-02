@@ -5,9 +5,9 @@ class ConvLSTM_SIMPLE(nn.Module):
     def __init__(self, input_dim, output_dim, num_layers=3):
         super(ConvLSTM_SIMPLE, self).__init__()
         # Class Parameter
-        kernel_size = 5
+        kernel_size = 3
         stride = 1
-        padding = 2
+        padding = 1
         self.relu = nn.LeakyReLU(negative_slope=0.2)
         self.pool = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
 
@@ -20,7 +20,7 @@ class ConvLSTM_SIMPLE(nn.Module):
                                padding=padding)
 
         # LSTM
-        self.lstm = nn.LSTM(64, 128, num_layers, batch_first=True, dropout=0.05,
+        self.lstm = nn.LSTM(64, 128, num_layers, batch_first=True, dropout=0.1,
                                     bidirectional=True)
         # FC
         self.fc = nn.Linear(256, 128)
@@ -28,7 +28,7 @@ class ConvLSTM_SIMPLE(nn.Module):
         self.fc3 = nn.Linear(64, output_dim)
 
         # dropout
-        self.dropout = nn.Dropout(0.05)
+        self.dropout = nn.Dropout(0.1)
 
         # Layer Norm
         self.layer_norm1 = nn.LayerNorm(normalized_shape=128 * 2)
