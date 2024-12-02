@@ -5,9 +5,9 @@ class ConvLSTM_SIMPLE(nn.Module):
     def __init__(self, input_dim, output_dim, num_layers=3):
         super(ConvLSTM_SIMPLE, self).__init__()
         # Class Parameter
-        kernel_size = 3
+        kernel_size = 5
         stride = 1
-        padding = 1
+        padding = 2
         self.relu = nn.LeakyReLU(negative_slope=0.2)
         self.pool = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
 
