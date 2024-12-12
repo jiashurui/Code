@@ -98,9 +98,9 @@ class LSTMClassifier(nn.Module):
                                padding=padding)
 
         self.layer_norm = nn.LayerNorm(32)
-        self.fc_cnn = nn.Linear(15 * 15 * 32, 512)
+        self.fc_cnn = nn.Linear(3 * 3 * 32, 128)
 
-        self.fc1 = nn.Linear(32 + 512, 16)
+        self.fc1 = nn.Linear(32 + 128, 16)
         self.fc2 = nn.Linear(16, 8)
         self.fc3 = nn.Linear(8, 3)
 
@@ -111,9 +111,9 @@ class LSTMClassifier(nn.Module):
         # (batch, seq, feature_num)
         for data in x:
             data = data.reshape(data.shape[0], 1, 15, 15)
-            data = self.relu(self.conv1(data))
-            data = self.relu(self.conv2(data))
-            data = self.relu(self.conv3(data))
+            data = self.pool(self.relu(self.conv1(data)))
+            data = self.pool(self.relu(self.conv2(data)))
+            data = self.pool(self.relu(self.conv3(data)))
             data = data.view(data.size(0), -1)  # 展平 (batch, 64*7*7)
 
             data = self.fc_cnn(data)
