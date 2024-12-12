@@ -8,6 +8,8 @@ from torch.utils.data import TensorDataset, DataLoader
 from torch import nn
 import torch
 
+from train.conv_lstm import ConvLSTM
+
 # 共通の緯度・経度グリッドを定義します
 common_lat = np.arange(15, 55.5, 0.5)
 common_lon = np.arange(115, 155.5, 0.5)
@@ -136,9 +138,82 @@ class ConvLSTM_Weather(nn.Module):
         result = self.fc3(result)
         return result
 
+class ConvLSTM_Weather2(nn.Module):
+    def __init__(self):
+        super(ConvLSTM_Weather2, self).__init__()
+        kernel_size = 3
+        stride = 1
+        padding = 1
+        self.relu = nn.LeakyReLU()
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=1)
+
+        # CONV
+        self.conv1 = nn.Conv2d(1, 64, kernel_size, stride, padding)
+        self.conv2 = nn.Conv2d(64, 128, kernel_size, stride, padding)
+        self.conv3 = nn.Conv2d(128, 256, kernel_size, stride, padding)
+
+        # LSTM
+        self.lstm = nn.LSTM(256 * 3 * 3, 128, num_layers=2, batch_first=True, dropout=0.1)
+
+        # FC
+        self.fc = nn.Linear(256 * 3 * 3 + 128, 64)  # CNN + LSTM 融合特征
+        self.fc2 = nn.Linear(64, 32)
+        self.fc3 = nn.Linear(32, 3)
+
+        # Dropout and BatchNorm
+        self.dropout = nn.Dropout(0.1)
+        self.batch_norm1 = nn.BatchNorm2d(64)
+        self.batch_norm2 = nn.BatchNorm2d(128)
+        self.batch_norm3 = nn.BatchNorm2d(256)
+
+        self.init_weights()
+
+    def init_weights(self):
+        for m in [self.fc, self.fc2, self.fc3]:
+            nn.init.xavier_normal_(m.weight)
+            nn.init.zeros_(m.bias)
+
+    def forward(self, input):
+        # CNN
+        x = self.relu(self.batch_norm1(self.conv1(input)))
+        x = self.pool(x)
+        x = self.dropout(x)
+        x = self.relu(self.batch_norm2(self.conv2(x)))
+        x = self.pool(x)
+        x = self.dropout(x)
+        x = self.relu(self.batch_norm3(self.conv3(x)))
+        x = self.pool(x)
+        x = self.dropout(x)
+
+        # Flatten CNN output
+        x_cnn = x.view(x.size(0), -1)
+
+        # LSTM
+        x_seq = x_cnn.unsqueeze(1)  # 添加时间维度
+        x_lstm, _ = self.lstm(x_seq)
+
+        # Feature Fusion
+        x_fusion = torch.cat((x_cnn, x_lstm[:, -1, :]), dim=1)
+
+        # FC
+        x = self.fc(x_fusion)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = self.dropout(x)
+        x = self.fc3(x)
+
+        return x
 
 # apply Conv-LSTM model
-model = ConvLSTM_Weather().to(device)
+# model = ConvLSTM().to(device)
+# 初始化 ConvLSTM 模型
+model = ConvLSTM(input_dim=1,
+                 hidden_dim=[64, 64],
+                 kernel_size=(3, 3),
+                 num_layers=2,
+                 batch_first=True,
+                 bias=True,
+                 return_all_layers=False)
 
 torch.manual_seed(3407)
 random.seed(3407)
