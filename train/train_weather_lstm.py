@@ -136,7 +136,7 @@ class LSTMClassifier(nn.Module):
 # apply Conv-LSTM model
 # model = ConvLSTM().to(device)
 # 初始化 ConvLSTM 模型
-model = LSTMClassifier()
+model = LSTMClassifier().to(device)
 
 torch.manual_seed(3407)
 random.seed(3407)
