@@ -80,16 +80,54 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class LSTMClassifier(nn.Module):
     def __init__(self):
         super(LSTMClassifier, self).__init__()
-        self.lstm = nn.LSTM(15 * 15, 32, 2, batch_first=True)
+        # Class Parameter
+        kernel_size = 3
+        stride = 1
+        padding = 1
+
+        self.lstm = nn.LSTM(15 * 15, 32, 3, batch_first=True)
+
+        # CNN
+        self.relu = nn.ReLU()
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=kernel_size, stride=stride,
+                               padding=padding)
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=kernel_size, stride=stride,
+                               padding=padding)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=kernel_size, stride=stride,
+                               padding=padding)
+
         self.layer_norm = nn.LayerNorm(32)
-        self.fc1 = nn.Linear(32, 16)
+        self.fc_cnn = nn.Linear(15 * 15 * 32, 512)
+
+        self.fc1 = nn.Linear(32 + 512, 16)
         self.fc2 = nn.Linear(16, 8)
         self.fc3 = nn.Linear(8, 3)
 
     def forward(self, x):
+
+        cnn_features = []
+
+        # (batch, seq, feature_num)
+        for data in x:
+            data = data.reshape(data.shape[0], 1, 15, 15)
+            data = self.relu(self.conv1(data))
+            data = self.relu(self.conv2(data))
+            data = self.relu(self.conv3(data))
+            data = data.view(data.size(0), -1)  # 展平 (batch, 64*7*7)
+
+            data = self.fc_cnn(data)
+
+            cnn_features.append(data)
+
+        cnn_features = torch.stack(cnn_features, dim=0)  # (batch, seq_len, output_dim)
+
+
         lstm_out, _ = self.lstm(x)
-        lstm_out = self.layer_norm(lstm_out)# lstm_out: [batch_size, window_size, hidden_dim]
-        out = self.fc1(lstm_out[:, -1, :])  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
+        lstm_out = self.layer_norm(lstm_out)
+        concat_features = torch.cat((cnn_features, lstm_out), dim=2)
+
+        out = self.fc1(concat_features[:, -1, :])  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
         out = self.fc2(out)  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
         out = self.fc3(out)  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
 
