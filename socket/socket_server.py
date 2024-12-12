@@ -19,7 +19,7 @@ PORT = 8081  # 监听的端口
 sys.path.append('../prototype')  # 将 module_a 所在的文件夹添加到路径
 # apply_model = 'realworld'
 apply_model = 'student'
-seq_length = 25
+seq_length = 20
 show_size = -1 * seq_length * 8
 # apply_model = 'mHealth'
 model = 'conv-lstm-vae'  # cnn, lstm ,conv-lstm, conv-lstm-vae
