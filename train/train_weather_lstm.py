@@ -2,16 +2,12 @@ import random
 
 import numpy as np
 import pandas as pd
+import torch
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from torch.utils.data import TensorDataset, DataLoader
 from torch import nn
-import torch
+from torch.utils.data import TensorDataset, DataLoader
 
-from train.conv_lstm import ConvLSTM
-
-
-import numpy as np
 
 def sliding_window_split_2d(data, window_size, step):
     seq_len, features = data.shape
@@ -23,26 +19,21 @@ def sliding_window_split_2d(data, window_size, step):
 
     return np.stack(windows, axis=0)
 
+
 # 共通の緯度・経度グリッドを定義します
 common_lat = np.arange(15, 55.5, 0.5)
 common_lon = np.arange(115, 155.5, 0.5)
-
 
 file_path = '../data/weather/Data.csv'
 df = pd.read_csv(file_path, index_col=0)
 df.head()
 
 # 沖縄周辺
-selected_lat = common_lat[(common_lat >= 23.0) & (common_lat <= 30.0)]
-selected_lon = common_lon[(common_lon >= 124.0) & (common_lon <= 131.0)]
-
-# 日本列島
-# selected_lat = common_lat[(common_lat >= 30.0) & (common_lat < 46.0)]
-# selected_lon = common_lon[(common_lon >= 128.0) & (common_lon < 144.0)]
-
+selected_lat = common_lat[(common_lat >= 24.0) & (common_lat <= 29.0)]
+selected_lon = common_lon[(common_lon >= 125.0) & (common_lon <= 130.0)]
 
 # build select index
-selected_index = ['沖縄の天気','沖縄の降水量']
+selected_index = ['沖縄の天気', '沖縄の降水量']
 for lat in selected_lat:
     for lon in selected_lon:
         selected_index.append(f"{lat}_{lon}")
@@ -68,24 +59,25 @@ scaler = MinMaxScaler()
 x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 
-
 x_train = sliding_window_split_2d(x_train, 8, 1)
 x_test = sliding_window_split_2d(x_test, 8, 1)
 y1_train = sliding_window_split_2d(y1_train.values.reshape(-1, 1), 8, 1).squeeze(-1)[:, -1]
 y1_test = sliding_window_split_2d(y1_test.values.reshape(-1, 1), 8, 1).squeeze(-1)[:, -1]
+y2_train = sliding_window_split_2d(y2_train.values.reshape(-1, 1), 8, 1).squeeze(-1)[:, -1]
+y2_test = sliding_window_split_2d(y2_test.values.reshape(-1, 1), 8, 1).squeeze(-1)[:, -1]
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 定义模型
+
 class LSTMClassifier(nn.Module):
-    def __init__(self):
+    def __init__(self, is_regression=False):
         super(LSTMClassifier, self).__init__()
         # Class Parameter
         kernel_size = 3
         stride = 1
         padding = 1
 
-        self.lstm = nn.LSTM(15 * 15, 32, 3, batch_first=True)
+        self.lstm = nn.LSTM(11 * 11, 32, 3, batch_first=True)
 
         # CNN
         self.relu = nn.ReLU()
@@ -102,57 +94,59 @@ class LSTMClassifier(nn.Module):
 
         self.fc1 = nn.Linear(32 + 128, 16)
         self.fc2 = nn.Linear(16, 8)
-        self.fc3 = nn.Linear(8, 3)
+
+        if is_regression:
+            self.fc3 = nn.Linear(8, 1)
+        else:
+            self.fc3 = nn.Linear(8, 3)
 
     def forward(self, x):
 
         cnn_features = []
-
-        # (batch, seq, feature_num)
         for data in x:
-            data = data.reshape(data.shape[0], 1, 15, 15)
+            data = data.reshape(data.shape[0], 1, 11, 11)
             data = self.pool(self.relu(self.conv1(data)))
             data = self.pool(self.relu(self.conv2(data)))
             data = self.pool(self.relu(self.conv3(data)))
-            data = data.view(data.size(0), -1)  # 展平 (batch, 64*7*7)
+            data = data.view(data.size(0), -1)
 
             data = self.fc_cnn(data)
 
             cnn_features.append(data)
 
-        cnn_features = torch.stack(cnn_features, dim=0)  # (batch, seq_len, output_dim)
-
+        cnn_features = torch.stack(cnn_features, dim=0)
 
         lstm_out, _ = self.lstm(x)
         lstm_out = self.layer_norm(lstm_out)
         concat_features = torch.cat((cnn_features, lstm_out), dim=2)
 
-        out = self.fc1(concat_features[:, -1, :])  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
-        out = self.fc2(out)  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
-        out = self.fc3(out)  # 只取最后一个时间步 [batch_size, hidden_dim] -> [batch_size, output_dim]
-
+        out = self.fc1(concat_features[:, -1, :])
+        out = self.fc2(out)
+        out = self.fc3(out)
         return out
 
-# apply Conv-LSTM model
-# model = ConvLSTM().to(device)
-# 初始化 ConvLSTM 模型
+
 model = LSTMClassifier().to(device)
 
 torch.manual_seed(3407)
 random.seed(3407)
-learning_rate: float = 0.00001
+learning_rate: float = 0.0001
 batch_size = 16
-epochs = 200
-class_weights = torch.tensor([1, 1.2, 4.0]).to(device)  # 根据标签分布设置权重
+epochs = 100
+class_weights = torch.tensor([1, 1.2, 4.0]).to(device)
 
 loss_function = nn.CrossEntropyLoss(weight=class_weights)
+regression_loss_function = nn.MSELoss()
+
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 x_train_tensor = torch.tensor(x_train, dtype=torch.float32)
 y1_train_tensor = torch.tensor(y1_train, dtype=torch.long)
+y2_train_tensor = torch.tensor(y2_train, dtype=torch.float32)
+
 x_test_tensor = torch.tensor(x_test, dtype=torch.float32)
 y1_test_tensor = torch.tensor(y1_test, dtype=torch.long)
-
+y2_test_tensor = torch.tensor(y2_test, dtype=torch.float32)
 
 train_loader = DataLoader(
     TensorDataset(x_train_tensor, y1_train_tensor),
@@ -165,13 +159,25 @@ test_loader = DataLoader(
     shuffle=True
 )
 
+regression_train_loader = DataLoader(
+    TensorDataset(x_train_tensor, y2_train_tensor),
+    batch_size=batch_size,
+    shuffle=True
+)
+regression_test_loader = DataLoader(
+    TensorDataset(x_test_tensor, y2_test_tensor),
+    batch_size=batch_size,
+    shuffle=True
+)
+
+
 def calculate_accuracy(outputs, labels):
-    _, predicted = torch.max(outputs, 1)  # 获取预测类别
-    correct = (predicted == labels).sum().item()  # 计算正确的预测数量
-    accuracy = correct / labels.size(0)  # 计算准确率
+    _, predicted = torch.max(outputs, 1)
+    correct = (predicted == labels).sum().item()
+    accuracy = correct / labels.size(0)
     return accuracy
 
-# 训练循环
+
 train_losses = []
 test_losses = []
 train_accuracies = []
@@ -188,11 +194,9 @@ for epoch in range(epochs):
 
         inputs, labels = inputs.to(device), labels.to(device)
 
-        # 前向传播
         outputs = model(inputs)
         loss = loss_function(outputs, labels - 1)
 
-        # 反向传播
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -208,8 +212,7 @@ for epoch in range(epochs):
     avg_train_accuracy = running_train_accuracy / len(train_loader)
     train_accuracies.append(avg_train_accuracy)
 
-    # 计算测试精度
-    model.eval()  # 设置模型为评估模式
+    model.eval()
     running_test_accuracy = 0.0
     test_loss = 0.0
 
@@ -221,10 +224,8 @@ for epoch in range(epochs):
 
             inputs, labels = inputs.to(device), labels.to(device)
 
-            # 前向传播
             outputs = model(inputs)
 
-            # 计算测试精度
             test_accuracy = calculate_accuracy(outputs, labels - 1)
             running_test_accuracy += test_accuracy
             test_loss += loss.item()
@@ -234,7 +235,6 @@ for epoch in range(epochs):
         avg_test_accuracy = running_test_accuracy / len(test_loader)
         test_accuracies.append(avg_test_accuracy)
 
-    # 打印每个 epoch 的损失
     print(f"Epoch [{epoch + 1}/{epochs}], "
           f"Loss: {running_loss / len(train_loader):.4f} "
           f"Train Accuracy: {avg_train_accuracy * 100:.2f}%, "
@@ -252,7 +252,6 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
 
-# 绘制准确率曲线
 plt.subplot(1, 2, 2)
 plt.plot(train_accuracies, label='Train Accuracy')
 plt.plot(test_accuracies, label='Test Accuracy')
