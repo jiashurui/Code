@@ -13,7 +13,7 @@ from stat_common import calc_fft_spectral_energy, spectral_entropy, calc_hanmmin
     save_fft_result
 
 from utils.slidewindow import slide_window2
-is_transform = True
+is_transform = False
 
 if is_transform:
     all_save_base_path = './child/202303/all_trans/'
@@ -337,4 +337,4 @@ def calc_df_avg_fft(df):
     return fft_x_avg_series, fft_y_avg_series, fft_z_avg_series, freq, df_stat
 
 if __name__ == '__main__':
-    show_child_hist_stat3()
+    show_child_hist_stat()

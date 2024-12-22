@@ -9,7 +9,7 @@ from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features, get
 from prototype import constant
 
 # Parameters
-slice_length = 40
+slice_length = 20
 
 # Load student data (global transformation based on frame)
 origin_data = simple_get_stu_1111_all_features(slice_length, type='df', with_rpy=True)
@@ -34,7 +34,7 @@ param_grid = {
 }
 
 # Perform Grid Search for hyperparameter tuning
-clf = GridSearchCV(DecisionTreeClassifier(random_state=0), param_grid, scoring='accuracy', cv=5)
+clf = GridSearchCV(DecisionTreeClassifier(random_state=0), param_grid, scoring='accuracy', cv=10)
 clf.fit(X_train, y_train)
 
 # Output the best parameters and cross-validation score

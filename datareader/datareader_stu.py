@@ -191,13 +191,13 @@ def simple_get_stu_all_features(slide_window_length, type='tensor', filtered_lab
         # 低通滤波器
         # d = d.apply(lambda x: butter_lowpass_filter(x, 3, 10, 4))
 
-        # if with_rpy:
-        #     transformed_frame = transform_sensor_data_to_df1(d)
-        # else:
-        #     transformed_frame = transform_sensor_data_to_df(d)
+        if with_rpy:
+            transformed_frame = transform_sensor_data_to_df1(d)
+        else:
+            transformed_frame = transform_sensor_data_to_df(d)
 
         # transformed_frame.iloc[:, :9] = scaler.fit_transform(transformed_frame.iloc[:, :9])
-        transformed_list.append(d)
+        transformed_list.append(transformed_frame)
 
     np_arr = np.array(transformed_list)
     data_tensor = torch.tensor(np_arr, dtype=torch.float32).to(device)

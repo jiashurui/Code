@@ -11,15 +11,12 @@ from joblib import dump
 
 simpling = 50
 features_number = 9
-slice_length = 256
+slice_length = 128
 filtered_label = [0, 1, 3, 5]
 mapping = constant.Constant.simple_action_set.mapping_realworld
 
 # 全局变换之后RealWorld数据(全局变换按照frame进行)
-origin_data = simple_get_realworld_all_features(slice_length, type='df',
-                                                filtered_label=filtered_label,
-                                                mapping_label=mapping,
-                                                with_rpy=True)
+origin_data = simple_get_realworld_all_features(slice_length, type='df',with_rpy=True)
 origin_data_np = np.array(origin_data)
 
 features_list = get_features(origin_data)

@@ -11,15 +11,13 @@ from joblib import dump
 
 simpling = 50
 features_number = 9
-slice_length = 256
+slice_length = 128
 
 filtered_label = [0, 2, 3, 5, 6, 7, 8, 9, 10]
 mapping = constant.Constant.simple_action_set.mapping_mh
 
 # 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_mh_all_features(slice_length, type='df',
-                                         filtered_label=filtered_label,
-                                         mapping_label=mapping, with_rpy=True)
+origin_data = simple_get_mh_all_features(slice_length, type='df',with_rpy=True)
 origin_data_np = np.array(origin_data)
 
 features_list = get_features(origin_data)

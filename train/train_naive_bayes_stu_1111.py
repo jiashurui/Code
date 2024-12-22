@@ -10,7 +10,7 @@ from prototype import constant
 from joblib import dump
 
 # Param
-slice_length = 40
+slice_length = 20
 
 # 全局变换之后的大学生数据(全局变换按照frame进行)
 origin_data = simple_get_stu_1111_all_features(slice_length, type='df', with_rpy=True)

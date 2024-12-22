@@ -10,14 +10,12 @@ from prototype import constant
 from joblib import dump
 
 # Param
-slice_length = 40
+slice_length = 20
 filtered_label = [2, 3]
 mapping = constant.Constant.simple_action_set.mapping_stu
 
 # 全局变换之后的大学生数据(全局变换按照frame进行)
-origin_data = simple_get_stu_all_features(slice_length, type='df',
-                                          filtered_label=filtered_label,
-                                          mapping_label=mapping, with_rpy=True)
+origin_data = simple_get_stu_all_features(slice_length, type='df',with_rpy=True)
 origin_data_np = np.array(origin_data)
 # 抽取特征
 features_list = get_features(origin_data)

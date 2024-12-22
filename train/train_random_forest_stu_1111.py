@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features, get_features
 
 # Parameters
-slice_length = 40
+slice_length = 20
 
 # Load student data with global transformation based on frame
 origin_data = simple_get_stu_1111_all_features(slice_length, type='df', with_rpy=True)
@@ -25,12 +25,12 @@ X_train, X_test, y_train, y_test = train_test_split(train_data, label, test_size
 # Define Random Forest and parameter grid for Grid Search
 param_grid = {
     'n_estimators': [10, 20, 30],
-    'max_depth': [5, 10, 20, None],
+    'max_depth': [5, 10, 20],
     'min_samples_split': [2, 5, 10]
 }
 
 # Initialize Grid Search with Random Forest
-clf = GridSearchCV(RandomForestClassifier(random_state=0), param_grid, scoring='accuracy', cv=5)
+clf = GridSearchCV(RandomForestClassifier(random_state=0), param_grid, scoring='accuracy', cv=10)
 clf.fit(X_train, y_train)
 
 # Output the best parameters and cross-validation score

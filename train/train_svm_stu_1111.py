@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from datareader.datareader_stu_1111 import simple_get_stu_1111_all_features, get_features
 
 # Param
-slice_length = 40
+slice_length = 20
 
 # 读取并处理数据
 origin_data = simple_get_stu_1111_all_features(slice_length, type='df', with_rpy=True)
@@ -30,14 +30,13 @@ X_test = scaler.transform(X_test)
 
 # 定义 SVM 模型和参数搜索范围，包含多种核函数
 param_grid = {
-    'C': [0.1, 1, 10, 50],
-    'gamma': ['scale', 'auto', 0.01, 0.1, 1],
-    'kernel': ['linear', 'rbf', 'poly', 'sigmoid'],
-    'degree': [2, 3, 4],  # 多项式核的阶数
-    'coef0': [0.0, 0.1, 0.5]  # sigmoid 和 poly 核函数的独立项系数
+    'C': [0.1, 1, 10],
+    'gamma': [0.01, 0.1, 1],
+    'kernel': ['linear', 'rbf'],
+    'coef0': [0.0, 0.1]
 }
 svc = SVC()
-clf = GridSearchCV(svc, param_grid, scoring='accuracy', cv=5)
+clf = GridSearchCV(svc, param_grid, scoring='accuracy', cv=10)
 
 # 执行网格搜索以找到最佳参数
 clf.fit(X_train, y_train)
